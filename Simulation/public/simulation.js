@@ -34,6 +34,9 @@ function create() {
 	s.anchor.setTo(0.5,0.5);
 	s.inputEnabled = true;
 	
+	simulation.physics.arcade.enable(r);
+	simulation.physics.arcade.enable(r);
+	
 	
 	t = simulation.add.sprite(250,300,'car2');
 	t.anchor.setTo(0.5,0.5);
@@ -57,56 +60,49 @@ function createParkingLot() {
 	}
 }
 
-function sleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds){
-      break;
-    }
-  }
-}
 
-function moveTo(object, direction, spaces){
-	var startX = object.x;
-	var startY = object.y;
-	
-	if (direction == 'E'){		
-			
-	} else if (direction == 'W'){
-		simulation.physics.arcade.moveToXY(object,startX - (GRID_WIDTH * spaces), startY, VELOCITY);
-			
-	} else if (direction == 'N'){
-		simulation.physics.arcade.moveToXY(object,startX, startY + (GRID_HEIGHT * spaces), VELOCITY);
-			
-	} else if (direction == 'S'){
-		simulation.physics.arcade.moveToXY(object,startX, startY -(GRID_HEIGHT * spaces), VELOCITY);
-		
-	}
-
-	
-};
 
 function update() {	
 	isOver = s.input.pointerOver()? true : false;
 	
 	if (isOver){
 		simulation.input.onDown.add(moveAround,this);
+
 	}
 	
-	s.body.velocity.x = 0;
-	s.body.velocity.y = 0;
-	s.body.angularVelocity = 0;
 }
 
-function getInstructions(e){
-	if (e == 'A'){
-		
-	} else if (e == 'B'){
-		
-	}
-}
 
 function moveAround(){	
-	moveTo(s, 'N', 1);
+	// Some random movement
+	//Move one left
+	var f1 = move('W', 1);
+	var tween1 = simulation.add.tween(s).to({x:f1[0],y:f1[0]},1 * 2000);
+	console.log(f1);
+	tween1.start();
+	
+	//Move two down
+	var f2 = move('S', 2);
+	var tween2 = simulation.add.tween(s).to({x:f2[0],y:f2[1]}, 2 * 2000);
+	console.log(f2);
+	
+	tween2.start();
+}
 
+function move(direction, distance){
+	var newX = 0;
+	var newY = 0;
+	if (direction == 'N'){
+		newY = (GRID_HEIGHT * distance);
+		return [newX,newY];
+	} else if (direction == 'S'){
+		newY = (GRID_HEIGHT * distance);
+		return [newX,newY];
+	} else if (direction == 'E'){
+		newX = (GRID_WIDTH * distance);
+		return [newX,newY];
+	} else if (direction == 'W'){
+		newX = (GRID_WIDTH * distance);
+		return [newX,newY];
+	}
 }

@@ -5,6 +5,10 @@ from bottle import route, run, jinja2_template as template, error, static_file
 def index():
     return template("index.html")
 
+@route("/index2")
+def index2():
+    return template("index2.html")
+
 @route("/public/<filename:path>")
 def static_url(filename):
     return static_file(filename, root="./public")
