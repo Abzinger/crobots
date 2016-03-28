@@ -1,0 +1,69 @@
+Using the Grid
+==============
+
+struct XY;  // position on the grid
+const XY nowhere;
+
+Read_From_Raw_Data__Grid G( ns, ew, my_string );
+
+class Read_From_Raw_Data__Grid: public Grid {};
+
+class Grid member functions:
+
+XY east (XY xy) const
+XY north(XY xy) const
+XY south(XY xy) const
+XY west (XY xy) const
+
+Return "nowhere" if there's a wall in that direction.
+
+Using the Grid Status
+=====================
+
+Status of a position on the grid:
+---------------------------------
+
+struct Full_Stat {
+    On_Node     on_node;  // car or not
+    NdStat      ndstat;   // what kind of robot
+    R_Vertical  r_vert;   // vertical movement of robot (if present)
+    R_Move      r_mv;     // horizontoal movement of robot (if present)
+};
+
+Possible values are:
+    enum class On_Node : char { empty,  Car0,  Car1,  Car2};
+    enum class NdStat  : char { nobodyhome, // no robot
+	    R_ready,   R_moving,   R_vertical,
+	    C0R_ready, C0R_moving,
+	    C1R_ready, C1R_moving,
+	    C2R_ready, C2R_moving};
+    enum class R_Vertical  : char { lift, l1, l2, l3, l4, drop};
+    enum class R_Move  : char { accE, mvE0, accN, mvN1, mvN0, accW, mvW0, accS, mvS1, mvS0,
+	    w0_accE, w0_mvE1, w0_mvE0,   w0_accN, w0_mvN1, w0_mvN2, w0_mvN3, w0_mvN0,   w0_accW, w0_mvW1, w0_mvW0,   w0_accS, w0_mvS1, w0_mvS2, w0_mvS3, w0_mvS0,
+	    w1_accE, w1_mvE1, w1_mvE0,   w1_accN, w1_mvN1, w1_mvN2, w1_mvN3, w1_mvN0,   w1_accW, w1_mvW1, w1_mvW0,   w1_accS, w1_mvS1, w1_mvS2, w1_mvS3, w1_mvS0,
+	    w2_accE, w2_mvE1, w2_mvE0,   w2_accN, w2_mvN1, w2_mvN2, w2_mvN3, w2_mvN0,   w2_accW, w2_mvW1, w2_mvW0,   w2_accS, w2_mvS1, w2_mvS2, w2_mvS3, w2_mvS0};
+
+Accessing grid positions
+-------------------------
+template<typename T> struct vector_grid: public std::vector<T>
+has operator[] overloaded for type XY,
+
+
+typedef      Grid::vector_grid< Full_Stat >       Stat_Vector_t;
+use this to access the status of a position on the grid:
+
+Example:
+Stat_Vector_t sv;
+if (sv[xy].on_node==On_Node::empty) cout<<"No car on this slot";
+
+Load the grid statuses for all times from a file (this is taken from visualize.cc)
+
+Grid G;
+std::vector< GridSpace::Stat_Vector_t > fullsol {t_max+1, G};
+for (unsigned t=0; t<=t_max; ++t) {
+    std::getline(file>>std::ws,tmpstr);
+    GridSpace::raw_read( &( fullsol[t] ), tmpstr );
+    std::cout<<'.'<<std::flush;
+}
+
+if (fullsol[t][xy].on_node==On_Node::empty) cout<<"No car on this slot at this time";
