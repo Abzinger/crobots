@@ -21,9 +21,14 @@ var MOVING = false;
 var robot_img = new Image();
 robot_img.src = './public/assets/robots/robot_200.png';
 
+var robot_up_img = new Image();
+robot_up_img.src = './public/assets/robots/robot_up_200.png';
+
 var corner_img = new Image();
 var line_center_img = new Image();
 var noline_img = new Image();
+
+var car_imgs = [];
 
 corner_img.src = './public/assets/parking_lot/corner_200.jpg';
 line_center_img.src = './public/assets/parking_lot/line_center_200.jpg';
@@ -31,7 +36,7 @@ noline_img.src = './public/assets/parking_lot/noline_200.jpg';
 
 function sprite (options) {
 	var that = {},
-		frameIndex = 0;
+		speedCount = 0;
 	
 	that.context = options.context;
 	that.width = options.width;
@@ -48,6 +53,14 @@ function sprite (options) {
 	that.endY = options.y;
 	that.dirX = options.dirX;
 	that.dirY = options.dirY;
+	/*
+	Speed:
+	1 - It takes 1 step to travel 1 tile e.g. Robot only EW movement
+	2 - It takes 2 steps to travel 2 tiles e.g. Robot only NS movement + robot with car EW movement
+	4 - It takes 4 steps to travel 4 tiles e.g. Robot with car NS movement
+	*/
+	that.speed = options.speed;
+	
 	
 	that.render = function () {
 		if (that.moving){
@@ -84,16 +97,29 @@ function sprite (options) {
 				stopAllMovement();
 			}
 		}
+		speedCount += 1;
+		console.log(that.speed);
+		if (that.speed == 1 || (that.speed == 2 && speedCount == 2) || (that.speed == 4 && speedCount == 2)){
+			console.log("Whatup");
+			that.addPixel(dirX,dirY);
+		}
+		
+						
+	}
+	
+	that.addPixel = function (dirX, dirY){
 		if (dirX == 1){
 			that.x += 1;
 		} else if (dirX == -1){
 			that.x -= 1;
 		} else if (dirY == 1){
-			that.y -= 2;
+			that.y -= 1;
 		} else if (dirY == -1){
-			that.y += 2;
-		}				
+			that.y += 1;
+		}
+		speedCount = 0;
 	}
+	
 	return that;
 }
 
@@ -157,6 +183,71 @@ function addCars(amount){
 	}
 }
 
+function getCarImgs(){
+	var car_imgs = [];
+	
+	for (var i = 1; i <= 3; i++){
+		var car_img = [];
+		car_img.push(new Image());
+		car_img[0].src = './public/assets/cars/car' + i + '_200.png';
+		car_img.push(new Image());
+		car_img[1].src = './public/assets/cars/car' + i + '_up_200.png';
+		car_imgs.push(car_img);
+	}
+	
+	return car_imgs;
+}
+
+function addMachine(type, xGrid, yGrid){
+	
+	if (type == "C0"){
+		var img = car_imgs[0][0];
+		var upImg = car_imgs[0][1];
+	} else if (type == "C1"){
+		var img = car_imgs[1][0];
+		var upImg = car_imgs[1][1];
+	} else if (type == "C2"){
+		var img = car_imgs[2][0];
+		var upImg = car_imgs[2][1];
+	} else if (type == "R"){
+		var img = robot_img;
+		var upImg = robot_up_img;
+	} else {
+		console.log("Problem with types in addMachine()");
+	}
+	
+	var x = yGrid * GRID_WIDTH;
+	var y = xGrid * GRID_HEIGHT;
+	
+	console.log(xGrid, yGrid, x,y);
+	
+	if (type == "C0" || type == "C1" || type == "C2"){
+		var car = sprite({
+			context: canvas.getContext('2d'),
+			width: 100,
+			height: 200,
+			image: img,
+			upimage: upImg,
+			x: x,
+			y: y
+		});
+		
+		cars.push(car);
+	} else if (type == "R"){
+		var robot = sprite({
+			context: canvas.getContext('2d'),
+			width: 100,
+			height: 200,
+			image: img,
+			upimage: upImg,
+			x: x,
+			y: y
+		});
+		
+		robots.push(robot);
+	}
+}
+
 function randomIntFromInterval(min,max)
 {
     return Math.floor(Math.random()*(max-min+1)+min);
@@ -182,23 +273,15 @@ function gameLoop() {
 	}
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	createParkingLayout();
-	//renderCars();
+	renderMachines(robots);
+	renderMachines(cars);
 }
 
-function renderCars(){
-	for (var i = 0; i < cars.length; i++){
-		cars[i].render();
+function renderMachines(machineArray){
+	for (var i = 0; i < machineArray.length; i++){
+		machineArray[i].render();
 	}
 }
-
-//noline_img.onload = populateParkingLot();
-
-
-$(document).ready(function(){
-	//addCars(10);
-})
-
-
 
 canvas.addEventListener("mousedown", selectCar, false);
 
@@ -233,7 +316,7 @@ function selectCar(e){
 	}
 }
 
-function moveCar(direction, car){
+function moveCar(direction, car, speed){
 	car.moving = true;
 	MOVING = true;
 	switch(direction){
@@ -241,30 +324,34 @@ function moveCar(direction, car){
 			car.endY = car.y - GRID_HEIGHT;
 			car.dirX = 0;
 			car.dirY = 1;
+			car.speed = speed;
 			car.update(0,1);
 			break;
 		case "S":
 			car.endY = car.y + GRID_HEIGHT;
 			car.dirX = 0;
 			car.dirY = -1;
+			car.speed = speed;
 			car.update(0,-1);
 			break;
 		case "E":
 			car.endX = car.x + GRID_WIDTH;
 			car.dirX = 1;
 			car.dirY = 0;
+			car.speed = speed;
 			car.update(1,0);
 			break;
 		case "W":
 			car.endX = car.x - GRID_WIDTH;
 			car.dirX = -1;
 			car.dirY = 0;
+			car.speed = speed;
 			car.update(-1,0);
 			break;
 	}
 }
 
-var moveArray=[[["E",0],["N",1]],[["S",0],["E",1]],[["W",0],["S",1]],[["N",0],["W",1]]];
+var moveArray=[[["E",0,2],["N",3,4]],[["E",0,2],["N",3,4]],[["W",0,2],["N",3,4]],[["W",0,2],["N",3,4]]];
 
 function movements(moveArray){
 	//console.log(STEPS);
@@ -272,7 +359,7 @@ function movements(moveArray){
 	if (step < moveArray.length){
 		var stepArray = moveArray[step];
 		for (var j = 0; j < stepArray.length; j++){
-			moveCar(stepArray[j][0],cars[stepArray[j][1]]);
+			moveCar(stepArray[j][0],cars[stepArray[j][1]],stepArray[j][2]);
 		}
 	} else{
 		stopAllMovement();
@@ -287,10 +374,16 @@ function populateParkingLot(route){
 		GRID_H = data.height;
 		GRID_W = data.width;
 		LAYOUT = data.layout;
+		cars = [];
+		robots = [];
 		console.log(LAYOUT);
 		canvas.width = GRID_WIDTH * GRID_W;
 		canvas.height = GRID_HEIGHT * GRID_H;
 		createParkingLayout();
+		car_imgs = getCarImgs();
+		for (var i = 0; i < data.machines.length; i++){
+			addMachine(data.machines[i][0], data.machines[i][1], data.machines[i][2])
+		}
 	})
 }
 
@@ -298,11 +391,12 @@ function createParkingLayout(){
 	for (var i = 0; i < GRID_H; i++){
 		for (var j = 0; j < GRID_W; j++){
 			if (LAYOUT[i][j] == "P"){	
-				ctx.drawImage(noline_img, i*GRID_WIDTH, j*GRID_HEIGHT);
+				ctx.drawImage(noline_img, j*GRID_WIDTH, i*GRID_HEIGHT);
 			}			
 		}
 	}
 };
+
 
 noline_img.addEventListener("load", gameLoop);
 
