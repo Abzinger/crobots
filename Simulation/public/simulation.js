@@ -1,108 +1,308 @@
-var simulation = new Phaser.Game(1600, 800, Phaser.AUTO, 'simulation', { preload: preload, create: create, update: update });
+var canvas = document.getElementById("simCanvas");
+ctx = canvas.getContext("2d");
+
+var cars = [];
+var robots = [];
 
 var GRID_WIDTH  = 100;
 var GRID_HEIGHT = 200;
-var VELOCITY = 30;
 
-var isOver;
+var CANVAS_WIDTH = 0;
+var CANVAS_HEIGHT = 0;
 
-function preload() {
-	simulation.load.image('corner', './public/assets/parking_lot/corner_200.jpg');
-	simulation.load.image('line_center', './public/assets/parking_lot/line_center_200.jpg');
-	simulation.load.image('noline', './public/assets/parking_lot/noline_200.jpg');
-	
-	simulation.load.image('car1', './public/assets/cars/car1_200.png');
-	simulation.load.image('car2', './public/assets/cars/car2_200.png');
-	simulation.load.image('car3', './public/assets/cars/car3_200.png');
-	simulation.load.image('car4', './public/assets/cars/car4_200.png');
-	simulation.load.image('car5', './public/assets/cars/car5_200.png');
-	simulation.load.image('car6', './public/assets/cars/car6_200.png');
-	
-	simulation.load.image('robot', './public/assets/robots/robot_200.png');
-	
-}
+var GRID_W = 0;
+var GRID_H = 0;
 
-function create() {
+var LAYOUT = [];
+
+var STEPS = 1;
+var MOVING = false;
+
+var robot_img = new Image();
+robot_img.src = './public/assets/robots/robot_200.png';
+
+var corner_img = new Image();
+var line_center_img = new Image();
+var noline_img = new Image();
+
+corner_img.src = './public/assets/parking_lot/corner_200.jpg';
+line_center_img.src = './public/assets/parking_lot/line_center_200.jpg';
+noline_img.src = './public/assets/parking_lot/noline_200.jpg';
+
+function sprite (options) {
+	var that = {},
+		frameIndex = 0;
+	
+	that.context = options.context;
+	that.width = options.width;
+	that.height = options.height;
+	
+	that.image = options.image;
+	that.upimage = options.upimage;
+	that.x = options.x;
+	that.y = options.y;
+	that.up = false;
+	
+	that.moving = false;
+	that.endX = options.x;
+	that.endY = options.y;
+	that.dirX = options.dirX;
+	that.dirY = options.dirY;
+	
+	that.render = function () {
+		if (that.moving){
+			that.update(that.dirX, that.dirY);
+		}
 		
-	createParkingLot();
+		if (that.up){
+			that.context.drawImage(
+			that.upimage,
+			x = that.x,
+			y = that.y
+			)
+		} else {
+			that.context.drawImage(
+			that.image,
+			x = that.x,
+			y = that.y
+			)
+		}
+		
+	};
 	
-	r = simulation.add.sprite(150,300,'robot');
-	r.anchor.setTo(0.5,0.5);
-	r.inputEnabled = true;
+	that.loop = options.loop;
 	
-	s = simulation.add.sprite(150,300,'car1');
-	s.anchor.setTo(0.5,0.5);
-	s.inputEnabled = true;
-	
-	simulation.physics.arcade.enable(r);
-	simulation.physics.arcade.enable(r);
-	
-	
-	t = simulation.add.sprite(250,300,'car2');
-	t.anchor.setTo(0.5,0.5);
-	t.inputEnabled = true;
-	
-	
-	simulation.add.sprite(300,400,'car3');
-	simulation.add.sprite(1000,600,'car4');
-	simulation.add.sprite(500,400,'car5');
-	simulation.add.sprite(300,0,'car6');
-	
-	
+	that.update = function (dirX, dirY) {
+		if (that.x == that.endX && that.y == that.endY){
+			console.log(STEPS);
+			var step = (STEPS) / 100;			
+			if (step < moveArray.length){
+				movements(moveArray);
+			} else {
+				that.moving = false;
+				MOVING = false;
+				stopAllMovement();
+			}
+		}
+		if (dirX == 1){
+			that.x += 1;
+		} else if (dirX == -1){
+			that.x -= 1;
+		} else if (dirY == 1){
+			that.y -= 2;
+		} else if (dirY == -1){
+			that.y += 2;
+		}				
+	}
+	return that;
 }
 
-function createParkingLot() {
-	// 8 * 4
-	for (var i = 0; i < 16; i++){
-		for (var j = 0; j < 4; j++){
-			simulation.add.sprite(i*100, j*200, 'noline');
+function addCars(amount){
+	var car_imgs = [];
+	
+	for (var i = 1; i <= amount; i++){
+		var car_img = [];
+		var carInt = randomIntFromInterval(1,6);
+		car_img.push(new Image());
+		car_img[0].src = './public/assets/cars/car' + carInt + '_200.png';
+		car_img.push(new Image());
+		car_img[1].src = './public/assets/cars/car' + carInt + '_up_200.png';
+		car_imgs.push(car_img);
+	}
+	
+	var coords = [];
+	
+	var placesX = CANVAS_WIDTH / GRID_WIDTH;
+	var placesY = CANVAS_HEIGHT / GRID_HEIGHT;
+	
+	for (var i = 0; i < amount; i++){
+		
+		do {
+			var existing = false;
+			var x = randomIntFromInterval(0,placesX - 1) * GRID_WIDTH;
+			var y = randomIntFromInterval(0, placesY - 1) * GRID_HEIGHT;
+			
+			for (var k = 0; k < coords.length; k++){
+				if (coords[k][0] == x && coords[k][1] == y){					
+					existing = true;
+				}
+			}
+		}
+		while (existing);
+		coords.push([x,y]);		
+	}	
+	
+	
+	for (var i = 0; i < amount; i++){
+		var img = car_imgs[i][0];
+		var upImg = car_imgs[i][1];
+		var x = coords[i][0];
+		var y = coords[i][1]
+		var car = sprite({
+		context: canvas.getContext('2d'),
+		width: 100,
+		height: 200,
+		image: img,
+		upimage: upImg,
+		x: x,
+		y: y
+		});
+		
+		cars.push(car);
+		
+	}
+
+	for (var i = 0; i < cars.length; i++){
+		cars[i].render();
+	}
+}
+
+function randomIntFromInterval(min,max)
+{
+    return Math.floor(Math.random()*(max-min+1)+min);
+}
+
+var noline = sprite({
+	context: canvas.getContext('2d'),
+	width: 100,
+	height: 200,
+	image: noline_img
+});
+
+function stopAllMovement(){
+	for (var i = 0; i < cars.length; i++){
+		cars[i].moving = false;
+	}
+}
+
+function gameLoop() {
+	window.requestAnimationFrame(gameLoop);
+	if (MOVING){
+		STEPS += 1;
+	}
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	createParkingLayout();
+	//renderCars();
+}
+
+function renderCars(){
+	for (var i = 0; i < cars.length; i++){
+		cars[i].render();
+	}
+}
+
+//noline_img.onload = populateParkingLot();
+
+
+$(document).ready(function(){
+	//addCars(10);
+})
+
+
+
+canvas.addEventListener("mousedown", selectCar, false);
+
+function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
+    };
+}
+
+function selectCar(e){
+	var pos = getMousePos(canvas,e);
+	var posx = pos.x;
+	var posy = pos.y;
+	
+	// To get the car in this position
+	if (!MOVING){	
+		for (var i = 0; i < cars.length; i++){
+			if (posx >= cars[i].x && posx < (cars[i].x + GRID_WIDTH) && posy >= cars[i].y && posy < (cars[i].y + GRID_HEIGHT)){
+				if (cars[i].up){
+					cars[i].up = false;
+				} else {
+					cars[i].up = true;
+				}
+				movements(moveArray);
+			}
+		}
+	} else {
+		var step = Math.ceil((STEPS -1) / 100);
+		console.log("Next step will be number " + (step + 1));
+	}
+}
+
+function moveCar(direction, car){
+	car.moving = true;
+	MOVING = true;
+	switch(direction){
+		case "N":
+			car.endY = car.y - GRID_HEIGHT;
+			car.dirX = 0;
+			car.dirY = 1;
+			car.update(0,1);
+			break;
+		case "S":
+			car.endY = car.y + GRID_HEIGHT;
+			car.dirX = 0;
+			car.dirY = -1;
+			car.update(0,-1);
+			break;
+		case "E":
+			car.endX = car.x + GRID_WIDTH;
+			car.dirX = 1;
+			car.dirY = 0;
+			car.update(1,0);
+			break;
+		case "W":
+			car.endX = car.x - GRID_WIDTH;
+			car.dirX = -1;
+			car.dirY = 0;
+			car.update(-1,0);
+			break;
+	}
+}
+
+var moveArray=[[["E",0],["N",1]],[["S",0],["E",1]],[["W",0],["S",1]],[["N",0],["W",1]]];
+
+function movements(moveArray){
+	//console.log(STEPS);
+	var step = Math.ceil((STEPS -1) / 100);
+	if (step < moveArray.length){
+		var stepArray = moveArray[step];
+		for (var j = 0; j < stepArray.length; j++){
+			moveCar(stepArray[j][0],cars[stepArray[j][1]]);
+		}
+	} else{
+		stopAllMovement();
+	}
+}
+
+
+function populateParkingLot(route){
+	var URL = "/Route/" + route + "/Layout";
+	$.getJSON( URL, function ( data ) {
+		console.log(data);
+		GRID_H = data.height;
+		GRID_W = data.width;
+		LAYOUT = data.layout;
+		console.log(LAYOUT);
+		canvas.width = GRID_WIDTH * GRID_W;
+		canvas.height = GRID_HEIGHT * GRID_H;
+		createParkingLayout();
+	})
+}
+
+function createParkingLayout(){
+	for (var i = 0; i < GRID_H; i++){
+		for (var j = 0; j < GRID_W; j++){
+			if (LAYOUT[i][j] == "P"){	
+				ctx.drawImage(noline_img, i*GRID_WIDTH, j*GRID_HEIGHT);
+			}			
 		}
 	}
-}
+};
 
+noline_img.addEventListener("load", gameLoop);
 
-
-function update() {	
-	isOver = s.input.pointerOver()? true : false;
-	
-	if (isOver){
-		simulation.input.onDown.add(moveAround,this);
-
-	}
-	
-}
-
-
-function moveAround(){	
-	// Some random movement
-	//Move one left
-	var f1 = move('W', 1);
-	var tween1 = simulation.add.tween(s).to({x:f1[0],y:f1[0]},1 * 2000);
-	console.log(f1);
-	tween1.start();
-	
-	//Move two down
-	var f2 = move('S', 2);
-	var tween2 = simulation.add.tween(s).to({x:f2[0],y:f2[1]}, 2 * 2000);
-	console.log(f2);
-	
-	tween2.start();
-}
-
-function move(direction, distance){
-	var newX = 0;
-	var newY = 0;
-	if (direction == 'N'){
-		newY = (GRID_HEIGHT * distance);
-		return [newX,newY];
-	} else if (direction == 'S'){
-		newY = (GRID_HEIGHT * distance);
-		return [newX,newY];
-	} else if (direction == 'E'){
-		newX = (GRID_WIDTH * distance);
-		return [newX,newY];
-	} else if (direction == 'W'){
-		newX = (GRID_WIDTH * distance);
-		return [newX,newY];
-	}
-}

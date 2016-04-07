@@ -1,4 +1,34 @@
 {% extends "layout.html" %}
 {% block content %}
+<script type="text/javascript">
+$( document ).ready( function() {
+	$.getJSON("/Route/GetRouteList", function(result) {
+			var optionsValues = '<select id="routes">';
+			$.each(result, function(item) {
+				optionsValues += '<option value="' + result[item].value + '">' + result[item].name + '</option>';
+			});
+			optionsValues += '</select>';
+			var options = $('#routes');
+			options.replaceWith(optionsValues);
+		});
+		
+	$( "#selectRoute" ).click(function( event ){
+		var route = $('#routes').val();
+		populateParkingLot(route);
+	});
+	
+});
+
+
+</script>
+<div id="container">
+	<canvas id="simCanvas" >
+	</canvas>
+	<div id="routeChooser">
+		<select id="routes">
+		</select>
+		<button id="selectRoute">Choose route</button>
+	</div>
+</div>
 <script type="text/javascript" src="./public/simulation.js"></script>
 {% endblock %}
