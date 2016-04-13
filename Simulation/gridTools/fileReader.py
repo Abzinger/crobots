@@ -28,7 +28,7 @@ class ndStat(Enum):
     R_m = 2
     R_v = 3
     C0R_r = 4
-    COR_m = 5
+    C0R_m = 5
     C1R_r = 6
     C1R_m = 7
     C2R_r = 8
@@ -165,6 +165,8 @@ def getRoute(filename):
 def decodeGrid(grid):
     onNodeValue = onNode(ord(grid[0]) - ord('c'))
     ndStatValue = ndStat(ord(grid[1]) - ord('A'))
+    if (ndStatValue == ndStat.none):
+        ndStatValue = ndStat.NO
     rVerticalValue = rVertical(ord(grid[2]) - ord('v'))
     rMoveValue = rMove(ord(grid[3]) - ord('!'))
     return GridState(onNodeValue, ndStatValue, rVerticalValue, rMoveValue)
@@ -210,7 +212,11 @@ def getCoordinates(route, level, instructionsMaker = False):
     robotID = 0
 
     for i in range(0, len(instructions)):
-        if (instructions[i].onNode == onNode.C0 or instructions[i].onNode == onNode.C1 or instructions[i].onNode == onNode.C2):
+        if (instructions[i].onNode == onNode.C0 or instructions[i].onNode == onNode.C1 or instructions[i].onNode == onNode.C2 or
+            instructions[i].ndStat == ndStat.C0R_r or instructions[i].ndStat == ndStat.C0R_m or
+            instructions[i].ndStat == ndStat.C1R_r or instructions[i].ndStat == ndStat.C1R_m or
+            instructions[i].ndStat == ndStat.C2R_r or instructions[i].ndStat == ndStat.C2R_m):
+
             placeStr = str(i)
             if len(placeStr) == 1:
                 level = 0
@@ -257,7 +263,7 @@ def getParkingLayout(route):
     return (json.dumps({'width' : lotWidth, 'height' : lotHeight, 'layout' : layoutArray, 'machines' : machineArray}, separators=(',',':')))
 
 def getRouteList():
-    routes = glob.glob("../../Examples/*.robroute")
+    routes = glob.glob("../Examples/*.robroute")
     return routes
 
 def getJSONRouteList():
@@ -268,70 +274,147 @@ def getJSONRouteList():
     return (json.dumps(routeArray, separators=(',',':')))
 
 def getInstructions(route):
-    initialMachines = getCoordinates(route, 0, True)
+    initialMachines = getCoordinates(route,0,True)
     instructionsArray = []
-    for i in range(1,len(route.instructionsArray)):
-        levelInstructions = []
-        nextState = getCoordinates(route, i, True)
-        for j in range (0, len(nextState)):
-            if nextState[j][0] == 'C0' or nextState[j][0] == 'C1' or nextState[j][0] == 'C2':
-                if nextState[j][4].rMove != rMove.NO:
-                    move = nextState[j][4].rMove
-                    # Horizontal movement of car + robot
-                    if move == rMove.w0_accN or move == rMove.w0_mvN0 or move == rMove.w0_mvN1 or move == rMove.w0_mvN2 or move == rMove.w0_mvN3 \
-                        or move == rMove.w1_accN or move == rMove.w1_mvN0 or move == rMove.w1_mvN1 or move == rMove.w1_mvN2 or move == rMove.w1_mvN3 \
-                        or move == rMove.w2_accN or move == rMove.w2_mvN0 or move == rMove.w2_mvN1 or move == rMove.w2_mvN2 or move == rMove.w2_mvN3:
-                        x = nextState[j][1]
-                        y = nextState[j][2]
-                        nextState[j][3] = getCarID(initialMachines, x, y, 'C')
-                        levelInstructions.append([nextState[j][3], 'N', 4])
-                    elif move == rMove.w0_accS or move == rMove.w0_mvS0 or move == rMove.w0_mvS1 or move == rMove.w0_mvS2 or move == rMove.w0_mvS3 \
-                        or move == rMove.w1_accS or move == rMove.w1_mvS0 or move == rMove.w1_mvS1 or move == rMove.w1_mvS2 or move == rMove.w1_mvS3 \
-                        or move == rMove.w2_accS or move == rMove.w2_mvS0 or move == rMove.w2_mvS1 or move == rMove.w2_mvS2 or move == rMove.w2_mvS3:
-                        x = nextState[j][1]
-                        y = nextState[j][2]
-                        nextState[j][3] = getCarID(initialMachines, x, y, 'C')
-                        levelInstructions.append([nextState[j][3], 'S', 4])
-                    elif move == rMove.w0_accE or move == rMove.w0_mvE0 or move == rMove.w0_mvE1  \
-                        or move == rMove.w1_accE or move == rMove.w1_mvE0 or move == rMove.w1_mvE1 \
-                        or move == rMove.w2_accE or move == rMove.w2_mvE0 or move == rMove.w2_mvE1:
-                        x = nextState[j][1]
-                        y = nextState[j][2]
-                        nextState[j][3] = getCarID(initialMachines, x, y, 'C')
-                        levelInstructions.append([nextState[j][3], 'E', 2])
-                    elif move == rMove.w0_accW or move == rMove.w0_mvW0 or move == rMove.w0_mvW1  \
-                        or move == rMove.w1_accW or move == rMove.w1_mvW0 or move == rMove.w1_mvW1  \
-                        or move == rMove.w2_accW or move == rMove.w2_mvW0 or move == rMove.w2_mvW1 :
-                        x = nextState[j][1]
-                        y = nextState[j][2]
-                        nextState[j][3] = getCarID(initialMachines, x, y, 'C')
-                        levelInstructions.append([nextState[j][3], 'E', 2])
-            if nextState[j][0] == 'R':
-                if nextState[j][4].rMove != rMove.NO:
-                    move = nextState[j][4].rMove
-                # Horizontal movement of robot
-                    if move == rMove.accE or move == rMove.mvE0:
-                        x = nextState[j][1]
-                        y = nextState[j][2]
-                        nextState[j][3] = getCarID(initialMachines, x, y, 'R')
-                        levelInstructions.append([nextState[j][3],'E',1])
-                    elif move == rMove.accW or move == rMove.mvW0:
-                        x = nextState[j][1]
-                        y = nextState[j][2]
-                        nextState[j][3] = getCarID(initialMachines, x, y, 'R')
-                        levelInstructions.append([nextState[j][3],'W',1])
-                    elif move == rMove.accN or move == rMove.mvN0:
-                        x = nextState[j][1]
-                        y = nextState[j][2]
-                        nextState[j][3] = getCarID(initialMachines, x, y, 'R')
-                        levelInstructions.append([nextState[j][3],'N',2])
-                    elif move == rMove.accS or move == rMove.mvS0:
-                        x = nextState[j][1]
-                        y = nextState[j][2]
-                        nextState[j][3] = getCarID(initialMachines, x, y, 'R')
-                        levelInstructions.append([nextState[j][3],'S',2])
-        instructionsArray.append(levelInstructions)
-    return instructionsArray
+    for i in range(0, len(route.instructionsArray)):
+        instructionsArray.append([])
+    for machine in initialMachines:
+        y = machine[1]
+        x = machine[2]
+        id = machine[3]
+        state = machine[4]
+        type = 'C'
+        if machine[0] == 'R':
+            type = 'R'
+        for i in range(1,len(route.instructionsArray)):
+            nextState = getCoordinates(route, i, True)
+            if type == 'R':
+                if state.rMove != rMove.NO:
+                    if state.rMove == rMove.mvW0 or state.rMove == rMove.accW:
+                        instructionsArray[i].append([id,'W',1])
+                        #print("West")
+                        x -= 1
+                    elif state.rMove == rMove.mvE0 or state.rMove == rMove.accE:
+                        instructionsArray[i].append([id,'E',1])
+                        #print("East")
+                        x += 1
+                    elif state.rMove == rMove.mvN1:
+                        #print("North")
+                        y += 1
+                    elif state.rMove == rMove.mvS1:
+                        #print("South")
+                        y -= 1
+                    elif state.rMove == rMove.w0_mvN3 or state.rMove == rMove.w1_mvN3 or state.rMove == rMove.w2_mvN3:
+                        #print("North w/ car")
+                        y += 1
+                    elif state.rMove == rMove.w0_mvS3 or state.rMove == rMove.w1_mvS3 or state.rMove == rMove.w2_mvS3:
+                        #print("South w/ car")
+                        y -= 1
+                    elif state.rMove == rMove.w0_mvE1 or state.rMove == rMove.w1_mvE1 or state.rMove == rMove.w2_mvE1:
+                        #print("East w/ car")
+                        x += 1
+                    elif state.rMove == rMove.w0_mvW1 or state.rMove == rMove.w1_mvW1 or state.rMove == rMove.w2_mvW1:
+                        #print("West w/ car")
+                        x -= 1
+
+                    if state.rMove == rMove.accN or state.rMove == rMove.mvN1 or state.rMove == rMove.mvN0:
+                        instructionsArray[i].append([id,'N',2])
+                    elif state.rMove == rMove.accS or state.rMove == rMove.mvS1 or state.rMove == rMove.mvS0:
+                        instructionsArray[i].append([id,'S',2])
+                    elif state.rMove == rMove.w0_mvN0 or state.rMove == rMove.w0_mvN1 or state.rMove == rMove.w0_mvN2 or state.rMove == rMove.w0_mvN3 or \
+                        state.rMove == rMove.w1_mvN0 or state.rMove == rMove.w1_mvN1 or state.rMove == rMove.w1_mvN2 or state.rMove == rMove.w1_mvN3 or \
+                        state.rMove == rMove.w2_mvN0 or state.rMove == rMove.w2_mvN1 or state.rMove == rMove.w2_mvN2 or state.rMove == rMove.w2_mvN3 or \
+                        state.rMove == rMove.w0_accN or state.rMove == rMove.w1_accN or state.rMove == rMove.w1_accN:
+                        instructionsArray[i].append([id,'N',4])
+                    elif state.rMove == rMove.w0_mvS0 or state.rMove == rMove.w0_mvS1 or state.rMove == rMove.w0_mvS2 or state.rMove == rMove.w0_mvS3 or \
+                        state.rMove == rMove.w1_mvS0 or state.rMove == rMove.w1_mvS1 or state.rMove == rMove.w1_mvS2 or state.rMove == rMove.w1_mvS3 or \
+                        state.rMove == rMove.w2_mvS0 or state.rMove == rMove.w2_mvS1 or state.rMove == rMove.w2_mvS2 or state.rMove == rMove.w2_mvS3 or \
+                        state.rMove == rMove.w0_accS or state.rMove == rMove.w1_accS or state.rMove == rMove.w1_accS:
+                        instructionsArray[i].append([id,'S',4])
+                    elif state.rMove == rMove.w0_accE or state.rMove == rMove.w0_mvE0 or state.rMove == rMove.w0_mvE1 or \
+                        state.rMove == rMove.w1_accE or state.rMove == rMove.w1_mvE0 or state.rMove == rMove.w1_mvE1 or \
+                        state.rMove == rMove.w2_accE or state.rMove == rMove.w2_mvE0 or state.rMove == rMove.w2_mvE1:
+                        instructionsArray[i].append([id,'E',2])
+                    elif state.rMove == rMove.w0_accW or state.rMove == rMove.w0_mvW0 or state.rMove == rMove.w0_mvW1 or \
+                        state.rMove == rMove.w1_accW or state.rMove == rMove.w1_mvW0 or state.rMove == rMove.w1_mvW1 or \
+                        state.rMove == rMove.w2_accW or state.rMove == rMove.w2_mvW0 or state.rMove == rMove.w2_mvW1:
+                        instructionsArray[i].append([id,'W',2])
+
+                else:
+                    if state.rVertical != rVertical.NO:
+                        if state.rVertical == rVertical.lift:
+                            instructionsArray[i].append([id,'L',0])
+                            #print("Starting to lift")
+                        elif state.rVertical == rVertical.l1:
+                            instructionsArray[i].append([id,'L',1])
+                            #print("Lift level 1")
+                        elif state.rVertical == rVertical.l2:
+                            instructionsArray[i].append([id,'L',2])
+                            #print("Lift level 2")
+                        elif state.rVertical == rVertical.l3:
+                            instructionsArray[i].append([id,'L',3])
+                            #print("Lift level 3")
+                        elif state.rVertical == rVertical.l4:
+                            instructionsArray[i].append([id,'L',4])
+                           #print("Lift level 4")
+                        elif state.rVertical == rVertical.drop:
+                            instructionsArray[i].append([id,'D',0])
+                            #print("Dropping car")
+
+
+
+            else:
+                if state.rMove != rMove.NO:
+                    if state.rMove == rMove.w0_mvN3 or state.rMove == rMove.w1_mvN3 or state.rMove == rMove.w2_mvN3:
+                        #print("North w/ car")
+                        y += 1
+                    elif state.rMove == rMove.w0_mvS3 or state.rMove == rMove.w1_mvS3 or state.rMove == rMove.w2_mvS3:
+                        #print("South w/ car")
+                        y -= 1
+                    elif state.rMove == rMove.w0_mvE1 or state.rMove == rMove.w1_mvE1 or state.rMove == rMove.w2_mvE1:
+                        #print("East w/ car")
+                        x += 1
+                    elif state.rMove == rMove.w0_mvW1 or state.rMove == rMove.w1_mvW1 or state.rMove == rMove.w2_mvW1:
+                        #print("West w/ car")
+                        x -= 1
+
+                    if state.rMove == rMove.w0_mvN0 or state.rMove == rMove.w0_mvN1 or state.rMove == rMove.w0_mvN2 or state.rMove == rMove.w0_mvN3 or \
+                        state.rMove == rMove.w1_mvN0 or state.rMove == rMove.w1_mvN1 or state.rMove == rMove.w1_mvN2 or state.rMove == rMove.w1_mvN3 or \
+                        state.rMove == rMove.w2_mvN0 or state.rMove == rMove.w2_mvN1 or state.rMove == rMove.w2_mvN2 or state.rMove == rMove.w2_mvN3 or \
+                        state.rMove == rMove.w0_accN or state.rMove == rMove.w1_accN or state.rMove == rMove.w1_accN:
+                        instructionsArray[i].append([id,'N',4])
+                    elif state.rMove == rMove.w0_mvS0 or state.rMove == rMove.w0_mvS1 or state.rMove == rMove.w0_mvS2 or state.rMove == rMove.w0_mvS3 or \
+                        state.rMove == rMove.w1_mvS0 or state.rMove == rMove.w1_mvS1 or state.rMove == rMove.w1_mvS2 or state.rMove == rMove.w1_mvS3 or \
+                        state.rMove == rMove.w2_mvS0 or state.rMove == rMove.w2_mvS1 or state.rMove == rMove.w2_mvS2 or state.rMove == rMove.w2_mvS3 or \
+                        state.rMove == rMove.w0_accS or state.rMove == rMove.w1_accS or state.rMove == rMove.w1_accS:
+                        instructionsArray[i].append([id,'S',4])
+                    elif state.rMove == rMove.w0_accE or state.rMove == rMove.w0_mvE0 or state.rMove == rMove.w0_mvE1 or \
+                        state.rMove == rMove.w1_accE or state.rMove == rMove.w1_mvE0 or state.rMove == rMove.w1_mvE1 or \
+                        state.rMove == rMove.w2_accE or state.rMove == rMove.w2_mvE0 or state.rMove == rMove.w2_mvE1:
+                        instructionsArray[i].append([id,'E',2])
+                    elif state.rMove == rMove.w0_accW or state.rMove == rMove.w0_mvW0 or state.rMove == rMove.w0_mvW1 or \
+                        state.rMove == rMove.w1_accW or state.rMove == rMove.w1_mvW0 or state.rMove == rMove.w1_mvW1 or \
+                        state.rMove == rMove.w2_accW or state.rMove == rMove.w2_mvW0 or state.rMove == rMove.w2_mvW1:
+                        instructionsArray[i].append([id,'W',2])
+
+            stateHolder = getMachineState(nextState,y,x,type)
+            if stateHolder != None:
+                state = stateHolder
+            else:
+                print ("!!!No state found!!!")
+
+    return (json.dumps(instructionsArray, separators=(',',':')))
+
+
+
+
+def getMachineState(machines, x, y, type):
+   for machine in machines:
+        if machine[1] == x and machine[2] == y:
+            if type == 'C' and machine[0] != 'R':
+                return machine[4]
+            elif type == 'R' and machine[0] == 'R':
+                return machine[4]
 
 
 def getCarID (machines, x, y, type):
@@ -342,7 +425,7 @@ def getCarID (machines, x, y, type):
             elif type == 'R' and machine[0] == 'R':
                 return machine[3]
 
-route = getRoute(getRouteList()[0])
+#route = getRoute(getRouteList()[0])
 
-print(getInstructions(route))
+#getInstructions(route)
 

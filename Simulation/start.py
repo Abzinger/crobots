@@ -22,6 +22,10 @@ def layout(routeNr):
     response.content_type = 'application/json'
     return fr.getParkingLayout(fr.getRoute(routes[routeNr]))
 
+@route("/Route/<routeNr:int>/Instructions")
+def instructions(routeNr):
+    response.content_type = 'application/json'
+    return fr.getInstructions(fr.getRoute(routes[routeNr]))
 
 
 @error(404)

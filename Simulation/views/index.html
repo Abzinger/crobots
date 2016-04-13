@@ -15,6 +15,7 @@ $( document ).ready( function() {
 	$( "#selectRoute" ).click(function( event ){
 		var route = $('#routes').val();
 		populateParkingLot(route);
+		getInstructions(route);
 	});
 	
 });
