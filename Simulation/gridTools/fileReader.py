@@ -8,6 +8,12 @@ class Route:
         self.lotLayout  = lotLayout
         self.instructionsArray = instructionsArray
 
+# Grid with 4 properties
+# onNode - what kind of car is on the grid
+# ndStat - What is robot doing? Is it moving, is it ready, is it moving with car etc.
+# rVertical - is robot moving vertically (lifting the car up or dropping it)
+# rMove - is the machine(s) on the grid moving.
+
 class GridState:
     def __init__(self, onNode, ndStat, rVertical, rMove):
         self.onNode = onNode
@@ -15,6 +21,8 @@ class GridState:
         self.rVertical = rVertical
         self.rMove = rMove
 
+# Different onNode states
+# onNode - what kind of car is on the grid
 class onNode(Enum):
     em = 0
     C0 = 1
@@ -22,6 +30,8 @@ class onNode(Enum):
     C2 = 3
     NO = 4
 
+# Different ndStat states
+# ndStat - What is robot doing? Is it moving, is it ready, is it moving with car etc.
 class ndStat(Enum):
     none = 0
     R_r = 1
@@ -35,7 +45,8 @@ class ndStat(Enum):
     C2R_m = 9
     NO = 10
 
-
+# Different rVertical states
+# rVertical - is robot moving vertically (lifting the car up or dropping it)
 class rVertical(Enum):
     lift = 0
     l1 = 1
@@ -45,6 +56,8 @@ class rVertical(Enum):
     drop = 5
     NO = 6
 
+# Different rMove states
+# rMove - is the machine(s) on the grid moving.
 class rMove(Enum):
     accE = 0
     mvE0 = 1
@@ -106,6 +119,9 @@ class rMove(Enum):
     w2_mvS0 = 57
     NO = 58
 
+# Different pieces of grid
+# noWall - robot can drive from this grid to every direction
+# wall* - robot cannot drive to direction *
 class gridPieces(Enum):
     wallNW = 0
     wallN = 1
@@ -117,6 +133,8 @@ class gridPieces(Enum):
     wallW = 7
     noWall = 8
 
+# getParkingLot takes the size of the lot and the layout string from the file and will convert it to two-dimensional
+# table that will later be used to track the machines' movement.
 def getParkingLot(lotSize, layoutString):
     layouts = [layoutString[i:i+lotSize[1]] for i in range(0, len(layoutString), lotSize[1])]
     decodedLevels = []
@@ -146,8 +164,9 @@ def getParkingLot(lotSize, layoutString):
         decodedLevels.append(decodedLevel)
     return decodedLevels
 
+# getRoute will get the file name of the .robroute (parking lot instruction set) as an input
+# As an output Route class object will be returned that is the basis for all the movements.
 def getRoute(filename):
-
     with open(filename, "r") as input:
         array = []
         for line in input:
@@ -162,6 +181,8 @@ def getRoute(filename):
         decodedInstructions.append(gridStates(instrLines.rstrip()))
     return Route(lotSize, parkingLotLayout, decodedInstructions)
 
+# decodeGrid will decode one piece of parking layout and will return the states and other values of that grid as a
+# GridState object.
 def decodeGrid(grid):
     onNodeValue = onNode(ord(grid[0]) - ord('c'))
     ndStatValue = ndStat(ord(grid[1]) - ord('A'))
@@ -171,6 +192,8 @@ def decodeGrid(grid):
     rMoveValue = rMove(ord(grid[3]) - ord('!'))
     return GridState(onNodeValue, ndStatValue, rVerticalValue, rMoveValue)
 
+# gridStates is a helper function that takes the instruction string from the file as an input and will return instructions
+# as an array of GridState objects.
 def gridStates (instructionString):
     instructions = [instructionString[i:i+4] for i in range(0, len(instructionString), 4)]
     instructionsDecoded = []
@@ -178,32 +201,9 @@ def gridStates (instructionString):
         instructionsDecoded.append(decodeGrid(instr))
     return instructionsDecoded
 
-def printGrid(route, level):
-    instructions = route.instructionsArray[level]
-    parkingLotString = ""
-    for i in range (0, route.lotSize[0]):
-        instr = ""
-        for j in range(0, route.lotSize[1]):
-            instr += "|"
-            instr += instructions[i*10 + j].onNode.name
-            instr += "|"
-            instr += instructions[i*10 + j].ndStat.name
-            instr += "|"
-            instr += instructions[i*10 + j].rVertical.name
-            instr += "|"
-            instr += instructions[i*10 + j].rMove.name
-            instr += "\t"
-        instr += "\n"
-        parkingLotString += instr
-    parkingLotString += "\n\n"
-    return (parkingLotString)
 
-def writeInstructions(route):
-    f = open('instructions.txt', 'w')
-    for i in range (0, len(route.instructionsArray)):
-        f.write(printGrid(route, i))
-    f.close()
-
+# getCoordinates takes the route object as an input and will return the coordinates of all the machines on one instruction
+# level as an array of arrays.
 def getCoordinates(route, level, instructionsMaker = False):
     instructions = route.instructionsArray[level]
     locationArray = []
@@ -230,6 +230,7 @@ def getCoordinates(route, level, instructionsMaker = False):
             else:
                 locationArray.append([instructions[i].onNode.name, level, place, "C" + str(carID)])
             carID += 1
+
         if (instructions[i].ndStat != ndStat.none and instructions[i].ndStat != ndStat.NO):
             placeStr = str(i)
             if len(placeStr) == 1:
@@ -245,16 +246,15 @@ def getCoordinates(route, level, instructionsMaker = False):
                 locationArray.append(["R", level, place, "R" + str(robotID)])
 
             robotID += 1
-
     return locationArray
 
+# getParkingLayout will return the layout and the initial machine positioning as a JSON object - used by client.
 def getParkingLayout(route):
     lotWidth = route.lotSize[1]
     lotHeight = route.lotSize[0]
     layoutArray = []
     machineArray = getCoordinates(route, 0)
 
-    #Only for testing, soon there should be other types of grids needed
     for i in range(0, lotHeight):
         level = []
         for j in range(0, lotWidth):
@@ -262,10 +262,12 @@ def getParkingLayout(route):
         layoutArray.append(level)
     return (json.dumps({'width' : lotWidth, 'height' : lotHeight, 'layout' : layoutArray, 'machines' : machineArray}, separators=(',',':')))
 
+# returns list of routes (.robroute files in Examples directory)
 def getRouteList():
     routes = glob.glob("../Examples/*.robroute")
     return routes
 
+# returns the list of routes as a JSON objects
 def getJSONRouteList():
     routes = getRouteList()
     routeArray = []
@@ -273,6 +275,10 @@ def getJSONRouteList():
         routeArray.append({'name' : "Route " + str(i+1), 'value' : str(i)})
     return (json.dumps(routeArray, separators=(',',':')))
 
+# Crucial part of the program - getInstructions will transform the instructions from file to implicit instructions
+# where a machine will be given ID and a list of instructions  - for example C1 (car ID 1), 'W', 2 would mean that
+# car object with ID 1 should at this step move west with the speed of 2 (number means how many steps it takes to move
+# from a grid to adjacent grid.
 def getInstructions(route):
     initialMachines = getCoordinates(route,0,True)
     instructionsArray = []
@@ -360,9 +366,6 @@ def getInstructions(route):
                         elif state.rVertical == rVertical.drop:
                             instructionsArray[i].append([id,'D',0])
                             #print("Dropping car")
-
-
-
             else:
                 if state.rMove != rMove.NO:
                     if state.rMove == rMove.w0_mvN3 or state.rMove == rMove.w1_mvN3 or state.rMove == rMove.w2_mvN3:
@@ -407,7 +410,7 @@ def getInstructions(route):
 
 
 
-
+#  Will return the state of the machine that is on grid coordinates x,y. Helper function for getCoordinates().
 def getMachineState(machines, x, y, type):
    for machine in machines:
         if machine[1] == x and machine[2] == y:
@@ -416,14 +419,33 @@ def getMachineState(machines, x, y, type):
             elif type == 'R' and machine[0] == 'R':
                 return machine[4]
 
+# Helper function for debugging, will return human readable instructions
+def printGrid(route, level):
+    instructions = route.instructionsArray[level]
+    parkingLotString = ""
+    for i in range(0, route.lotSize[0]):
+        instr = ""
+        for j in range(0, route.lotSize[1]):
+            instr += "|"
+            instr += instructions[i * 10 + j].onNode.name
+            instr += "|"
+            instr += instructions[i * 10 + j].ndStat.name
+            instr += "|"
+            instr += instructions[i * 10 + j].rVertical.name
+            instr += "|"
+            instr += instructions[i * 10 + j].rMove.name
+            instr += "\t"
+        instr += "\n"
+        parkingLotString += instr
+    parkingLotString += "\n\n"
+    return (parkingLotString)
 
-def getCarID (machines, x, y, type):
-    for machine in machines:
-        if machine[1] == x and machine[2] == y:
-            if type == 'C' and machine[0] != 'R':
-                return machine[3]
-            elif type == 'R' and machine[0] == 'R':
-                return machine[3]
+# writes abovementioned instructions to a file
+def writeInstructions(route):
+    f = open('instructions.txt', 'w')
+    for i in range(0, len(route.instructionsArray)):
+        f.write(printGrid(route, i))
+    f.close()
 
 #route = getRoute(getRouteList()[0])
 

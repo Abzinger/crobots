@@ -3,31 +3,35 @@ import gridTools.fileReader as fr
 
 routes = fr.getRouteList()
 
+# Get index page
 @route("/")
 def index():
     return template("index.html")
 
+# Route for static files
 @route("/public/<filename:path>")
 def static_url(filename):
     return static_file(filename, root="./public")
 
+# Get all the routes
 @route("/Route/GetRouteList")
 def routeList():
     response.content_type = 'application/json'
     return fr.getJSONRouteList()
 
-
+# Get the layout of the selected route
 @route("/Route/<routeNr:int>/Layout")
 def layout(routeNr):
     response.content_type = 'application/json'
     return fr.getParkingLayout(fr.getRoute(routes[routeNr]))
 
+# Get the instructions of the selected route
 @route("/Route/<routeNr:int>/Instructions")
 def instructions(routeNr):
     response.content_type = 'application/json'
     return fr.getInstructions(fr.getRoute(routes[routeNr]))
 
-
+# Error page
 @error(404)
 def error404(error):
     return 'Nothing here, sorry'
