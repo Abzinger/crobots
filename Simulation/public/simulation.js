@@ -102,10 +102,11 @@ function sprite(options) {
         if (that.x == that.endX && that.y == that.endY) {
             //console.log(STEPS);
             var step = Math.ceil((STEPS - 1) / 100);
-            console.log("Update step: " + step);
+            //console.log("Update step: " + step);
             if (step < routeInstructions.length) {
                 moves(routeInstructions);
             } else {
+				console.log("Stopping all movement at step " + step + " as instructions with length " + routeInstructions.length + " are done!");
                 that.moving = false;
                 MOVING = false;
                 stopAllMovement();
@@ -303,28 +304,28 @@ function moveMachine(machine, instruction, speed) {
     MOVING = true;
     switch (instruction) {
         case "N":
-            machine.endY = machine.y - GRID_HEIGHT;
+            machine.endY = (machine.y - GRID_HEIGHT) / speed;
             machine.dirX = 0;
             machine.dirY = 1;
             machine.speed = speed;
             machine.update(0, 1);
             break;
         case "S":
-            machine.endY = machine.y + GRID_HEIGHT;
+            machine.endY = (machine.y + GRID_HEIGHT) / speed;
             machine.dirX = 0;
             machine.dirY = -1;
             machine.speed = speed;
             machine.update(0, -1);
             break;
         case "E":
-            machine.endX = machine.x + GRID_WIDTH;
+            machine.endX = (machine.x + GRID_WIDTH) / speed;
             machine.dirX = 1;
             machine.dirY = 0;
             machine.speed = speed;
             machine.update(1, 0);
             break;
         case "W":
-            machine.endX = machine.x - GRID_WIDTH;
+            machine.endX = (machine.x - GRID_WIDTH) / speed;
             machine.dirX = -1;
             machine.dirY = 0;
             machine.speed = speed;
@@ -338,7 +339,8 @@ function moveMachine(machine, instruction, speed) {
 // Function that will move all the machines one instruction step at a time.
 function moves(instructions) {
     var step = Math.ceil((STEPS - 1) / 100);
-    console.log("Step number " + step + ", length of instructions: " + instructions.length);
+    //console.log("Step number " + step + ", length of instructions: " + instructions.length);
+console.log("Step: " + step + ", instructions: " + instructions[step]);
     if (step < instructions.length) {
         var stepArray = instructions[step];
         for (var i = 0; i < stepArray.length; i++) {
