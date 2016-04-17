@@ -22,8 +22,11 @@ var GRID_H = 0;
 var LAYOUT = [];
 
 // Variables needed to hold the steps - ghost steps is for the case where in one instruction set there is no movement at all
-var STEPS = 1;
+var STEPS = 0;
+var STEPINDEX = 0;
+var STEPCOUNT = 100;
 var GHOSTSTEPS = 0;
+var PREVIOUSSTEP = 0;
 var GHOSTMOVEMENT = false;
 var MOVING = false;
 
@@ -98,20 +101,7 @@ function sprite(options) {
     };
 	
 	// Update the sprite location if needed, add a step.
-    that.update = function(dirX, dirY) {
-        if (that.x == that.endX && that.y == that.endY) {
-            //console.log(STEPS);
-            var step = Math.ceil((STEPS - 1) / 100);
-            //console.log("Update step: " + step);
-            if (step < routeInstructions.length) {
-                moves(routeInstructions);
-            } else {
-				console.log("Stopping all movement at step " + step + " as instructions with length " + routeInstructions.length + " are done!");
-                that.moving = false;
-                MOVING = false;
-                stopAllMovement();
-            }
-        }
+    that.update = function(dirX, dirY) {        
         speedCount += 1;
 
         //console.log(that.speed + ", " + speedCount);
@@ -240,16 +230,26 @@ function simulationLoop() {
         GHOSTSTEPS += 1;
         stopAllMovement();
     }
-    if (GHOSTSTEPS == 100) {
+    if (GHOSTSTEPS == STEPCOUNT) {
         MOVING = false;
         GHOSTMOVEMENT = false;
         GHOSTSTEPS = 0;
-        moves(routeInstructions);
     }
+	
     if (MOVING) {
-        STEPS += 1;
+        STEPS++;
     }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+	
+	var step = Math.ceil((STEPS) / STEPCOUNT);
+	console.log("STEPS: " + STEPS +  "; step: " + step + "; STEPINDEX: " + STEPINDEX);
+	if (step > STEPINDEX){
+		console.log("Doing step number " + step + ".");
+		stopAllMovement();
+		moves(routeInstructions, step);
+		STEPINDEX++;
+	}
+		
     createParkingLayout();
     renderMachines(robots);
     renderMachines(cars);
@@ -289,12 +289,12 @@ function selectCar(e) {
                 } else {
                     cars[i].up = true;
                 }
-                moves(routeInstructions);
+                moves(routeInstructions, 0);
             }
         }
     } else {
         var step = Math.ceil((STEPS - 1) / 100);
-        console.log("Next step will be number " + (step + 1));
+        //console.log("Next step will be number " + (step + 1));
     }
 }
 
@@ -337,17 +337,14 @@ function moveMachine(machine, instruction, speed) {
 }
 
 // Function that will move all the machines one instruction step at a time.
-function moves(instructions) {
-    var step = Math.ceil((STEPS - 1) / 100);
-    //console.log("Step number " + step + ", length of instructions: " + instructions.length);
-console.log("Step: " + step + ", instructions: " + instructions[step]);
-    if (step < instructions.length) {
-        var stepArray = instructions[step];
+function moves(instructions, stepNr) {
+    if (stepNr < instructions.length) {
+        var stepArray = instructions[stepNr];
         for (var i = 0; i < stepArray.length; i++) {
             moveMachine(getMachine(stepArray[i][0]), stepArray[i][1], stepArray[i][2]);
         }
         if (stepArray.length == 0) {
-            console.log("BOO! " + step);
+            console.log("BOO! " + stepNr);
             GHOSTMOVEMENT = true;
         }
     } else {
