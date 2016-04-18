@@ -217,13 +217,8 @@ def getCoordinates(route, level, instructionsMaker = False):
             instructions[i].ndStat == ndStat.C1R_r or instructions[i].ndStat == ndStat.C1R_m or
             instructions[i].ndStat == ndStat.C2R_r or instructions[i].ndStat == ndStat.C2R_m):
 
-            placeStr = str(i)
-            if len(placeStr) == 1:
-                level = 0
-                place = i
-            else:
-                level = int(placeStr[0])
-                place = int(placeStr[1])
+            level = i // lotWidth
+            place = i - (level * lotWidth)
 
             if instructionsMaker == True:
                 locationArray.append([instructions[i].onNode.name, level, place, "C" + str(carID),instructions[i]])
@@ -232,13 +227,9 @@ def getCoordinates(route, level, instructionsMaker = False):
             carID += 1
 
         if (instructions[i].ndStat != ndStat.none and instructions[i].ndStat != ndStat.NO):
-            placeStr = str(i)
-            if len(placeStr) == 1:
-                level = 0
-                place = i
-            else:
-                level = int(placeStr[0])
-                place = int(placeStr[1])
+
+            level = i // lotWidth
+            place = i - (level * lotWidth)
 
             if instructionsMaker == True:
                 locationArray.append(["R", level, place, "R" + str(robotID), instructions[i]])
@@ -324,19 +315,19 @@ def getInstructions(route):
                         x -= 1
 
                     if state.rMove == rMove.accN or state.rMove == rMove.mvN1 or state.rMove == rMove.mvN0:
-                        instructionsArray[i].append([id,'N',2])
-                    elif state.rMove == rMove.accS or state.rMove == rMove.mvS1 or state.rMove == rMove.mvS0:
                         instructionsArray[i].append([id,'S',2])
+                    elif state.rMove == rMove.accS or state.rMove == rMove.mvS1 or state.rMove == rMove.mvS0:
+                        instructionsArray[i].append([id,'N',2])
                     elif state.rMove == rMove.w0_mvN0 or state.rMove == rMove.w0_mvN1 or state.rMove == rMove.w0_mvN2 or state.rMove == rMove.w0_mvN3 or \
                         state.rMove == rMove.w1_mvN0 or state.rMove == rMove.w1_mvN1 or state.rMove == rMove.w1_mvN2 or state.rMove == rMove.w1_mvN3 or \
                         state.rMove == rMove.w2_mvN0 or state.rMove == rMove.w2_mvN1 or state.rMove == rMove.w2_mvN2 or state.rMove == rMove.w2_mvN3 or \
                         state.rMove == rMove.w0_accN or state.rMove == rMove.w1_accN or state.rMove == rMove.w1_accN:
-                        instructionsArray[i].append([id,'N',4])
+                        instructionsArray[i].append([id,'S',4])
                     elif state.rMove == rMove.w0_mvS0 or state.rMove == rMove.w0_mvS1 or state.rMove == rMove.w0_mvS2 or state.rMove == rMove.w0_mvS3 or \
                         state.rMove == rMove.w1_mvS0 or state.rMove == rMove.w1_mvS1 or state.rMove == rMove.w1_mvS2 or state.rMove == rMove.w1_mvS3 or \
                         state.rMove == rMove.w2_mvS0 or state.rMove == rMove.w2_mvS1 or state.rMove == rMove.w2_mvS2 or state.rMove == rMove.w2_mvS3 or \
                         state.rMove == rMove.w0_accS or state.rMove == rMove.w1_accS or state.rMove == rMove.w1_accS:
-                        instructionsArray[i].append([id,'S',4])
+                        instructionsArray[i].append([id,'N',4])
                     elif state.rMove == rMove.w0_accE or state.rMove == rMove.w0_mvE0 or state.rMove == rMove.w0_mvE1 or \
                         state.rMove == rMove.w1_accE or state.rMove == rMove.w1_mvE0 or state.rMove == rMove.w1_mvE1 or \
                         state.rMove == rMove.w2_accE or state.rMove == rMove.w2_mvE0 or state.rMove == rMove.w2_mvE1:
@@ -385,12 +376,12 @@ def getInstructions(route):
                         state.rMove == rMove.w1_mvN0 or state.rMove == rMove.w1_mvN1 or state.rMove == rMove.w1_mvN2 or state.rMove == rMove.w1_mvN3 or \
                         state.rMove == rMove.w2_mvN0 or state.rMove == rMove.w2_mvN1 or state.rMove == rMove.w2_mvN2 or state.rMove == rMove.w2_mvN3 or \
                         state.rMove == rMove.w0_accN or state.rMove == rMove.w1_accN or state.rMove == rMove.w1_accN:
-                        instructionsArray[i].append([id,'N',4])
+                        instructionsArray[i].append([id,'S',4])
                     elif state.rMove == rMove.w0_mvS0 or state.rMove == rMove.w0_mvS1 or state.rMove == rMove.w0_mvS2 or state.rMove == rMove.w0_mvS3 or \
                         state.rMove == rMove.w1_mvS0 or state.rMove == rMove.w1_mvS1 or state.rMove == rMove.w1_mvS2 or state.rMove == rMove.w1_mvS3 or \
                         state.rMove == rMove.w2_mvS0 or state.rMove == rMove.w2_mvS1 or state.rMove == rMove.w2_mvS2 or state.rMove == rMove.w2_mvS3 or \
                         state.rMove == rMove.w0_accS or state.rMove == rMove.w1_accS or state.rMove == rMove.w1_accS:
-                        instructionsArray[i].append([id,'S',4])
+                        instructionsArray[i].append([id,'N',4])
                     elif state.rMove == rMove.w0_accE or state.rMove == rMove.w0_mvE0 or state.rMove == rMove.w0_mvE1 or \
                         state.rMove == rMove.w1_accE or state.rMove == rMove.w1_mvE0 or state.rMove == rMove.w1_mvE1 or \
                         state.rMove == rMove.w2_accE or state.rMove == rMove.w2_mvE0 or state.rMove == rMove.w2_mvE1:
@@ -450,4 +441,3 @@ def writeInstructions(route):
 #route = getRoute(getRouteList()[0])
 
 #getInstructions(route)
-

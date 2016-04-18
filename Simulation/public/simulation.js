@@ -21,13 +21,10 @@ var GRID_H = 0;
 // The layout array
 var LAYOUT = [];
 
-// Variables needed to hold the steps - ghost steps is for the case where in one instruction set there is no movement at all
+// Variables needed to hold the steps
 var STEPS = 0;
 var STEPINDEX = 0;
 var STEPCOUNT = 100;
-var GHOSTSTEPS = 0;
-var PREVIOUSSTEP = 0;
-var GHOSTMOVEMENT = false;
 var MOVING = false;
 
 // Images of robots, cars, parking lot.
@@ -53,6 +50,7 @@ noline_img.src = './public/assets/parking_lot/noline_200.jpg';
 function sprite(options) {
     var that = {},
         speedCount = 0;
+		
 
     that.context = options.context;
     that.width = options.width;
@@ -65,10 +63,9 @@ function sprite(options) {
     that.up = false;
 
     that.moving = false;
-    that.endX = options.x;
-    that.endY = options.y;
     that.dirX = options.dirX;
     that.dirY = options.dirY;
+	that.direction = options.direction;
     /*
     Speed:
     1 - It takes 1 step to travel 1 tile e.g. Robot only EW movement
@@ -85,11 +82,12 @@ function sprite(options) {
         }
 
         if (that.up) {
-            that.context.drawImage(
-                that.upimage,
+			that.context.drawImage(
+                that.image,
                 x = that.x,
                 y = that.y
             )
+            
         } else {
             that.context.drawImage(
                 that.image,
@@ -103,12 +101,17 @@ function sprite(options) {
 	// Update the sprite location if needed, add a step.
     that.update = function(dirX, dirY) {        
         speedCount += 1;
-
-        //console.log(that.speed + ", " + speedCount);
-        if (that.speed == 1 || (that.speed == 2 && speedCount == 2) || (that.speed == 4 && speedCount == 2)) {
-            that.addPixel(dirX, dirY);
-        }
-
+		
+		if (that.direction == "E" || that.direction == "W"){
+			if (that.speed == 1 || (that.speed == 2 && speedCount == 2) || (that.speed == 4 && speedCount == 4)) {
+				that.addPixel(dirX, dirY);
+			}
+		} else if (that.direction == "N" || that.direction == "S"){
+			if ((that.speed == 2 && speedCount == 1) || (that.speed == 4 && speedCount == 2)){
+				that.addPixel(dirX, dirY);
+			}
+		}
+		
 
     }
 	
@@ -225,16 +228,6 @@ function stopAllMovement() {
 // Loop of the simulation - steps that will be taken every frame.
 function simulationLoop() {
     window.requestAnimationFrame(simulationLoop);
-    if (GHOSTMOVEMENT) {
-        MOVING = true;
-        GHOSTSTEPS += 1;
-        stopAllMovement();
-    }
-    if (GHOSTSTEPS == STEPCOUNT) {
-        MOVING = false;
-        GHOSTMOVEMENT = false;
-        GHOSTSTEPS = 0;
-    }
 	
     if (MOVING) {
         STEPS++;
@@ -242,7 +235,8 @@ function simulationLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 	
 	var step = Math.ceil((STEPS) / STEPCOUNT);
-	console.log("STEPS: " + STEPS +  "; step: " + step + "; STEPINDEX: " + STEPINDEX);
+	//console.log("Total frames moved: " + STEPS + "; ongoing step: " + STEPINDEX + "; calculated next step: " + step);
+	//console.log("MOVING: " + MOVING);
 	if (step > STEPINDEX){
 		console.log("Doing step number " + step + ".");
 		stopAllMovement();
@@ -304,35 +298,37 @@ function moveMachine(machine, instruction, speed) {
     MOVING = true;
     switch (instruction) {
         case "N":
-            machine.endY = (machine.y - GRID_HEIGHT) / speed;
             machine.dirX = 0;
             machine.dirY = 1;
+			machine.direction = "N";
             machine.speed = speed;
             machine.update(0, 1);
             break;
         case "S":
-            machine.endY = (machine.y + GRID_HEIGHT) / speed;
             machine.dirX = 0;
             machine.dirY = -1;
+			machine.direction = "S";
             machine.speed = speed;
             machine.update(0, -1);
             break;
         case "E":
-            machine.endX = (machine.x + GRID_WIDTH) / speed;
             machine.dirX = 1;
             machine.dirY = 0;
+			machine.direction = "E";
             machine.speed = speed;
             machine.update(1, 0);
             break;
         case "W":
-            machine.endX = (machine.x - GRID_WIDTH) / speed;
             machine.dirX = -1;
             machine.dirY = 0;
+			machine.direction = "W";
             machine.speed = speed;
             machine.update(-1, 0);
             break;
         case "L":
-            break;
+            machine.moving = false;
+		case "D":
+			machine.moving = false;
     }
 }
 
@@ -342,11 +338,12 @@ function moves(instructions, stepNr) {
         var stepArray = instructions[stepNr];
         for (var i = 0; i < stepArray.length; i++) {
             moveMachine(getMachine(stepArray[i][0]), stepArray[i][1], stepArray[i][2]);
+			console.log(stepArray[i][0], stepArray[i][1], stepArray[i][2]);
         }
-        if (stepArray.length == 0) {
-            console.log("BOO! " + stepNr);
-            GHOSTMOVEMENT = true;
-        }
+		if (stepArray.length == 0){
+			console.log("No movement")
+			MOVING = true;
+		}
     } else {
         stopAllMovement();
     }
