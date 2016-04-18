@@ -6,6 +6,8 @@ ctx = canvas.getContext("2d");
 var cars = [];
 var robots = [];
 
+
+
 // Height and width of one grid in pixels.
 var GRID_WIDTH = 100;
 var GRID_HEIGHT = 200;
@@ -25,6 +27,7 @@ var LAYOUT = [];
 var STEPS = 0;
 var STEPINDEX = 0;
 var STEPCOUNT = 100;
+var SPEED = 1;
 var MOVING = false;
 
 // Images of robots, cars, parking lot.
@@ -34,17 +37,14 @@ robot_img.src = './public/assets/robots/robot_200.png';
 var robot_up_img = new Image();
 robot_up_img.src = './public/assets/robots/robot_up_200.png';
 
-var corner_img = new Image();
-var line_center_img = new Image();
+
 var noline_img = new Image();
 
 var car_imgs = [];
 
 var routeInstructions = [];
 
-corner_img.src = './public/assets/parking_lot/corner_200.jpg';
-line_center_img.src = './public/assets/parking_lot/line_center_200.jpg';
-noline_img.src = './public/assets/parking_lot/noline_200.jpg';
+noline_img.src = './public/assets/parking_lot/noline_200_grid.png';
 
 // Basically a function class that will hold robot and car objects, make them move, stop etc.
 function sprite(options) {
@@ -85,14 +85,18 @@ function sprite(options) {
 			that.context.drawImage(
                 that.image,
                 x = that.x,
-                y = that.y
+                y = that.y,
+				width = that.width,
+				height = that.height
             )
             
         } else {
             that.context.drawImage(
                 that.image,
                 x = that.x,
-                y = that.y
+                y = that.y,
+				width = that.width,
+				height = that.height
             )
         }
 
@@ -110,6 +114,11 @@ function sprite(options) {
 			if ((that.speed == 2 && speedCount == 1) || (that.speed == 4 && speedCount == 2)){
 				that.addPixel(dirX, dirY);
 			}
+		} else if (that.direction == "L" || speedCount == 10){
+			console.log("WE ARE HERE!!");
+			that.addPixel(dirX, dirY);
+		} else if (that.direction == "D" || speedCount == 2){
+			that.addPixel(dirX, dirY);
 		}
 		
 
@@ -119,13 +128,13 @@ function sprite(options) {
     that.addPixel = function(dirX, dirY) {
 
         if (dirX == 1) {
-            that.x += 1;
+            that.x += 1 / SPEED;
         } else if (dirX == -1) {
-            that.x -= 1;
+            that.x -= 1 / SPEED;
         } else if (dirY == 1) {
-            that.y -= 1;
+            that.y -= 1 / SPEED;
         } else if (dirY == -1) {
-            that.y += 1;
+            that.y += 1 / SPEED;
         }
         speedCount = 0;
     }
@@ -176,8 +185,8 @@ function addMachine(type, xGrid, yGrid, id) {
     if (type == "C0" || type == "C1" || type == "C2") {
         var car = sprite({
             context: canvas.getContext('2d'),
-            width: 100,
-            height: 200,
+            width: GRID_WIDTH,
+            height: GRID_HEIGHT,
             image: img,
             upimage: upImg,
             x: x,
@@ -189,8 +198,8 @@ function addMachine(type, xGrid, yGrid, id) {
     } else if (type == "R") {
         var robot = sprite({
             context: canvas.getContext('2d'),
-            width: 100,
-            height: 200,
+            width: GRID_WIDTH,
+            height: GRID_HEIGHT,
             image: img,
             upimage: upImg,
             x: x,
@@ -210,8 +219,8 @@ function randomIntFromInterval(min, max) {
 // Sprite for parking lot.
 var noline = sprite({
     context: canvas.getContext('2d'),
-    width: 100,
-    height: 200,
+    width: GRID_WIDTH,
+    height: GRID_HEIGHT,
     image: noline_img
 });
 
@@ -235,8 +244,11 @@ function simulationLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 	
 	var step = Math.ceil((STEPS) / STEPCOUNT);
-	//console.log("Total frames moved: " + STEPS + "; ongoing step: " + STEPINDEX + "; calculated next step: " + step);
-	//console.log("MOVING: " + MOVING);
+	var momevementStep = Math.ceil((STEPS + 1) / STEPCOUNT);
+	if (momevementStep > STEPINDEX){
+		stopAllMovement();
+	}
+
 	if (step > STEPINDEX){
 		console.log("Doing step number " + step + ".");
 		stopAllMovement();
@@ -326,9 +338,13 @@ function moveMachine(machine, instruction, speed) {
             machine.update(-1, 0);
             break;
         case "L":
-            machine.moving = false;
+			machine.direction = "L";
+			machine.update(1,1);
+            //machine.moving = false;
 		case "D":
-			machine.moving = false;
+			machine.direction = "D";
+			machine.update(-1,-1);
+			//machine.moving = false;
     }
 }
 
