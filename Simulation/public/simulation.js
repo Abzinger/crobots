@@ -44,7 +44,7 @@ var car_imgs = [];
 
 var routeInstructions = [];
 
-noline_img.src = './public/assets/parking_lot/noline_200_grid.png';
+noline_img.src = './public/assets/parking_lot/noline_200.jpg';
 
 // Basically a function class that will hold robot and car objects, make them move, stop etc.
 function sprite(options) {
