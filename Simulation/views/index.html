@@ -2,6 +2,9 @@
 {% block content %}
 <script type="text/javascript">
 $( document ).ready( function() {
+
+	$( "#loading").hide();
+	
 	$.getJSON("/Route/GetRouteList", function(result) {
 			var optionsValues = '<select id="routes">';
 			$.each(result, function(item) {
@@ -13,6 +16,8 @@ $( document ).ready( function() {
 		});
 		
 	$( "#selectRoute" ).click(function( event ){
+		$( "#routeChooser").fadeOut(500);
+		$("#loading").fadeIn(500);
 		var route = $('#routes').val();
 		addStartingEndingStates(route);
 		getInstructions(route);
@@ -22,16 +27,31 @@ $( document ).ready( function() {
 
 
 </script>
-<div id="container">
-	<div id="startingPoint"></div>
-	<div id="endingPoint"></div>
-	<canvas id="simCanvas" >
-	</canvas>
-	<div id="routeChooser">
-		<select id="routes">
-		</select>
-		<button id="selectRoute">Choose route</button>
+
+<div class="overlay">
+	<div id="loading" class="centered">
+		<p>Loading</p>
+		<img src="/public/assets/ajax-loader.gif" id="loadgif">
+	</div>
+	<div id="routeChooser" class="centered">
+		<p>Robot Car Parking System Simulation</p>
+		<div id="selector">
+			<select id="routes"></select>
+			<button class="btn" id="selectRoute">Choose route</button>
+		</div>
 	</div>
 </div>
+
+<div id="simulation">
+	<div id="previews">
+		<div id="startingPoint"></div>
+		<div id="endingPoint"></div>
+	</div>
+	<div class="clearfix"></div>
+	<canvas id="simCanvas" >
+	</canvas>
+</div>
+	
+
 <script type="text/javascript" src="./public/simulation.js"></script>
 {% endblock %}

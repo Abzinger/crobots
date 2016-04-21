@@ -36,10 +36,10 @@ var MOVING = false;
 
 // Images of robots, cars, parking lot.
 var robot_img = new Image();
-robot_img.src = './public/assets/robots/robot_200.png';
+robot_img.src = './public/assets/robots/robot.png';
 
 var robot_shadow_img = new Image();
-robot_shadow_img.src = './public/assets/robots/robot_200_shadow.png';
+robot_shadow_img.src = './public/assets/robots/robot_shadow.png';
 
 
 var noline_img = new Image();
@@ -48,7 +48,7 @@ var car_imgs = [];
 
 var routeInstructions = [];
 
-noline_img.src = './public/assets/parking_lot/noline_200.jpg';
+noline_img.src = './public/assets/parking_lot/noline_grid.png';
 
 // Basically a function class that will hold robot and car objects, make them move, stop etc.
 function sprite(options) {
@@ -90,16 +90,16 @@ function sprite(options) {
             that.update(that.dirX, that.dirY);
         }
 
-        if (that.lifting) {
-			that.context.drawImage(
-                that.shadow,
-                x = that.shadowX,
-                y = that.shadowY,
-				width = that.shadowW,
-				height = that.shadowH
-            )
+
+		that.context.drawImage(
+			that.shadow,
+			x = that.shadowX,
+			y = that.shadowY,
+			width = that.shadowW,
+			height = that.shadowH
+		);
             
-        }
+        
 		
 		that.context.drawImage(
 			that.image,
@@ -107,7 +107,7 @@ function sprite(options) {
 			y = that.y,
 			width = that.width,
 			height = that.height
-		)
+		);
     };
 	
 	// Update the sprite location if needed, add a step.
@@ -179,9 +179,9 @@ function getCarImgs() {
     for (var i = 1; i <= 3; i++) {
         var car_img = [];
         car_img.push(new Image());
-        car_img[0].src = './public/assets/cars/car' + i + '_200.png';
+        car_img[0].src = './public/assets/cars/car' + i + '.png';
         car_img.push(new Image());
-        car_img[1].src = './public/assets/cars/car' + i + '_200_shadow.png';
+        car_img[1].src = './public/assets/cars/car' + i + '_shadow.png';
         car_imgs.push(car_img);
     }
 
@@ -305,6 +305,7 @@ function simulationLoop() {
 		startingImage.height = PREVIEW_SIZE * 2 * GRID_H;
 		document.getElementById("startingPoint").appendChild(startingImage);
 		canvas.style.visibility = "visible";
+		$( ".overlay").fadeOut(500);
 	}
 }
 
