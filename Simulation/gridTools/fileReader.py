@@ -240,11 +240,14 @@ def getCoordinates(route, level, instructionsMaker = False):
     return locationArray
 
 # getParkingLayout will return the layout and the initial machine positioning as a JSON object - used by client.
-def getParkingLayout(route):
+def getParkingLayout(route, first = True):
     lotWidth = route.lotSize[1]
     lotHeight = route.lotSize[0]
     layoutArray = []
-    machineArray = getCoordinates(route, 0)
+    if first:
+        machineArray = getCoordinates(route, 0)
+    else:
+        machineArray = getCoordinates(route,len(route.instructionsArray) - 1)
 
     for i in range(0, lotHeight):
         level = []
@@ -390,6 +393,27 @@ def getInstructions(route):
                         state.rMove == rMove.w1_accW or state.rMove == rMove.w1_mvW0 or state.rMove == rMove.w1_mvW1 or \
                         state.rMove == rMove.w2_accW or state.rMove == rMove.w2_mvW0 or state.rMove == rMove.w2_mvW1:
                         instructionsArray[i].append([id,'W',2])
+
+                else:
+                    if state.rVertical != rVertical.NO:
+                        if state.rVertical == rVertical.lift:
+                            instructionsArray[i].append([id,'L',0])
+                            #print("Starting to lift")
+                        elif state.rVertical == rVertical.l1:
+                            instructionsArray[i].append([id,'L',1])
+                            #print("Lift level 1")
+                        elif state.rVertical == rVertical.l2:
+                            instructionsArray[i].append([id,'L',2])
+                            #print("Lift level 2")
+                        elif state.rVertical == rVertical.l3:
+                            instructionsArray[i].append([id,'L',3])
+                            #print("Lift level 3")
+                        elif state.rVertical == rVertical.l4:
+                            instructionsArray[i].append([id,'L',4])
+                           #print("Lift level 4")
+                        elif state.rVertical == rVertical.drop:
+                            instructionsArray[i].append([id,'D',0])
+                            #print("Dropping car")
 
             stateHolder = getMachineState(nextState,y,x,type)
             if stateHolder != None:

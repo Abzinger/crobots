@@ -6,11 +6,15 @@ ctx = canvas.getContext("2d");
 var cars = [];
 var robots = [];
 
+var ROUTE = "";
 
+var TESTSTEP = 0;
+
+var PREVIEW_SIZE = 25;
 
 // Height and width of one grid in pixels.
-var GRID_WIDTH = 100;
-var GRID_HEIGHT = 200;
+var GRID_WIDTH = 25;
+var GRID_HEIGHT = 50;
 
 // Width and height of canvas, will be populated later.
 var CANVAS_WIDTH = 0;
@@ -34,8 +38,8 @@ var MOVING = false;
 var robot_img = new Image();
 robot_img.src = './public/assets/robots/robot_200.png';
 
-var robot_up_img = new Image();
-robot_up_img.src = './public/assets/robots/robot_up_200.png';
+var robot_shadow_img = new Image();
+robot_shadow_img.src = './public/assets/robots/robot_200_shadow.png';
 
 
 var noline_img = new Image();
@@ -55,13 +59,18 @@ function sprite(options) {
     that.context = options.context;
     that.width = options.width;
     that.height = options.height;
+	that.shadowW = options.width;
+	that.shadowH = options.height;
 
     that.image = options.image;
-    that.upimage = options.upimage;
+    that.shadow = options.shadow;
     that.x = options.x;
     that.y = options.y;
+	that.shadowX = options.shadowX;
+	that.shadowY = options.shadowY;
     that.up = false;
-
+	
+	that.lifting = false;
     that.moving = false;
     that.dirX = options.dirX;
     that.dirY = options.dirY;
@@ -81,25 +90,24 @@ function sprite(options) {
             that.update(that.dirX, that.dirY);
         }
 
-        if (that.up) {
+        if (that.lifting) {
 			that.context.drawImage(
-                that.image,
-                x = that.x,
-                y = that.y,
-				width = that.width,
-				height = that.height
+                that.shadow,
+                x = that.shadowX,
+                y = that.shadowY,
+				width = that.shadowW,
+				height = that.shadowH
             )
             
-        } else {
-            that.context.drawImage(
-                that.image,
-                x = that.x,
-                y = that.y,
-				width = that.width,
-				height = that.height
-            )
         }
-
+		
+		that.context.drawImage(
+			that.image,
+			x = that.x,
+			y = that.y,
+			width = that.width,
+			height = that.height
+		)
     };
 	
 	// Update the sprite location if needed, add a step.
@@ -114,27 +122,49 @@ function sprite(options) {
 			if ((that.speed == 2 && speedCount == 1) || (that.speed == 4 && speedCount == 2)){
 				that.addPixel(dirX, dirY);
 			}
-		} else if (that.direction == "L" || speedCount == 10){
-			console.log("WE ARE HERE!!");
-			that.addPixel(dirX, dirY);
-		} else if (that.direction == "D" || speedCount == 2){
-			that.addPixel(dirX, dirY);
+		} else if (that.direction == "L" && speedCount == 50){
+			that.addPixel(dirX, dirY, false);
+		} else if (that.direction == "D" && speedCount == 10){
+			that.addPixel(dirX, dirY, false);
+		}
+		
+		if (that.direction == "L"){
+			that.width = that.width + (GRID_WIDTH * 0.0001);
+			that.height = that.height + (GRID_HEIGHT * 0.0001);
+		} else if (that.direction == "D"){
+			that.width = that.width - (GRID_WIDTH * 0.0005);
+			that.height = that.height - (GRID_HEIGHT * 0.0005);
 		}
 		
 
     }
 	
 	// Will add one pixel in desired direction. - on next update car is moving one pixel.
-    that.addPixel = function(dirX, dirY) {
+    that.addPixel = function(dirX, dirY, updateShadow = true) {
 
         if (dirX == 1) {
             that.x += 1 / SPEED;
-        } else if (dirX == -1) {
+			if (updateShadow == true){
+				that.shadowX += 1 / SPEED;
+			}
+        }
+		if (dirX == -1) {
             that.x -= 1 / SPEED;
-        } else if (dirY == 1) {
+			if (updateShadow == true){
+				that.shadowX -= 1 / SPEED;
+			}
+        }
+		if (dirY == 1) {
             that.y -= 1 / SPEED;
-        } else if (dirY == -1) {
+			if (updateShadow == true){
+				that.shadowY -= 1 / SPEED;
+			}
+        }
+		if (dirY == -1) {
             that.y += 1 / SPEED;
+			if (updateShadow == true){
+				that.shadowY += 1 / SPEED;
+			}
         }
         speedCount = 0;
     }
@@ -151,7 +181,7 @@ function getCarImgs() {
         car_img.push(new Image());
         car_img[0].src = './public/assets/cars/car' + i + '_200.png';
         car_img.push(new Image());
-        car_img[1].src = './public/assets/cars/car' + i + '_up_200.png';
+        car_img[1].src = './public/assets/cars/car' + i + '_200_shadow.png';
         car_imgs.push(car_img);
     }
 
@@ -163,16 +193,16 @@ function addMachine(type, xGrid, yGrid, id) {
 
     if (type == "C0") {
         var img = car_imgs[0][0];
-        var upImg = car_imgs[0][1];
+        var shadowImg = car_imgs[0][1];
     } else if (type == "C1") {
         var img = car_imgs[1][0];
-        var upImg = car_imgs[1][1];
+        var shadowImg = car_imgs[1][1];
     } else if (type == "C2") {
         var img = car_imgs[2][0];
-        var upImg = car_imgs[2][1];
+        var shadowImg = car_imgs[2][1];
     } else if (type == "R") {
         var img = robot_img;
-        var upImg = robot_up_img;
+        var shadowImg = robot_shadow_img;
     } else {
         console.log("Problem with types in addMachine()");
     }
@@ -188,9 +218,11 @@ function addMachine(type, xGrid, yGrid, id) {
             width: GRID_WIDTH,
             height: GRID_HEIGHT,
             image: img,
-            upimage: upImg,
+            shadow: shadowImg,
             x: x,
             y: y,
+			shadowX: x,
+			shadowY: y,
             id: id
         });
 
@@ -201,19 +233,16 @@ function addMachine(type, xGrid, yGrid, id) {
             width: GRID_WIDTH,
             height: GRID_HEIGHT,
             image: img,
-            upimage: upImg,
+            shadow: shadowImg,
             x: x,
             y: y,
+			shadowX: x,
+			shadowY: y,
             id: id
         });
 
         robots.push(robot);
     }
-}
-
-// Was used for testing, returns random integer, deprecated.
-function randomIntFromInterval(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 // Sprite for parking lot.
@@ -259,6 +288,24 @@ function simulationLoop() {
     createParkingLayout();
     renderMachines(robots);
     renderMachines(cars);
+	
+	TESTSTEP++;
+	
+	if (TESTSTEP == 100){
+		var endingImage = canvasToImage(canvas);
+		endingImage.id = "end";
+		endingImage.width = PREVIEW_SIZE * GRID_W;
+		endingImage.height = PREVIEW_SIZE * 2 * GRID_H;
+		document.getElementById("endingPoint").appendChild(endingImage);
+		populateParkingLot(canvas,ROUTE);
+	} else if (TESTSTEP == 110){
+		var startingImage = canvasToImage(canvas);
+		startingImage.id = "start";
+		startingImage.width = PREVIEW_SIZE * GRID_W;
+		startingImage.height = PREVIEW_SIZE * 2 * GRID_H;
+		document.getElementById("startingPoint").appendChild(startingImage);
+		canvas.style.visibility = "visible";
+	}
 }
 
 // Helper function to render all the machines in the machine array
@@ -308,6 +355,7 @@ function selectCar(e) {
 function moveMachine(machine, instruction, speed) {
     machine.moving = true;
     MOVING = true;
+	machine.lifting = true;
     switch (instruction) {
         case "N":
             machine.dirX = 0;
@@ -338,13 +386,19 @@ function moveMachine(machine, instruction, speed) {
             machine.update(-1, 0);
             break;
         case "L":
+			machine.dirX = 1;
+			machine.dirY = 1;
 			machine.direction = "L";
 			machine.update(1,1);
-            //machine.moving = false;
+			machine.lifting = true;
+			break;            
 		case "D":
+			machine.dirX = -1;
+			machine.dirY = -1;
 			machine.direction = "D";
 			machine.update(-1,-1);
-			//machine.moving = false;
+			machine.lifting = true;
+			break;
     }
 }
 
@@ -386,24 +440,50 @@ function getMachine(id) {
 
 
 // Populates the parking lot by asking the layout of the parking lot from server.
-function populateParkingLot(route) {
-    var URL = "/Route/" + route + "/Layout";
+function populateParkingLot(canvas, route, first = true) {
+	if (first == true){
+		var URL = "/Route/" + route + "/Layout/1";
+	} else{
+		var URL = "/Route/" + route + "/Layout/0";
+	}    
     $.getJSON(URL, function(data) {
         GRID_H = data.height;
         GRID_W = data.width;
+		//HERE SHOULD BE THE CODE TO CHECK THE SIZE OF THE PARKING LOT AND VIEWPORT TO DETERMINE THE SCALE SIZE OF PARKING LOT.
+		var viewportWidth = window.innerWidth;
+		var viewportHeight = window.innerHeight;
+		setParkingLotScale(GRID_W, GRID_H, viewportWidth, viewportHeight);
         LAYOUT = data.layout;
         cars = [];
         robots = [];
-        //console.log(LAYOUT);
-        canvas.width = GRID_WIDTH * GRID_W;
-        canvas.height = GRID_HEIGHT * GRID_H;
-        createParkingLayout();
-        car_imgs = getCarImgs();
+		CANVAS_WIDTH = GRID_WIDTH * GRID_W;
+        canvas.width = CANVAS_WIDTH;
+		CANVAS_HEIGHT = GRID_HEIGHT * GRID_H; 
+        canvas.height = CANVAS_HEIGHT;       
+		createParkingLayout();
         for (var i = 0; i < data.machines.length; i++) {
-            //console.log(data.machines[i])
             addMachine(data.machines[i][0], data.machines[i][1], data.machines[i][2], data.machines[i][3])
         }
     })
+}
+
+function setParkingLotScale(gridX, gridY, viewPortW, viewPortH){
+	var previewWidth = PREVIEW_SIZE * gridX;
+	var previewHeight = PREVIEW_SIZE * gridY;
+	
+	var scaling  = [4, 2, 1];
+	
+	for (var i = 0; i < scaling.length; i++){
+		var lotWidth = gridX * 100 / scaling[i];
+		var lotHeight = gridY * 200 / scaling[i];
+		var totalHeight = previewHeight + lotHeight;
+		if (totalHeight <= viewPortH && lotWidth <= viewPortW){
+			GRID_WIDTH = 100 / scaling[i];
+			GRID_HEIGHT = 200 / scaling[i];
+			SPEED = scaling[i];
+		}
+	}
+	console.log(SPEED);
 }
 
 // Function for getting instructions from server
@@ -426,5 +506,19 @@ function createParkingLayout() {
     }
 };
 
+function canvasToImage(canvas){
+	var image = new Image();
+	image.src = canvas.toDataURL("image/png");
+	return image;
+}
 
-noline_img.addEventListener("load", simulationLoop);
+function addStartingEndingStates(route){
+	ROUTE = route;
+	populateParkingLot(canvas, route, false);	
+	
+	simulationLoop();
+}
+
+canvas.style.visibility = "hidden";
+car_imgs = getCarImgs();
+

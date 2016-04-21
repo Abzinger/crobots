@@ -20,10 +20,13 @@ def routeList():
     return fr.getJSONRouteList()
 
 # Get the layout of the selected route
-@route("/Route/<routeNr:int>/Layout")
-def layout(routeNr):
+@route("/Route/<routeNr:int>/Layout/<first:int>")
+def layout(routeNr, first):
     response.content_type = 'application/json'
-    return fr.getParkingLayout(fr.getRoute(routes[routeNr]))
+    if first == 1:
+        return fr.getParkingLayout(fr.getRoute(routes[routeNr]))
+    else:
+        return fr.getParkingLayout(fr.getRoute(routes[routeNr]), False)
 
 # Get the instructions of the selected route
 @route("/Route/<routeNr:int>/Instructions")
