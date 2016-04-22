@@ -8,7 +8,13 @@ var robots = [];
 
 var ROUTE = "";
 
+var TEXT = "";
+
+var STARTED = false;
+
 var TESTSTEP = 0;
+
+var MANUALSTEP = false;
 
 var PREVIEW_SIZE = 25;
 
@@ -277,12 +283,17 @@ function simulationLoop() {
 	if (momevementStep > STEPINDEX){
 		stopAllMovement();
 	}
-
-	if (step > STEPINDEX){
-		console.log("Doing step number " + step + ".");
+	
+	if (!MANUALSTEP && step > STEPINDEX){
+		TEXT = "Doing step number " + step + ".<br>";
 		stopAllMovement();
 		moves(routeInstructions, step);
 		STEPINDEX++;
+	} else if (MANUALSTEP && step + 1 > STEPINDEX){
+		MOVING = false;
+		stopAllMovement();
+		$("#nextStep").prop('disabled', false);
+		$("#nextStep").html("Proceed to next step");
 	}
 		
     createParkingLayout();
@@ -304,7 +315,8 @@ function simulationLoop() {
 		startingImage.width = PREVIEW_SIZE * GRID_W;
 		startingImage.height = PREVIEW_SIZE * 2 * GRID_H;
 		document.getElementById("startingPoint").appendChild(startingImage);
-		canvas.style.visibility = "visible";
+		$("#instructions").css("width", canvas.width);
+		$("#simulation").fadeIn(500);
 		$( ".overlay").fadeOut(500);
 	}
 }
@@ -318,6 +330,31 @@ function renderMachines(machineArray) {
 
 // Event listener to start the simulation when the user clicks on a car.
 canvas.addEventListener("mousedown", selectCar, false);
+
+$("#startSim").click(function(){
+	$("#controls").fadeOut(500);
+	moves(routeInstructions, 0);	
+});
+
+$("#nextStep").click(function(){
+	if (!STARTED){
+		$(this).prop('disabled',true);
+		$(this).html('Active movement..');
+		$("#startSim").hide();
+		MANUALSTEP = true;
+		moves(routeInstructions, 0);
+		STARTED = true;
+	} else{
+		$(this).prop('disabled',true);
+		$(this).html('Active movement..');
+		var step = Math.ceil((STEPS) / STEPCOUNT);
+		TEXT = "Doing step number " + step + ".<br>";
+		stopAllMovement();
+		moves(routeInstructions, step);
+		STEPINDEX++;
+	}
+	
+});
 
 // Helper function that returns position of mouse relative to canvas.
 function getMousePos(canvas, evt) {
@@ -409,6 +446,7 @@ function moves(instructions, stepNr) {
         var stepArray = instructions[stepNr];
         for (var i = 0; i < stepArray.length; i++) {
             moveMachine(getMachine(stepArray[i][0]), stepArray[i][1], stepArray[i][2]);
+			TEXT+= "Machine " + stepArray[i][0] + " makes step " + stepArray[i][1] + " " + stepArray[i][2] + "<br>";
 			console.log(stepArray[i][0], stepArray[i][1], stepArray[i][2]);
         }
 		if (stepArray.length == 0){
@@ -418,6 +456,7 @@ function moves(instructions, stepNr) {
     } else {
         stopAllMovement();
     }
+	$("#instr").html(TEXT);
 }
 
 // Returns the machine object with the ID specified.
@@ -520,6 +559,6 @@ function addStartingEndingStates(route){
 	simulationLoop();
 }
 
-canvas.style.visibility = "hidden";
+$("#simulation").hide();
 car_imgs = getCarImgs();
 

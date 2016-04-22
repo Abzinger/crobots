@@ -1,4 +1,4 @@
-from bottle import route, run, jinja2_template as template, error, static_file, response
+from bottle import route, run, jinja2_template as template, error, static_file, response, get
 import gridTools.fileReader as fr
 
 routes = fr.getRouteList()
@@ -38,5 +38,10 @@ def instructions(routeNr):
 @error(404)
 def error404(error):
     return 'Nothing here, sorry'
+
+# Favicon
+@get('/favicon.ico')
+def get_favicon():
+    return static_file('favicon.ico', root="./public/assets")
 
 run(host='localhost', port=8080, debug=True)

@@ -122,3 +122,29 @@ select {
 	top:1px;
 }
 
+.btn:disabled{
+	border:1px solid #d90000;
+	-moz-box-shadow:inset 0px 1px 0px 0px #d90000;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #d90000;
+	box-shadow:inset 0px 1px 0px 0px #d90000;
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #d90000), color-stop(1, #ff0000));
+	background:-moz-linear-gradient(top, #d90000 5%, #ff0000 100%);
+	background:-webkit-linear-gradient(top, #d90000 5%, #ff0000 100%);
+	background:-o-linear-gradient(top, #d90000 5%, #ff0000 100%);
+	background:-ms-linear-gradient(top, #d90000 5%, #ff0000 100%);
+	background:linear-gradient(to bottom, #d90000 5%, #ff0000 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#d90000', endColorstr='#ff0000',GradientType=0);
+	background-color:#d90000;
+}
+
+#instructions{
+	background-color: rgba(0,0,0,0.5);
+}
+
+#instr{
+	color: #fff;
+	width: 300px;
+	min-height: 100px;
+	height: auto;
+}
+
