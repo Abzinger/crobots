@@ -269,6 +269,7 @@ function stopAllMovement() {
     }
 }
 
+var lastLoop = new Date();
 // Loop of the simulation - steps that will be taken every frame.
 function simulationLoop() {
     window.requestAnimationFrame(simulationLoop);
@@ -315,10 +316,16 @@ function simulationLoop() {
 		startingImage.width = PREVIEW_SIZE * GRID_W;
 		startingImage.height = PREVIEW_SIZE * 2 * GRID_H;
 		document.getElementById("startingPoint").appendChild(startingImage);
-		$("#instructions").css("width", canvas.width);
 		$("#simulation").fadeIn(500);
 		$( ".overlay").fadeOut(500);
 	}
+	
+	var thisLoop = new Date();
+	var fps = Math.floor(1000 / (thisLoop - lastLoop));
+	lastLoop = thisLoop;
+	if (STEPS % 20 == 0 && STEPS != 0) {
+			$("#FPSno").text("FPS: " + fps);
+	}	
 }
 
 // Helper function to render all the machines in the machine array
@@ -380,6 +387,7 @@ function selectCar(e) {
                 } else {
                     cars[i].up = true;
                 }
+				$("#controls").fadeOut(500);
                 moves(routeInstructions, 0);
             }
         }
@@ -516,8 +524,7 @@ function setParkingLotScale(gridX, gridY, viewPortW, viewPortH){
 	for (var i = 0; i < scaling.length; i++){
 		var lotWidth = gridX * 100 / scaling[i];
 		var lotHeight = gridY * 200 / scaling[i];
-		var totalHeight = previewHeight + lotHeight;
-		if (totalHeight <= viewPortH && lotWidth <= viewPortW){
+		if (lotHeight <= viewPortH && lotWidth <= viewPortW){
 			GRID_WIDTH = 100 / scaling[i];
 			GRID_HEIGHT = 200 / scaling[i];
 			SPEED = scaling[i];
