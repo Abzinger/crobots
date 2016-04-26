@@ -1,71 +1,70 @@
 {% extends "layout.html" %}
 {% block content %}
 <script type="text/javascript">
-$( document ).ready( function() {
+$(document).ready(function () {
 
-	$( "#loading").hide();
-	
-	$.getJSON("/Route/GetRouteList", function(result) {
-			var optionsValues = '<select id="routes">';
-			$.each(result, function(item) {
-				optionsValues += '<option value="' + result[item].value + '">' + result[item].name + '</option>';
-			});
-			optionsValues += '</select>';
-			var options = $('#routes');
-			options.replaceWith(optionsValues);
-		});
-		
-	$( "#selectRoute" ).click(function( event ){
-		$( "#routeChooser").fadeOut(500);
-		$("#loading").fadeIn(500);
-		var route = $('#routes').val();
-		addStartingEndingStates(route);
-		getInstructions(route);
-	});
-	
+  $('#loading').hide();
+
+  $.getJSON('/Route/GetRouteList', function (result) {
+    var optionsValues = '<select id="routes">';
+    $.each(result, function (item) {
+      optionsValues += '<option value="' + result[item].value + '">' +
+			result[item].name + '</option>';
+    });
+
+    optionsValues += '</select>';
+    $('#routes').replaceWith(optionsValues);
+  });
+
+  $('#selectRoute').click(function (event) {
+    $('#routeChooser').fadeOut(500);
+    $('#loading').fadeIn(500);
+    var route = $('#routes').val();
+    addStartingEndingStates(route);
+    getInstructions(route);
+  });
+
 });
-
-
 </script>
 
 <div class="overlay">
 	<div id="loading" class="centered">
 		<p>Loading</p>
-		<img src="/public/assets/ajax-loader.gif" id="loadgif">
+		<img src="/public/assets/ajax-loader.gif" id="loadgif" class="loadgif" alt="Loading">
 	</div>
 	<div id="routeChooser" class="centered">
 		<p>Robot Car Parking System Simulation</p>
-		<div id="selector">
+		<div id="selector" class="selector">
 			<select id="routes"></select>
 			<button class="btn" id="selectRoute">Choose route</button>
 		</div>
 	</div>
 </div>
 
-<div id="simulation">
-	<div id="previews">
+<div id="simulation" class="simulation">
+	<div id="previews" class="previews">
 		<div id="startingPoint" class="verticalPreview">
 			<p>State at simulation start</p>
 		</div>
 		<div id="endingPoint" class="verticalPreview">
 			<p>State at simulation end</p>
 		</div>
-		<div id="controls" class="verticalPreview">
+		<div id="controls" class="verticalPreview,controls">
 			<button class="btn" id="startSim">Start automatic simulation</button>
 			<button class="btn" id="nextStep">Step-by-step simulation</button>
 		</div>
-		<div id="instructions">
-			<p id="instr"> </p>
+		<div id="instructions" class="instructions">
+			<p id="instr" class="instr"> </p>
 		</div>
 		<div id="FPS">
 			<p id ="FPSno"> </p>
 		</div>
-	</div>	
+	</div>
 	<div class="verticalCanvas">
 		<canvas id="simCanvas" ></canvas>
 	</div>
 </div>
-	
+
 
 <script type="text/javascript" src="./public/simulation.js"></script>
 {% endblock %}
