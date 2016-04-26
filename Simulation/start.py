@@ -1,43 +1,51 @@
-from bottle import route, run, jinja2_template as template, error, static_file, response, get
-import gridTools.fileReader as fr
+from bottle import (route, run, jinja2_template as template,
+                    error, static_file, response, get)
+import gridTools.fileReader as FileReader
 
-routes = fr.getRouteList()
+routes = FileReader.get_route_list()
+
 
 # Get index page
 @route("/")
 def index():
     return template("index.html")
 
+
 # Route for static files
-@route("/public/<filename:path>")
-def static_url(filename):
-    return static_file(filename, root="./public")
+@route("/public/<file_name:path>")
+def static_url(file_name):
+    return static_file(file_name, root="./public")
+
 
 # Get all the routes
 @route("/Route/GetRouteList")
-def routeList():
+def route_list():
     response.content_type = 'application/json'
-    return fr.getJSONRouteList()
+    return FileReader.get_json_route_list()
+
 
 # Get the layout of the selected route
-@route("/Route/<routeNr:int>/Layout/<first:int>")
-def layout(routeNr, first):
+@route("/Route/<route_number:int>/Layout/<first:int>")
+def layout(route_number, first):
     response.content_type = 'application/json'
     if first == 1:
-        return fr.getParkingLayout(fr.getRoute(routes[routeNr]))
+        return FileReader.get_parking_layout(FileReader.get_route(routes[route_number]))
     else:
-        return fr.getParkingLayout(fr.getRoute(routes[routeNr]), False)
+        return FileReader.get_parking_layout(FileReader.get_route(routes[route_number]), False)
+
 
 # Get the instructions of the selected route
-@route("/Route/<routeNr:int>/Instructions")
-def instructions(routeNr):
+@route("/Route/<route_number:int>/Instructions")
+def instructions(route_number):
     response.content_type = 'application/json'
-    return fr.getInstructions(fr.getRoute(routes[routeNr]))
+    return FileReader.get_instructions(FileReader.get_route(routes[route_number]))
+
 
 # Error page
 @error(404)
-def error404(error):
+def error404():
     return 'Nothing here, sorry'
+
 
 # Favicon
 @get('/favicon.ico')
