@@ -16,6 +16,13 @@ $(document).ready(function () {
     $('#routes').replaceWith(optionsValues);
   });
 
+  $('#speed1, #speed2, #speed4').change(function () {
+    if ($(this).is(':checked')) {
+      var speed = $(this).val();
+      changeSpeed(speed);
+    }
+  });
+
   $('#selectRoute').click(function (event) {
     $('#routeChooser').fadeOut(500);
     $('#loading').fadeIn(500);
@@ -49,6 +56,12 @@ $(document).ready(function () {
 		<div id="endingPoint" class="verticalPreview">
 			<p>State at simulation end</p>
 		</div>
+    <div id="speedChooser">
+      <p>Please choose the speed before starting simulation!</p>
+      <input type="radio" id="speed1" name="speed" value="1" checked>1x speed<br>
+      <input type="radio" id="speed2" name="speed" value="2">2x speed<br>
+      <input type="radio" id="speed4" name="speed" value="4">4x speed
+    </div>
 		<div id="controls" class="verticalPreview,controls">
 			<button class="btn" id="startSim">Start automatic simulation</button>
 			<button class="btn" id="nextStep">Step-by-step simulation</button>

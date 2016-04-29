@@ -550,3 +550,4 @@ def write_instructions(route):
     for i in range(0, len(route.instructions_array)):
         f.write(print_grid(route, i))
     f.close()
+

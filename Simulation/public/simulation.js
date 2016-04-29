@@ -32,12 +32,15 @@ var GRID_H = 0;
 // The layout array
 var LAYOUT = [];
 
-// Variables needed to hold the steps
+// Variables needed to hold the steps and regulate the SCALEFACTOR
+var SPEED = 1;
 var STEPS = 0;
 var STEPINDEX = 0;
 var STEPCOUNT = 100;
-var SPEED = 1;
+var SCALEFACTOR = 1;
 var MOVING = false;
+var LIFTSPEED = 50;
+var DROPSPEED = 10;
 
 // Images of robots, cars, parking lot.
 var robotImg = new Image();
@@ -125,9 +128,9 @@ function sprite(options) {
       (that.speed == 4 && speedCount == 2)) {
         that.addPixel(dirX, dirY);
       }
-    } else if (that.direction == 'L' && speedCount == 50) {
+    } else if (that.direction == 'L' && speedCount == LIFTSPEED) {
       that.addPixel(dirX, dirY, false);
-    } else if (that.direction == 'D' && speedCount == 10) {
+    } else if (that.direction == 'D' && speedCount == DROPSPEED) {
       that.addPixel(dirX, dirY, false);
     }
 
@@ -143,30 +146,30 @@ function sprite(options) {
   // Will add one pixel in desired direction. - on next update car is moving one pixel.
   that.addPixel = function (dirX, dirY, updateShadow = true) {
     if (dirX == 1) {
-      that.x += 1 / SPEED;
+      that.x += SPEED / SCALEFACTOR;
       if (updateShadow == true) {
-        that.shadowX += 1 / SPEED;
+        that.shadowX += SPEED / SCALEFACTOR;
       }
     }
 
     if (dirX == -1) {
-      that.x -= 1 / SPEED;
+      that.x -= SPEED / SCALEFACTOR;
       if (updateShadow == true) {
-        that.shadowX -= 1 / SPEED;
+        that.shadowX -= SPEED / SCALEFACTOR;
       }
     }
 
     if (dirY == 1) {
-      that.y -= 1 / SPEED;
+      that.y -= SPEED / SCALEFACTOR;
       if (updateShadow == true) {
-        that.shadowY -= 1 / SPEED;
+        that.shadowY -= SPEED / SCALEFACTOR;
       }
     }
 
     if (dirY == -1) {
-      that.y += 1 / SPEED;
+      that.y += SPEED / SCALEFACTOR;
       if (updateShadow == true) {
-        that.shadowY += 1 / SPEED;
+        that.shadowY += SPEED / SCALEFACTOR;
       }
     }
 
@@ -340,16 +343,29 @@ function renderMachines(machineArray) {
 canvas.addEventListener('mousedown', selectCar, false);
 
 $('#startSim').click(function () {
-  $('#controls').fadeOut(500);
-  moves(routeInstructions, 0);
+  $('#speedChooser').fadeOut(500);
+  if (!MANUALSTEP) {
+    $(this).prop('disabled', true);
+    $('#nextStep').prop('disabled', false);
+    $('#nextStep').html('Step-by-step simulation');
+  } else {
+    MANUALSTEP = false;
+    $(this).html('Switch to automatic movement');
+  }
+
+  $(this).html('Movement in progress');
+  var step = Math.ceil((STEPS) / STEPCOUNT);
+  moves(routeInstructions, step);
 });
 
 $('#nextStep').click(function () {
+  $('#startSim').html('Switch to automatic movement');
+  $('#startSim').prop('disabled', false);
+  $('#speedChooser').fadeOut(500);
+  MANUALSTEP = true;
   if (!STARTED) {
     $(this).prop('disabled', true);
     $(this).html('Active movement..');
-    $('#startSim').hide();
-    MANUALSTEP = true;
     moves(routeInstructions, 0);
     STARTED = true;
   } else {
@@ -536,7 +552,7 @@ function setParkingLotScale(gridX, gridY, viewPortW, viewPortH) {
     if (lotHeight <= viewPortH && lotWidth <= viewPortW) {
       GRID_WIDTH = 100 / scaling[i];
       GRID_HEIGHT = 200 / scaling[i];
-      SPEED = scaling[i];
+      SCALEFACTOR = scaling[i];
     }
   }
 }
@@ -571,6 +587,19 @@ function addStartingEndingStates(route) {
   populateParkingLot(canvas, route, false);
 
   simulationLoop();
+}
+
+function changeSpeed(speed) {
+  if (speed == 1) {
+    LIFTSPEED = 50;
+    DROPSPEED = 10;
+  } else if (speed == 2 || speed == 4) {
+    LIFTSPEED = 25;
+    DROPSPEED = 5;
+  }
+
+  STEPCOUNT = 100 / speed;
+  SPEED = speed;
 }
 
 $('#simulation').hide();
