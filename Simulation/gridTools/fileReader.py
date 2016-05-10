@@ -295,6 +295,263 @@ def get_json_route_list():
 # where a machine will be given ID and a list of instructions  - for example C1 (car ID 1), 'W', 2 would mean that
 # car object with ID 1 should at this step move west with the speed of 2 (number means how many steps it takes to move
 # from a grid to adjacent grid.
+def get_realistic_instructions(route):
+    initial_machines = get_coordinates(route, 0, True)
+    instructions_array = []
+    for i in range(0, len(route.instructions_array) + 1):
+        instructions_array.append([])
+    for machine in initial_machines:
+        y = machine[1]
+        x = machine[2]
+        machine_id = machine[3]
+        state = machine[4]
+        machine_type = 'C'
+        if machine[0] == 'R':
+            machine_type = 'R'
+        for i in range(1, len(route.instructions_array)):
+            next_state = get_coordinates(route, i, True)
+            instructions = []
+            acceleration = False
+            if machine_type == 'R':
+                if state.r_move != RobotMove.NO:
+                    if state.r_move == RobotMove.mvW0:
+                        instructions = [machine_id, 'W', 1]
+                        x -= 1
+                    elif state.r_move == RobotMove.accW:
+                        instructions = [machine_id, 'W', 2]
+                        x -= 1
+                        acceleration = True
+                    elif state.r_move == RobotMove.mvE0:
+                        instructions = [machine_id, 'E', 1]
+                        x += 1
+                    elif state.r_move == RobotMove.accE:
+                        instructions = [machine_id, 'E', 2]
+                        x += 1
+                        acceleration = True
+                    elif state.r_move == RobotMove.mvN1:
+                        y += 1
+                    elif state.r_move == RobotMove.mvS1:
+                        y -= 1
+                    elif (state.r_move == RobotMove.w0_mvN3 or
+                            state.r_move == RobotMove.w1_mvN3 or
+                            state.r_move == RobotMove.w2_mvN3):
+                            y += 1
+                    elif (state.r_move == RobotMove.w0_mvS3 or
+                            state.r_move == RobotMove.w1_mvS3 or
+                            state.r_move == RobotMove.w2_mvS3):
+                            y -= 1
+                    elif (state.r_move == RobotMove.w0_mvE1 or
+                            state.r_move == RobotMove.w1_mvE1 or
+                            state.r_move == RobotMove.w2_mvE1):
+                            x += 1
+                    elif (state.r_move == RobotMove.w0_mvW1 or
+                            state.r_move == RobotMove.w1_mvW1 or
+                            state.r_move == RobotMove.w2_mvW1):
+                            x -= 1
+
+                    if state.r_move == RobotMove.accN:
+                        instructions = [machine_id, 'S', 4]
+                        acceleration = True
+                    elif (state.r_move == RobotMove.mvN1 or
+                            state.r_move == RobotMove.mvN0):
+                            instructions = [machine_id, 'S', 2]
+                    elif state.r_move == RobotMove.accS:
+                        instructions = [machine_id, 'N', 4]
+                        acceleration = True
+                    elif (state.r_move == RobotMove.mvS1 or
+                            state.r_move == RobotMove.mvS0):
+                            instructions = [machine_id, 'N', 2]
+                    elif (state.r_move == RobotMove.w0_accN or
+                            state.r_move == RobotMove.w1_accN or
+                            state.r_move == RobotMove.w1_accN):
+                            instructions = [machine_id, 'S', 8]
+                            acceleration = True
+                    elif (state.r_move == RobotMove.w0_mvN0 or
+                            state.r_move == RobotMove.w0_mvN1 or
+                            state.r_move == RobotMove.w0_mvN2 or
+                            state.r_move == RobotMove.w0_mvN3 or
+                            state.r_move == RobotMove.w1_mvN0 or
+                            state.r_move == RobotMove.w1_mvN1 or
+                            state.r_move == RobotMove.w1_mvN2 or
+                            state.r_move == RobotMove.w1_mvN3 or
+                            state.r_move == RobotMove.w2_mvN0 or
+                            state.r_move == RobotMove.w2_mvN1 or
+                            state.r_move == RobotMove.w2_mvN2 or
+                            state.r_move == RobotMove.w2_mvN3):
+                            instructions = [machine_id, 'S', 4]
+                    elif (state.r_move == RobotMove.w0_accS or
+                            state.r_move == RobotMove.w1_accS or
+                            state.r_move == RobotMove.w1_accS):
+                            instructions = [machine_id, 'N', 8]
+                            acceleration = True
+                    elif (state.r_move == RobotMove.w0_mvS0 or
+                            state.r_move == RobotMove.w0_mvS1 or
+                            state.r_move == RobotMove.w0_mvS2 or
+                            state.r_move == RobotMove.w0_mvS3 or
+                            state.r_move == RobotMove.w1_mvS0 or
+                            state.r_move == RobotMove.w1_mvS1 or
+                            state.r_move == RobotMove.w1_mvS2 or
+                            state.r_move == RobotMove.w1_mvS3 or
+                            state.r_move == RobotMove.w2_mvS0 or
+                            state.r_move == RobotMove.w2_mvS1 or
+                            state.r_move == RobotMove.w2_mvS2 or
+                            state.r_move == RobotMove.w2_mvS3):
+                            instructions = [machine_id, 'N', 4]
+                    elif (state.r_move == RobotMove.w0_accE or
+                          state.r_move == RobotMove.w1_accE or
+                          state.r_move == RobotMove.w2_accE):
+                            instructions = [machine_id, 'E', 4]
+                            acceleration = True
+                    elif (state.r_move == RobotMove.w0_mvE0 or
+                            state.r_move == RobotMove.w0_mvE1 or
+                            state.r_move == RobotMove.w1_mvE0 or
+                            state.r_move == RobotMove.w1_mvE1 or
+                            state.r_move == RobotMove.w2_mvE0 or
+                            state.r_move == RobotMove.w2_mvE1):
+                            instructions = [machine_id, 'E', 2]
+                    elif (state.r_move == RobotMove.w0_accW or
+                            state.r_move == RobotMove.w1_accW or
+                            state.r_move == RobotMove.w2_accW):
+                            instructions = [machine_id, 'W', 4]
+                            acceleration = True
+                    elif (state.r_move == RobotMove.w0_mvW0 or
+                            state.r_move == RobotMove.w0_mvW1 or
+                            state.r_move == RobotMove.w1_mvW0 or
+                            state.r_move == RobotMove.w1_mvW1 or
+                            state.r_move == RobotMove.w2_mvW0 or
+                            state.r_move == RobotMove.w2_mvW1):
+                            instructions = [machine_id, 'W', 2]
+
+                else:
+                    if state.r_vertical != RobotVertical.NO:
+                        if state.r_vertical == RobotVertical.lift:
+                            instructions = [machine_id, 'L', 0]
+                        elif state.r_vertical == RobotVertical.l1:
+                            instructions = [machine_id, 'L', 1]
+                        elif state.r_vertical == RobotVertical.l2:
+                            instructions = [machine_id, 'L', 2]
+                        elif state.r_vertical == RobotVertical.l3:
+                            instructions = [machine_id, 'L', 3]
+                        elif state.r_vertical == RobotVertical.l4:
+                            instructions = [machine_id, 'L', 4]
+                        elif state.r_vertical == RobotVertical.drop:
+                            instructions = [machine_id, 'D', 0]
+            else:
+                if state.r_move != RobotMove.NO:
+                    if (state.r_move == RobotMove.w0_mvN3 or
+                            state.r_move == RobotMove.w1_mvN3 or
+                            state.r_move == RobotMove.w2_mvN3):
+                            y += 1
+                    elif (state.r_move == RobotMove.w0_mvS3 or
+                            state.r_move == RobotMove.w1_mvS3 or
+                            state.r_move == RobotMove.w2_mvS3):
+                            y -= 1
+                    elif (state.r_move == RobotMove.w0_mvE1 or
+                            state.r_move == RobotMove.w1_mvE1 or
+                            state.r_move == RobotMove.w2_mvE1):
+                            x += 1
+                    elif (state.r_move == RobotMove.w0_mvW1 or
+                            state.r_move == RobotMove.w1_mvW1 or
+                            state.r_move == RobotMove.w2_mvW1):
+                            x -= 1
+
+                    if (state.r_move == RobotMove.w0_mvN0 or
+                            state.r_move == RobotMove.w0_mvN1 or
+                            state.r_move == RobotMove.w0_mvN2 or
+                            state.r_move == RobotMove.w0_mvN3 or
+                            state.r_move == RobotMove.w1_mvN0 or
+                            state.r_move == RobotMove.w1_mvN1 or
+                            state.r_move == RobotMove.w1_mvN2 or
+                            state.r_move == RobotMove.w1_mvN3 or
+                            state.r_move == RobotMove.w2_mvN0 or
+                            state.r_move == RobotMove.w2_mvN1 or
+                            state.r_move == RobotMove.w2_mvN2):
+                            instructions = [machine_id, 'S', 4]
+                    elif (state.r_move == RobotMove.w2_mvN3 or
+                            state.r_move == RobotMove.w0_accN or
+                            state.r_move == RobotMove.w1_accN or
+                            state.r_move == RobotMove.w1_accN):
+                            instructions = [machine_id, 'S', 8]
+                            acceleration = True
+                    elif (state.r_move == RobotMove.w0_mvS0 or
+                            state.r_move == RobotMove.w0_mvS1 or
+                            state.r_move == RobotMove.w0_mvS2 or
+                            state.r_move == RobotMove.w0_mvS3 or
+                            state.r_move == RobotMove.w1_mvS0 or
+                            state.r_move == RobotMove.w1_mvS1 or
+                            state.r_move == RobotMove.w1_mvS2 or
+                            state.r_move == RobotMove.w1_mvS3 or
+                            state.r_move == RobotMove.w2_mvS0 or
+                            state.r_move == RobotMove.w2_mvS1 or
+                            state.r_move == RobotMove.w2_mvS2 or
+                            state.r_move == RobotMove.w2_mvS3):
+                            instructions = [machine_id, 'N', 4]
+                    elif (state.r_move == RobotMove.w0_accS or
+                            state.r_move == RobotMove.w1_accS or
+                            state.r_move == RobotMove.w1_accS):
+                            instructions = [machine_id, 'N', 8]
+                            acceleration = True
+                    elif (state.r_move == RobotMove.w0_mvE0 or
+                            state.r_move == RobotMove.w0_mvE1 or
+                            state.r_move == RobotMove.w1_mvE0 or
+                            state.r_move == RobotMove.w1_mvE1 or
+                            state.r_move == RobotMove.w2_mvE0 or
+                            state.r_move == RobotMove.w2_mvE1):
+                            instructions = [machine_id, 'E', 2]
+                    elif (state.r_move == RobotMove.w0_accE or
+                            state.r_move == RobotMove.w1_accE or
+                            state.r_move == RobotMove.w2_accE):
+                            instructions = [machine_id, 'E', 4]
+                            acceleration = True
+                    elif (state.r_move == RobotMove.w0_mvW0 or
+                            state.r_move == RobotMove.w0_mvW1 or
+                            state.r_move == RobotMove.w1_mvW0 or
+                            state.r_move == RobotMove.w1_mvW1 or
+                            state.r_move == RobotMove.w2_mvW0 or
+                            state.r_move == RobotMove.w2_mvW1):
+                            instructions = [machine_id, 'W', 2]
+                    elif (state.r_move == RobotMove.w0_accW or
+                            state.r_move == RobotMove.w1_accW or
+                            state.r_move == RobotMove.w2_accW):
+                            instructions = [machine_id, 'W', 4]
+                            acceleration = True
+
+                else:
+                    if state.r_vertical != RobotVertical.NO:
+                        if state.r_vertical == RobotVertical.lift:
+                            instructions = [machine_id, 'L', 0]
+                        elif state.r_vertical == RobotVertical.l1:
+                            instructions = [machine_id, 'L', 1]
+                        elif state.r_vertical == RobotVertical.l2:
+                            instructions = [machine_id, 'L', 2]
+                        elif state.r_vertical == RobotVertical.l3:
+                            instructions = [machine_id, 'L', 3]
+                        elif state.r_vertical == RobotVertical.l4:
+                            instructions = [machine_id, 'L', 4]
+                        elif state.r_vertical == RobotVertical.drop:
+                            instructions = [machine_id, 'D', 0]
+
+            state_holder = get_machine_state(next_state, y, x, machine_type)
+
+            if len(instructions) == 3:
+                instructions_array[i].append(instructions)
+
+
+            if state_holder is not None:
+                if len(instructions) != 0:
+                    if state_holder.r_move == RobotMove.NO and i < len(instructions_array):
+                        if (instructions[1] == 'N' or
+                                instructions[1] == 'E' or
+                                instructions[1] == 'S' or
+                                instructions[1] == 'W'):
+                                    if not acceleration:
+                                        instructions_array[i+1].append([instructions[0], instructions[1], instructions[2] * 2])
+                                    else:
+                                        instructions_array[i+1].append([instructions[0], instructions[1], instructions[2]])
+                state = state_holder
+
+    return json.dumps(instructions_array, separators=(',', ':'))
+
 def get_instructions(route):
     initial_machines = get_coordinates(route, 0, True)
     instructions_array = []
@@ -510,7 +767,6 @@ def get_instructions(route):
                 print("!!!No state found!!!")
 
     return json.dumps(instructions_array, separators=(',', ':'))
-
 
 #  Will return the state of the machine that is on grid coordinates x,y. Helper function for getCoordinates().
 def get_machine_state(machines, y, x, machine_type):

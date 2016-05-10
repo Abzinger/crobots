@@ -1,9 +1,5 @@
 body{
-	background:#ffffff; /* Old browsers */
-	background:-moz-radial-gradient(center, ellipse cover,  #ffffff 0%, #e5e5e5 100%); /* FF3.6-15 */
-	background:-webkit-radial-gradient(center, ellipse cover,  #ffffff 0%,#e5e5e5 100%); /* Chrome10-25,Safari5.1-6 */
-	background:radial-gradient(ellipse at center,  #ffffff 0%,#e5e5e5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-	filter:progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+	background: #74a2b0;
 }
 
 select {
@@ -146,7 +142,7 @@ select :focus {
 }
 
 .selector{
-	width:25%;
+	width:40%;
 	margin:0 auto;
 }
 

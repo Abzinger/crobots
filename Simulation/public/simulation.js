@@ -9,6 +9,8 @@ var ROUTE = '';
 
 var TEXT = '';
 
+var ALPHA = 0.75;
+
 var STARTED = false;
 
 var TESTSTEP = 0;
@@ -96,6 +98,10 @@ function sprite(options) {
       that.update(that.dirX, that.dirY);
     };
 
+    if (that.id.charAt(0) == 'C') {
+      that.context.globalAlpha = ALPHA;
+    }
+
     that.context.drawImage(
       that.shadow,
       x = that.shadowX,
@@ -111,6 +117,8 @@ function sprite(options) {
       width = that.width,
       height = that.height
     );
+
+    that.context.restore();
   };
 
   // Update the sprite location if needed, add a step.
@@ -125,7 +133,8 @@ function sprite(options) {
       }
     } else if (that.direction == 'N' || that.direction == 'S') {
       if ((that.speed == 2 && speedCount == 1) ||
-      (that.speed == 4 && speedCount == 2)) {
+      (that.speed == 4 && speedCount == 2) ||
+      (that.speed == 8 && speedCount == 4)) {
         that.addPixel(dirX, dirY);
       }
     } else if (that.direction == 'L' && speedCount == LIFTSPEED) {
@@ -215,7 +224,7 @@ function addMachine(type, xGrid, yGrid, id) {
   }
 
   var x = yGrid * GRID_WIDTH;
-  var y = xGrid * GRID_HEIGHT;
+  var y = xGrid * GRID_HEIGHT + (GRID_HEIGHT / 2);
 
   //console.log(xGrid, yGrid, x,y, id);
 
@@ -290,15 +299,25 @@ function simulationLoop() {
   }
 
   if (!MANUALSTEP && step > STEPINDEX) {
-    TEXT = 'Doing step number ' + step + '.<br>';
-    stopAllMovement();
-    moves(routeInstructions, step);
-    STEPINDEX++;
+    if (step < routeInstructions.length) {
+      TEXT = 'Doing step number ' + step + '.<br>';
+      stopAllMovement();
+      moves(routeInstructions, step);
+      STEPINDEX++;
+    } else {
+      $('#controls').fadeOut(500);
+      $('#instr').html('Scenario finished');
+    }
   } else if (MANUALSTEP && step + 1 > STEPINDEX) {
-    MOVING = false;
-    stopAllMovement();
-    $('#nextStep').prop('disabled', false);
-    $('#nextStep').html('Proceed to next step');
+    if (step < routeInstructions.length) {
+      MOVING = false;
+      stopAllMovement();
+      $('#nextStep').prop('disabled', false);
+      $('#nextStep').html('Proceed to next step');
+    } else {
+      $('#controls').fadeOut(500);
+      $('#instr').html('Scenario finished');
+    }
   }
 
   createParkingLayout();
@@ -314,7 +333,7 @@ function simulationLoop() {
     endingImage.height = PREVIEW_SIZE * 2 * GRID_H;
     document.getElementById('endingPoint').appendChild(endingImage);
     populateParkingLot(canvas, ROUTE);
-  } else if (TESTSTEP == 110) {
+  } else if (TESTSTEP == 200) {
     var startingImage = canvasToImage(canvas);
     startingImage.id = 'start';
     startingImage.width = PREVIEW_SIZE * GRID_W;
@@ -347,7 +366,7 @@ $('#startSim').click(function () {
   if (!MANUALSTEP) {
     $(this).prop('disabled', true);
     $('#nextStep').prop('disabled', false);
-    $('#nextStep').html('Step-by-step simulation');
+    $('#nextStep').html('Step-by-step visualization');
   } else {
     MANUALSTEP = false;
     $(this).html('Switch to automatic movement');
@@ -406,6 +425,7 @@ function selectCar(e) {
         }
 
         $('#controls').fadeOut(500);
+        $('#speedChooser').fadeOut(500);
         moves(routeInstructions, 0);
       }
     }
@@ -512,9 +532,9 @@ function getMachine(id) {
 // Populates the parking lot by asking the layout of the parking lot from server.
 function populateParkingLot(canvas, route, first = true) {
   if (first == true) {
-    var URL = '/Route/' + route + '/Layout/1';
+    var URL = '/Scenarios/' + route + '/Layout/1';
   } else {
-    var URL = '/Route/' + route + '/Layout/0';
+    var URL = '/Scenarios/' + route + '/Layout/0';
   }
 
   $.getJSON(URL, function (data) {
@@ -527,9 +547,9 @@ function populateParkingLot(canvas, route, first = true) {
     cars = [];
     robots = [];
     CANVAS_WIDTH = GRID_WIDTH * GRID_W;
-    canvas.width = CANVAS_WIDTH;
+    canvas.width = CANVAS_WIDTH + (GRID_WIDTH / 2);
     CANVAS_HEIGHT = GRID_HEIGHT * GRID_H;
-    canvas.height = CANVAS_HEIGHT;
+    canvas.height = CANVAS_HEIGHT + (GRID_HEIGHT / 2);
     createParkingLayout();
     for (var i = 0; i < data.machines.length; i++) {
       addMachine(data.machines[i][0],
@@ -558,8 +578,8 @@ function setParkingLotScale(gridX, gridY, viewPortW, viewPortH) {
 }
 
 // Function for getting instructions from server
-function getInstructions(route) {
-  var URL = '/Route/' + route + '/Instructions';
+function getInstructions(route, realistic) {
+  var URL = '/Scenarios/' + route + '/Instructions/' + realistic;
   $.getJSON(URL, function (data) {
     routeInstructions = data;
   });
@@ -570,10 +590,12 @@ function createParkingLayout() {
   for (var i = 0; i < GRID_H; i++) {
     for (var j = 0; j < GRID_W; j++) {
       if (LAYOUT[i][j] == 'P') {
-        ctx.drawImage(noLineImg, j * GRID_WIDTH, i * GRID_HEIGHT);
+        ctx.drawImage(noLineImg, j * GRID_WIDTH, i * GRID_HEIGHT + (GRID_HEIGHT / 2));
       }
     }
   }
+
+  ctx.clearRect((GRID_W * GRID_WIDTH), (GRID_HEIGHT / 2), (GRID_WIDTH / 2), (GRID_H * GRID_HEIGHT));
 };
 
 function canvasToImage(canvas) {

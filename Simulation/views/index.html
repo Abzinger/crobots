@@ -5,7 +5,7 @@ $(document).ready(function () {
 
   $('#loading').hide();
 
-  $.getJSON('/Route/GetRouteList', function (result) {
+  $.getJSON('/Scenarios', function (result) {
     var optionsValues = '<select id="routes">';
     $.each(result, function (item) {
       optionsValues += '<option value="' + result[item].value + '">' +
@@ -27,8 +27,14 @@ $(document).ready(function () {
     $('#routeChooser').fadeOut(500);
     $('#loading').fadeIn(500);
     var route = $('#routes').val();
+    var realistic = $('#realistic').val();
     addStartingEndingStates(route);
-    getInstructions(route);
+    getInstructions(route, realistic);
+  });
+
+  $('#opacity').on('change', function () {
+    $('#opVal').text($('#opacity').val() + '%');
+    ALPHA = $('#opacity').val() / 100;
   });
 
 });
@@ -43,7 +49,11 @@ $(document).ready(function () {
 		<p>Robot Car Parking System Simulation</p>
 		<div id="selector" class="selector">
 			<select id="routes"></select>
-			<button class="btn" id="selectRoute">Choose route</button>
+      <select id="realistic">
+        <option value="1">Realistic visualization</option>
+        <option value="0">Speed selection</option>
+      </select>
+			<button class="btn" id="selectRoute">Choose scenario</button>
 		</div>
 	</div>
 </div>
@@ -51,20 +61,25 @@ $(document).ready(function () {
 <div id="simulation" class="simulation">
 	<div id="previews" class="previews">
 		<div id="startingPoint" class="verticalPreview">
-			<p>State at simulation start</p>
+			<p>Visualization start state</p>
 		</div>
 		<div id="endingPoint" class="verticalPreview">
-			<p>State at simulation end</p>
+			<p>Visualization end state</p>
 		</div>
     <div id="speedChooser">
-      <p>Please choose the speed before starting simulation!</p>
+      <p>Please choose the speed before starting visualization!</p>
       <input type="radio" id="speed1" name="speed" value="1" checked>1x speed<br>
       <input type="radio" id="speed2" name="speed" value="2">2x speed<br>
       <input type="radio" id="speed4" name="speed" value="4">4x speed
     </div>
+    <div id="carOpacity">
+      <p>Opacity of machines</p>
+      <input id="opacity" type="range" min="50" max="100" defaultValue="75">
+      <p id="opVal">75%</p>
+    </div>
 		<div id="controls" class="verticalPreview,controls">
-			<button class="btn" id="startSim">Start automatic simulation</button>
-			<button class="btn" id="nextStep">Step-by-step simulation</button>
+			<button class="btn" id="startSim">Start automatic visualization</button>
+			<button class="btn" id="nextStep">Step-by-step visualization</button>
 		</div>
 		<div id="instructions" class="instructions">
 			<p id="instr" class="instr"> </p>
