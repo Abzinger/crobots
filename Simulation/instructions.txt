@@ -1,0 +1,1200 @@
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_r|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_m|NO|accW	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|accN	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvN1	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|R_m|NO|accN	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|R_m|NO|mvN1	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|R_v|lift|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|R_v|l1|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|R_v|l2|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|R_v|l3|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|C0|R_v|l4|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|C0R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|COR_m|NO|w0_accN	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|COR_m|NO|w0_mvN1	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|COR_m|NO|w0_mvN2	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|COR_m|NO|w0_mvN3	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|C0R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|R_v|drop|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|R_m|NO|accW	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|R_r|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|R_m|NO|accS	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|R_m|NO|mvS1	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|R_m|NO|mvS0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|R_m|NO|mvS1	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|R_m|NO|mvS0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|R_m|NO|mvS1	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|R_r|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|R_m|NO|accE	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|R_v|lift|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|R_v|l1|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|R_v|l2|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|R_v|l3|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|C0|R_v|l4|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|C0R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|COR_m|NO|w0_accE	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|COR_m|NO|w0_mvE1	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvE0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvE1	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|C0R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_accN	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvN1	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvN2	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvN3	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvN0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvN1	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvN2	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvN3	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|C0R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|drop|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_m|NO|accW	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|R_m|NO|accS	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|R_m|NO|mvS1	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|R_m|NO|accE	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvE0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvE0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvE0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvE0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvE0	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvE0	|em|none|NO|NO	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvE0	|C0|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_r|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|lift|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|l1|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|l2|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|l3|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|l4|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|C0R_r|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_accW	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvW1	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvW0	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvW1	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvW0	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvW1	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|C0R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|drop|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_m|NO|accW	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|accS	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvS1	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|accE	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvE0	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvE0	|C0|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_r|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|lift|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|l1|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|l2|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|l3|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|l4|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|C0R_r|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_accW	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvW1	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvW0	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvW1	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvW0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvW1	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|C0R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_accN	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvN1	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvN2	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|COR_m|NO|w0_mvN3	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|C0R_r|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_v|drop|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_r|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|R_m|NO|accW	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|accW	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|em|none|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|em|none|NO|NO	|em|none|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvW0	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|accW	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|accS	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+
+
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|R_r|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+|em|none|NO|NO	|C0|none|NO|NO	|em|none|NO|NO	|em|R_m|NO|mvS1	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	|em|none|NO|NO	
+
+
