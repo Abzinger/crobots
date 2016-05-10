@@ -1,0 +1,9 @@
+# robroute problem file
+# Syntax:
+# NS EW \ngrid(raw)\ntmax \ngridstat_0(raw)\n ... \ngridstat_tmax(raw)\n
+# Comments (lines like this one) are only allowed as a preamble.
+10 13
+DHHEAAAAAAAAALPPEAAAAAAAAAJPPEAAAAAAAAAALNEDGCDGDGDGALFHNNNNNNNNMAKAKAAAAAAAAAALFOAAAAAAAAAALFOAAAAAAAAAAKAKAAAAAAAAAAJFMAAAAAAAAA
+1
+cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[fA|[cA|[cA|[cA|[cA|[cA|[cA|[eA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[dA|[cA|[cA|[cA|[cB|[cA|[cA|[
+cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[eA|[cA|[dA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cB|[fA|[cA|[cA|[cA|[
