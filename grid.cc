@@ -56,59 +56,25 @@ std::string GridSpace::Grid::raw_write() const
 //********************************************************************************************************************************************************************************************************
 void GridSpace::check_Grid_consistency(const Grid & G, std::string whos_asking)
 {
+    using std::string;
+    using std::to_string;
+
     const short NS=G.NS;
     const short EW=G.EW;
     for (short y=0; y<NS; ++y) {
         for (short x=0; x<EW; ++x) {
             Node_type d = G.query(XY{x,y});
-            bool is = true;
-            if (d.north) {
-                if (y >= NS-1) is=false;
-                if (! G.query( blind_north( XY{x,y} ) ).south ) is=false;
-            }
-            if (d.south) {
-                if (!y) is=false;
-                if (! G.query( blind_south( XY{x,y} ) ).north ) is=false;
-            }
-            if (d.east) {
-                if (x >= EW-1) is=false;
-                if (! G.query( blind_east( XY{x,y} ) ).west ) is=false;
-            }
-            if (d.west) {
-                if (!x) is=false;
-                if (! G.query( blind_west( XY{x,y} ) ).east ) is=false;
-            }
-            if (!is) {
-                throw std::runtime_error(whos_asking+"-->"+std::string("check_Grid_consistency(): Not! (at ") +std::to_string(x)+","+std::to_string(y)+")");
-            }
+            if (d.north &&  y >= NS-1)    throw std::runtime_error(whos_asking+"-->"+string("check_Grid_consistency():  (")+to_string(x)+","+to_string(y)+") ->N leaves range.\n");
+            if (d.south &&  !y)           throw std::runtime_error(whos_asking+"-->"+string("check_Grid_consistency():  (")+to_string(x)+","+to_string(y)+") ->S leaves range.\n");
+            if (d.east  &&  x >= EW-1)    throw std::runtime_error(whos_asking+"-->"+string("check_Grid_consistency():  (")+to_string(x)+","+to_string(y)+") ->E leaves range.\n");
+            if (d.west  &&  !x)           throw std::runtime_error(whos_asking+"-->"+string("check_Grid_consistency():  (")+to_string(x)+","+to_string(y)+") ->W leaves range.\n");
+            if (d.north &&  ! G.query( blind_north( XY{x,y} ) ).south ) throw std::runtime_error(whos_asking+"-->"+string("check_Grid_consistency():  (")+to_string(x)+","+to_string(y)+") ->N not symmetric.\n");
+            if (d.south &&  ! G.query( blind_south( XY{x,y} ) ).north ) throw std::runtime_error(whos_asking+"-->"+string("check_Grid_consistency():  (")+to_string(x)+","+to_string(y)+") ->S not symmetric.\n");
+            if (d.east  &&  ! G.query( blind_east( XY{x,y} ) ).west )   throw std::runtime_error(whos_asking+"-->"+string("check_Grid_consistency():  (")+to_string(x)+","+to_string(y)+") ->E not symmetric.\n");
+            if (d.west  &&  ! G.query( blind_west( XY{x,y} ) ).east )   throw std::runtime_error(whos_asking+"-->"+string("check_Grid_consistency():  (")+to_string(x)+","+to_string(y)+") ->W not symmetric.\n");
         } // for x
     } // for y
 } // check_Grid_consistency()
-
-//********************************************************************************************************************************************************************************************************
-
-GridSpace::Marsi3_A::Marsi3_A(): Grid{4,4}
-{
-  data[idx(0,0)] = Node_type({                 Direction::east});
-  data[idx(1,0)] = Node_type({Direction::north,Direction::east,Direction::west});
-  data[idx(2,0)] = Node_type({Direction::north,Direction::east,Direction::west});
-  data[idx(3,0)] = Node_type({Direction::north,Direction::west});
-
-  data[idx(0,1)] = Node_type({                                  Direction::east});
-  data[idx(1,1)] = Node_type({Direction::north,Direction::south,Direction::east,Direction::west});
-  data[idx(2,1)] = Node_type({Direction::north,Direction::south,Direction::east,Direction::west});
-  data[idx(3,1)] = Node_type({Direction::north,Direction::south,Direction::west});
-
-  data[idx(0,2)] = Node_type({                                  Direction::east});
-  data[idx(1,2)] = Node_type({Direction::north,Direction::south,Direction::east,Direction::west});
-  data[idx(2,2)] = Node_type({Direction::north,Direction::south,Direction::east,Direction::west});
-  data[idx(3,2)] = Node_type({Direction::north,Direction::south,Direction::west});
-
-  data[idx(0,3)] = Node_type({                 Direction::east});
-  data[idx(1,3)] = Node_type({Direction::south,Direction::east,Direction::west});
-  data[idx(2,3)] = Node_type({Direction::south,Direction::east,Direction::west});
-  data[idx(3,3)] = Node_type({Direction::south,Direction::west});
-} // Marsi3_A ---constructor
 
 //********************************************************************************************************************************************************************************************************
 GridSpace::Full_Rectangle__Grid::Full_Rectangle__Grid(short _NS, short _EW): Grid(_NS,_EW)

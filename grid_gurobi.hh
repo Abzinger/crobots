@@ -25,8 +25,8 @@ namespace GridSpace {
 	const Grid & G;
 
 	enum class Ignore_Robots_In_Terminal_State { Yes, No };
-	void set_initial_state (const Grid_Stat &);                                                                                    // set state at t=0
-	void set_terminal_state(const Grid_Stat &, Ignore_Robots_In_Terminal_State ignore_robots=Ignore_Robots_In_Terminal_State::No); // set state at t=t_max
+	void set_initial_state (const Stat_Vector_t &);                                                                                    // set state at t=0
+	void set_terminal_state(const Stat_Vector_t &, Ignore_Robots_In_Terminal_State ignore_robots=Ignore_Robots_In_Terminal_State::No); // set state at t=t_max
 
 
 

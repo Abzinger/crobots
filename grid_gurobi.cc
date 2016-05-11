@@ -63,7 +63,7 @@ GridSpace::Grid_Gurobi::~Grid_Gurobi()
 } //    ~Grid_Gurobi
 
 //********************************************************************************************************************************************************************************************************
-void GridSpace::Grid_Gurobi::set_initial_state(const Grid_Stat & stat0)
+void GridSpace::Grid_Gurobi::set_initial_state(const Stat_Vector_t & stat0)
 {
     if (initial_state_has_been_set) throw std::runtime_error("Grid_Gurobi::set_initial_state(): Attempt to set initial state a 2nd time.");
     initial_state_has_been_set = true;
@@ -102,7 +102,7 @@ void GridSpace::Grid_Gurobi::set_initial_state(const Grid_Stat & stat0)
     } // for y
 } // set_initial_state()
 
-void GridSpace::Grid_Gurobi::set_terminal_state(const Grid_Stat & state, Ignore_Robots_In_Terminal_State ignore_robots)
+void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t & state, Ignore_Robots_In_Terminal_State ignore_robots)
 {
     if (terminal_state_has_been_set) throw std::runtime_error("Grid_Gurobi::set_initial_state(): Attempt to set terminal state a 2nd time.");
     terminal_state_has_been_set = true;

@@ -13,13 +13,13 @@ namespace GridSpace {
     struct XY {
         short x;
         short y;
-        inline constexpr XY(short _x, short _y): x{_x}, y{_y}  {}
+        inline constexpr XY(short _x=-1, short _y=-1): x{_x}, y{_y}  {}
     }; // struct XY
 
     constexpr XY nowhere {-1,-1};
 
-    inline
-    bool operator == (XY xy, XY uv) { return xy.x==uv.x && xy.y==uv.y ; }
+    inline    bool operator == (XY xy, XY uv) { return xy.x==uv.x && xy.y==uv.y ; }
+    inline    bool operator != (XY xy, XY uv) { return xy.x!=uv.x || xy.y!=uv.y ; }
 
 
 
@@ -67,7 +67,7 @@ namespace GridSpace {
             const Grid & G;
             inline const T & operator[](XY xy) const { return std::vector<T>::operator[](G.idx(xy.x,xy.y)); }
             inline       T & operator[](XY xy)       { return std::vector<T>::operator[](G.idx(xy.x,xy.y)); }
-            vector_grid(const Grid & _G): std::vector<T>{_G.sz()}, G{_G} {}
+            vector_grid(const Grid & _G): std::vector<T>(_G.sz()), G{_G} {}
         };
 
         inline bool      exists (XY xy)   const      { return exists(xy.x,xy.y); }
@@ -95,6 +95,7 @@ namespace GridSpace {
 
         std::string raw_write() const;
 
+        ~Grid() { delete[] data; }
     protected:
         inline unsigned  sz()                          const      { return NS*EW; }
 
@@ -106,7 +107,6 @@ namespace GridSpace {
 
         Node_type *data;
         Grid(short _NS, short _EW): NS(_NS), EW(_EW), data {new Node_type[sz()]}, numo_slots_storage(-1) { if (NS<=0 || EW<=0) throw std::range_error("Grid(): NS and EW must be positive."); }
-        ~Grid() { delete[] data; }
     private:
         mutable int numo_slots_storage;
     }; // class Grid
@@ -115,19 +115,12 @@ namespace GridSpace {
     //******************************************************************************************************************************************************
     void check_Grid_consistency(const Grid &, std::string whos_asking="");
 
-    //******************************************************************************************************************************************************
-    // Some grids
-    //******************************************************************************************************************************************************
-    struct Marsi3_A: public Grid {
-        Marsi3_A();
-    };
-
     struct Full_Rectangle__Grid: public Grid {
         Full_Rectangle__Grid(short _NS, short _EW);
     };
 
     struct Random__Grid: public Grid {
-        Random__Grid(short _NS, short _EW, double p=.1);
+        Random__Grid(short _NS, short _EW, double edge_probability=.1);
     };
 
     struct Read_From_Raw_Data__Grid: public Grid {
@@ -146,4 +139,4 @@ int GridSpace::Grid::idx(short x, short y) const
 } // Grid::idx()
 
 #endif
-// EOF grid.hh
+// ^grid.hh EOF

@@ -4,6 +4,7 @@
 
 #include "grid.hh"
 #include "grid_stat.hh"
+#include "robroute.hh"
 
 #include <iostream>
 #include <fstream>
@@ -12,8 +13,6 @@
 
 static
 std::string write_pos(GridSpace::Stat_Vector_t & );
-
-typedef GridSpace::Read_From_Raw_Data__Grid   Grid;
 
 int main(int argc, const char *argv[]) try
 {
@@ -39,46 +38,16 @@ int main(int argc, const char *argv[]) try
     std::ifstream file {filename};
     file.exceptions(file.exceptions() | std::ios_base::badbit | std::ios_base::failbit);
 #   ifdef MY__DEBUG
-    std::cout<<"done\nReading grid size from file..."<<std::flush;
-#   endif
-    file>>std::ws; // eat whitespace
-    while (file.peek()=='#') {
-        std::string comment;
-        std::getline(file,comment);
-#       ifdef MY__DEBUG
-        std::cout<<"\n Comment:"<<comment;
-#       endif
-        file>>std::ws; // eat whitespace
-    }
-    short NS,EW;
-    file>>NS>>EW;
-#   ifdef MY__DEBUG
-    std::cout<<"\nDone: dimension are NS="<<NS<<", EW="<<EW<<"\n";
-    std::cout<<"Now reading grid data..."<<std::flush;
+    std::cout<<"done\nReading data from file..."<<std::flush;
 #   endif
 
-    std::string tmpstr;
+    std::string                                comments;
+    std::vector< GridSpace::Stat_Vector_t >    fullsol;
+    GridSpace::Grid * p_G = GridSpace::read_robroute(file, &fullsol, &comments);
 
-    std::getline(file>>std::ws,tmpstr);
-    Grid G {NS,EW,tmpstr};
-#   ifdef MY__DEBUG
-    std::cout<<"done.\nNow reading t_max..."<<std::flush;
-#   endif
-    unsigned t_max;
-    file>>t_max;
-#   ifdef MY__DEBUG
-    std::cout<<"done.\nt_max="<<t_max<<"\n";
-    std::cout<<"Now reading the "<<t_max+1<<"grid statuses: "<<std::flush;
-#   endif
+    const GridSpace::Grid & G     = *p_G;
+    const unsigned          t_max = fullsol.size()-1;
 
-    std::vector< GridSpace::Stat_Vector_t > fullsol {t_max+1, G};
-    for (unsigned t=0; t<=t_max; ++t) {
-        std::getline(file>>std::ws,tmpstr);
-        GridSpace::raw_read( &( fullsol[t] ), tmpstr );
-#   ifdef MY__DEBUG
-        std::cout<<'.'<<std::flush;
-#   endif
-    }
 #   ifdef MY__DEBUG
     std::cout<<"done. Looks like we're ready to go!"<<std::endl;
 #   endif
