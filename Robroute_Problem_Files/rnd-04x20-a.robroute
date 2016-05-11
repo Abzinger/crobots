@@ -1,0 +1,9 @@
+# Robot Router file (robroute)
+# Syntax:
+# NS EW \ngrid(raw)\ntmax \ngridstat_0(raw)\n ... \ngridstat_tmax(raw)\n
+# Comments (lines like this one) are only allowed as a preamble.
+4 20
+DHEDGCABHHFHEDGBFHEAJPFMJODGLMBOBPMCDODGDODECLNOLEDNHNHOKIIKJMJFNNFNNFMAIAIJNFFM
+1
+dB|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[fA|[fA|[cA|[dA|[cA|[cA|[cA|[cA|[eA|[cA|[cA|[eA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cB|[
+cA|[eA|[cA|[cA|[cA|[cA|[fA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[fA|[cA|[cA|[cA|[cA|[cB|[cA|[cA|[cA|[dA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[dA|[cA|[eA|[cA|[cA|[cA|[cA|[cA|[cA|[cA|[cB|[cA|[cA|[
