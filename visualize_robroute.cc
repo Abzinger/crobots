@@ -1,9 +1,10 @@
-// visualize_solution.cc C++11
+// visualize_robroute.cc C++11
 // Part of the Robot Routing project
 // Author: Dirk Oliver Theis
 
 #include "grid.hh"
 #include "grid_stat.hh"
+#include "robroute.hh"
 
 #include <iostream>
 #include <fstream>
@@ -13,16 +14,14 @@
 #include <termios.h>
 
 
-typedef GridSpace::Read_From_Raw_Data__Grid   Grid;
-
 int main(int argc, const char *argv[]) try
 {
-    std::cout<<"Robot Router visualize_solution\nPart of the Robot Routing project\n"<<std::endl;
+    std::cout<<"Robot Router visualize_robroute\nPart of the Robot Routing project\n"<<std::endl;
 
     if (argc!=2) {
         std::cerr<<
-            "USAGE: visualize_solution fn\n"
-            " where    fn is the name of a file of ``roboute'' type.\n";
+            "USAGE: visualize_robroute fn\n"
+            " where    fn is the name of a file of ``robroute'' type.\n";
         return 1;
     }
 
@@ -31,41 +30,21 @@ int main(int argc, const char *argv[]) try
     std::cout<<"Opening file ``"<<filename<<"'' for reading..."<<std::flush;
     std::ifstream file {filename};
     file.exceptions(file.exceptions() | std::ios_base::badbit | std::ios_base::failbit);
-    std::cout<<"done\nReading grid size from file..."<<std::flush;
-    file>>std::ws; // eat whitespace
-    while (file.peek()=='#') {
-        std::string comment;
-        std::getline(file,comment);
-        std::cout<<"\n Comment:"<<comment;
-        file>>std::ws; // eat whitespace
-    }
-    short NS,EW;
-    file>>NS>>EW;
-    std::cout<<"\nDone: dimension are NS="<<NS<<", EW="<<EW<<"\n";
-    std::cout<<"Now reading grid data..."<<std::flush;
+    std::cout<<"done\nReading data from file..."<<std::flush;
 
-    std::string tmpstr;
+    std::string                                comments;
+    std::vector< GridSpace::Stat_Vector_t >    fullsol;
+    GridSpace::Grid * p_G = GridSpace::read_robroute(file, &fullsol, &comments);
 
-    std::getline(file>>std::ws,tmpstr);
-    Grid G {NS,EW,tmpstr};
-    std::cout<<"done.\nNow reading t_max..."<<std::flush;
-    unsigned t_max;
-    file>>t_max;
-    std::cout<<"done.\nt_max="<<t_max<<"\n";
-    std::cout<<"Now reading the "<<t_max+1<<"grid statuses: "<<std::flush;
+    const GridSpace::Grid & G     = *p_G;
+    const unsigned          t_max = fullsol.size()-1;
 
-    std::vector< GridSpace::Stat_Vector_t > fullsol {t_max+1, G};
-    for (unsigned t=0; t<=t_max; ++t) {
-        std::getline(file>>std::ws,tmpstr);
-        GridSpace::raw_read( &( fullsol[t] ), tmpstr );
-        std::cout<<'.'<<std::flush;
-    }
     std::cout<<"done. Looks like we're ready to go!"<<std::endl;
 
     //******************************************************************************************************************************************************
 
-    std::cout<<"Press enter to view solution."<<std::endl;
-    std::cin.get();
+    // std::cout<<"Press enter to view solution."<<std::endl;
+    // std::cin.get();
 
     struct termios new_kbd_mode;
     struct termios g_old_kbd_mode;
@@ -105,7 +84,7 @@ int main(int argc, const char *argv[]) try
     //******************************************************************************************************************************************************
 
     std::cout<<
-        "\nRobot Router visualize_solution was brought to you by\n"
+        "\nRobot Router visualize_robroute was brought to you by\n"
         "Algorithms & Theory @ Uni Tartu\n"
         "http://ac.cs.ut.ee\n"
         "Bye-bye."<<std::endl;
@@ -135,5 +114,5 @@ catch(...) {
 
 // main()
 
-// EOF visualize_solution.cc
+// EOF visualize_robroute.cc
 
