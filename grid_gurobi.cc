@@ -102,12 +102,12 @@ void GridSpace::Grid_Gurobi::set_initial_state(const Stat_Vector_t & stat0)
     } // for y
 } // set_initial_state()
 
-void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t &, bool ignore_robots, bool ignore_C0, bool hardwire)
+void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t & state, bool ignore_robots, bool ignore_C0, bool hardwire)
 {
     if (terminal_state_has_been_set) throw std::runtime_error("Grid_Gurobi::set_initial_state(): Attempt to set terminal state a 2nd time.");
     terminal_state_has_been_set = true;
 
-    constexpr the_cost = 10;
+    constexpr double the_cost = 1;
 
     for (short y=0; y<G.NS_sz(); ++y) {
         for (short x=0; x<G.EW_sz(); ++x) {
@@ -128,13 +128,17 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t &, bool igno
                         }
                     }
                 }
-                // rewared reaching the state through large negative cost
+                // reward reaching the state through large negative cost
                 if (!ignore_robots) {
                     for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
                         if (hardwire) {
                             const double RHS = (s.ndstat==i ? 1 : 0 );
                             model.addConstr( RHS == var(xy,t_max,i) );
                         } else {
+                            GRBLinExpr _x = var(xy,t_max,i);
+                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
+                            GRBVar x = _x.getVar(0);
+                            x.set( GRB_DoubleAttr_Obj, (s.ndstat==i ? 0 : the_cost ) );
                         }
                     }
                     for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
@@ -142,6 +146,10 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t &, bool igno
                             const double RHS = (s.r_vert==i ? 1 : 0 );
                             model.addConstr( RHS == var(xy,t_max,i) );
                         } else {
+                            GRBLinExpr _x = var(xy,t_max,i);
+                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
+                            GRBVar x = _x.getVar(0);
+                            x.set( GRB_DoubleAttr_Obj, (s.r_vert==i ? 0 : the_cost ) );
                         }
                     }
                     for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
@@ -149,6 +157,10 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t &, bool igno
                             const double RHS = (s.r_mv==i ? 1 : 0 );
                             model.addConstr( RHS == var(xy,t_max,i) );
                         } else {
+                            GRBLinExpr _x = var(xy,t_max,i);
+                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
+                            GRBVar x = _x.getVar(0);
+                            x.set( GRB_DoubleAttr_Obj, (s.r_mv==i ? 0 : the_cost ) );
                         }
                     }
                 } // if (do robots)

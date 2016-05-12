@@ -59,7 +59,7 @@ int main(int argc, const char *argv[]) try
     std::cout<<
         "done\n"
         "Setting terminal grid state...."<<std::flush;
-    gGRB.set_terminal_state( gState_t_max , GridGRB::Ignore_Robots_In_Terminal_State::No);
+    gGRB.set_terminal_state( gState_t_max, true, true, false);
     std::cout<<"done\n"
              <<"Setting parameters\n";
     gGRB.set_parameter("SolutionLimit"    ,  1);

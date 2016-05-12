@@ -25,7 +25,8 @@ namespace GridSpace {
 	const Grid & G;
 
 	void set_initial_state (const Stat_Vector_t &);                                                                                    // set state at t=0
-	void set_terminal_state(const Stat_Vector_t &, bool ignore_robots, bool ignore_C0, bool hardwire);                                 // set desired state at t=t_max
+	void set_terminal_state(const Stat_Vector_t &,
+                                bool ignore_robots, bool ignore_C0, bool hardwire);                                 // set desired state at t=t_max
 
 
 
