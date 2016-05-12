@@ -14,7 +14,8 @@
 namespace GridSpace {
 
     void write_robroute(std::ostream                                  & out,
-                        const std::vector< GridSpace::Stat_Vector_t > & );
+                        const std::vector< GridSpace::Stat_Vector_t > & vec,
+                        std::string                                     comments = "");
 
     GridSpace::Grid * read_robroute(std::istream                            & in,
                                     std::vector< GridSpace::Stat_Vector_t > * p_vec,

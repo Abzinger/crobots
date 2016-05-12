@@ -14,7 +14,7 @@ GridSpace::Grid * GridSpace::read_robroute(std::istream                         
     while (in.peek()=='#') {
         std::string comment;
         std::getline(in,comment);
-        *p_comments += comment;
+        *p_comments += comment + '\n';
         in>>std::ws; // eat whitespace
     }
     short NS,EW;
@@ -38,18 +38,22 @@ GridSpace::Grid * GridSpace::read_robroute(std::istream                         
     return p_G;
 } //^ read_robroute()
 
-void GridSpace::write_robroute(std::ostream & out,
-                               const std::vector< GridSpace::Stat_Vector_t > &vec)
+void GridSpace::write_robroute(std::ostream                                  & out,
+                               const std::vector< GridSpace::Stat_Vector_t > & vec,
+                               std::string                                     comments)
+
 {
     if (! vec.size()) throw std::string("GridSpace::write_robroute(): vector of gridstats is empty.");
 
     const GridSpace::Grid & G { vec[0].G };
     const unsigned t_max = vec.size()-1;
-    std::string whole_file =
-        "# Robot Router file (robroute)\n"
-        "# Syntax:\n"
-        "# NS EW \\ngrid(raw)\\ntmax \\ngridstat_0(raw)\\n ... \\ngridstat_tmax(raw)\\n\n"
-        "# Comments (lines like this one) are only allowed as a preamble.\n";
+    std::string whole_file = "# Robroute file -- part of the Robots project http://ac.cs.ut.ee\n";
+    if (comments.size()) whole_file += "# ";
+    for (auto it=comments.begin(); it!=comments.end(); ++it) {
+        if (*it=='\n') whole_file += "\n# ";
+        else           whole_file += *it;
+    }
+    whole_file += '\n';
     whole_file
         += std::to_string(G.NS) + " " + std::to_string(G.EW)+"\n"
         + G.raw_write() + "\n"

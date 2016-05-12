@@ -92,8 +92,10 @@ GridSpace::Full_Rectangle__Grid::Full_Rectangle__Grid(short _NS, short _EW): Gri
 } // Full_Rectangle__Grid()
 
 //********************************************************************************************************************************************************************************************************
-GridSpace::Random__Grid::Random__Grid(short _NS, short _EW, double p): Grid(_NS,_EW)
+GridSpace::Random__Grid::Random__Grid(short _NS, short _EW, double pNS, double pEW): Grid(_NS,_EW)
 {
+    if (pEW < 0)  pEW = pNS;
+
     for (int y=0; y<NS; ++y) {
 	for (int x=0; x<EW; ++x) {
 	    Node_type nd{ {Direction::north,Direction::south,Direction::east,Direction::west} };
@@ -108,21 +110,46 @@ GridSpace::Random__Grid::Random__Grid(short _NS, short _EW, double p): Grid(_NS,
 	for (int x=0; x<EW; ++x) {
             if ( x+1 < EW ) { // east
                 const double q = std::rand()/(double)RAND_MAX;
-                if (q > p) {
+                if (q > pEW) {
                     Grid::data[Grid::idx(x,y)].east   = false;
                     Grid::data[Grid::idx(x+1,y)].west = false;
                 }
             } // if (east exists)
             if ( y+1 < NS ) { // north
                 const double q = std::rand()/(double)RAND_MAX;
-                if (q > p) {
+                if (q > pNS) {
                     Grid::data[Grid::idx(x,y)].north   = false;
                     Grid::data[Grid::idx(x,y+1)].south = false;
                 }
             } // if (north exists)
 	} // for x
     } // for y
-} // Random__Grid()
+} // Random__Grid(..., double, double)
+
+GridSpace::Random__Grid::Random__Grid(short _NS, short _EW, double p_exists): Grid(_NS,_EW)
+{
+    for (int y=0; y<NS; ++y) {
+	for (int x=0; x<EW; ++x) {
+	    Node_type nd{ {Direction::north,Direction::south,Direction::east,Direction::west} };
+	    if (x==0)  nd.west=false;
+	    if (x==EW-1) nd.east=false;
+	    if (y==0)  nd.south=false;
+	    if (y==NS-1) nd.north=false;
+	    Grid::data[Grid::idx(x,y)] = nd;
+	} // for x
+    } // for y
+    for (int y=0; y<NS; ++y) {
+	for (int x=0; x<EW; ++x) {
+            const double q = std::rand()/(double)RAND_MAX;
+            if ( q > p_exists ) {
+                Grid::data[Grid::idx(x,y)].east   = false;       if(x+1<EW) Grid::data[Grid::idx(x+1,y)].west  = false;
+                Grid::data[Grid::idx(x,y)].north  = false;       if(y+1<NS) Grid::data[Grid::idx(x,y+1)].south = false;
+                Grid::data[Grid::idx(x,y)].west   = false;       if(x>0)    Grid::data[Grid::idx(x-1,y)].east  = false;
+                Grid::data[Grid::idx(x,y)].south  = false;       if(y>0)    Grid::data[Grid::idx(x,y-1)].north = false;
+            } //^ if doesn't exist
+	} // for x
+    } // for y
+} // Random__Grid(..., double, double)
 
 
 //********************************************************************************************************************************************************************************************************

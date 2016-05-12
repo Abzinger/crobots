@@ -120,7 +120,8 @@ namespace GridSpace {
     };
 
     struct Random__Grid: public Grid {
-        Random__Grid(short _NS, short _EW, double edge_probability=.1);
+        Random__Grid(short _NS, short _EW, double NS_edge_probability, double EW_edge_probability); // if (p_EW<=0) p_EW=p_NS;
+        Random__Grid(short _NS, short _EW, double slot_probability);
     };
 
     struct Read_From_Raw_Data__Grid: public Grid {

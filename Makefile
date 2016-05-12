@@ -1,15 +1,17 @@
 GUROBI=/opt/gurobi/linux64/include/
 LINK_GUROBI=-L/opt/gurobi/linux64/lib/ -lgurobi_c++ -lgurobi65
 
-CCC=g++
-# CCCDEBUGFLAGS= -g -O0 -fno-inline -fno-eliminate-unused-debug-types
-CCCDEBUGFLAGS= -O
-CCCFLAGS=-Wall -std=c++11 -I $(GUROBI) $(CCCDEBUGFLAGS)
+DOTS_CODE=../../../../../../Work/Code/
+#LINK_DOTS_CODE=-L../../../../../../Work/Code/DOTs_Code.a
 
-HEADERS = grid.hh
-SOURCES = grid.cc grid_stat.cc grid_gurobi.cc gurobi_robot_router.cc visualize_solution.cc
+CCC=g++
+CCCDEBUGFLAGS= -O
+#CCCDEBUGFLAGS= -g -O0 -fno-inline -fno-eliminate-unused-debug-types
+CCCFLAGS=-Wall -std=c++11 -I $(DOTS_CODE) -I $(GUROBI) $(CCCDEBUGFLAGS)
+
+SOURCES = grid.cc example_grids.cc grid_stat.cc grid_properties.cc robroute.cc grid_gurobi.cc gurobi_robot_router.cc visualize_robroute.cc dump_robroute.cc robroute2json.cc generate_robroute.cc
 OBJECTS = $(SOURCES:.cc=.o)
-EXECS   = gurobi_robot_router visualize_solution
+EXECS   = gurobi_robot_router visualize_robroute dump_robroute robroute2json generate_robroute
 
 all: $(OBJECTS) $(EXECS) # all_transitions
 
@@ -30,10 +32,19 @@ all_transitions: all_transitions.cc
 	$(CCC) $(CCCFLAGS) -E all_transitions.cc -o all_transitions_out.cc
 
 gurobi_robot_router: $(OBJECTS)
-	$(CCC) $(CCCFLAGS) gurobi_robot_router.o grid_gurobi.o grid_stat.o grid.o $(LINK_GUROBI) -o gurobi_robot_router
+	$(CCC) $(CCCFLAGS) gurobi_robot_router.o grid_gurobi.o robroute.o grid_stat.o grid.o $(LINK_GUROBI) -o gurobi_robot_router
 
-visualize_solution: $(OBJECTS)
-	$(CCC) $(CCCFLAGS) visualize_solution.o grid_gurobi.o grid_stat.o grid.o $(LINK_GUROBI) -o visualize_solution
+visualize_robroute: $(OBJECTS)
+	$(CCC) $(CCCFLAGS) visualize_robroute.o grid_gurobi.o robroute.o grid_stat.o grid.o $(LINK_GUROBI) -o visualize_robroute
+
+dump_robroute: $(OBJECTS)
+	$(CCC) $(CCCFLAGS) dump_robroute.o grid_gurobi.o robroute.o grid_stat.o grid.o $(LINK_GUROBI) -o dump_robroute
+
+robroute2json: $(OBJECTS)
+	$(CCC) $(CCCFLAGS) robroute2json.o robroute.o grid_stat.o grid.o $(LINK_GUROBI) -o robroute2json
+
+generate_robroute: $(OBJECTS)
+	$(CCC) $(CCCFLAGS) generate_robroute.o robroute.o grid_stat.o grid_properties.o grid.o example_grids.o $(LINK_GUROBI) -o generate_robroute
 
 
 
