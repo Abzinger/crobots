@@ -130,15 +130,22 @@ class RobotMove(Enum):
 # noWall - robot can drive from this grid to every direction
 # wall* - robot cannot drive to direction *
 class GridPieces(Enum):
-    wallNW = 0
+    nowall = 0
     wallN = 1
-    wallNE = 2
-    wallE = 3
-    wallSE = 4
-    wallS = 5
-    wallSW = 6
-    wallW = 7
-    noWall = 8
+    wallE = 2
+    wallS = 3
+    wallW = 4
+    wallNE = 5
+    wallNS = 6
+    wallNW = 7
+    wallES = 8
+    wallEW = 9
+    wallSW = 10
+    wallNES = 11
+    wallNEW = 12
+    wallNSW = 13
+    wallESW = 14
+    wallNESW = 15
 
 
 # getParkingLot takes the size of the lot and the layout string from the file and will convert it to two-dimensional
@@ -149,29 +156,29 @@ def get_parking_lot(lot_size, layout_string):
     for level in layouts:
         decoded_level = []
         for char in level:
-            if char == 'D':
-                decoded_level.append(GridPieces(0))
-            elif char == 'H':
-                decoded_level.append(GridPieces(1))
-            elif char == 'G':
-                decoded_level.append(GridPieces(2))
-            elif char == 'O':
-                decoded_level.append(GridPieces(3))
-            elif char == 'M':
-                decoded_level.append(GridPieces(4))
-            elif char == 'N':
-                decoded_level.append(GridPieces(5))
-            elif char == 'J':
-                decoded_level.append(GridPieces(6))
-            elif char == 'L':
-                decoded_level.append(GridPieces(7))
-            elif char == 'P':
-                decoded_level.append(GridPieces(8))
-            else:
-                print("Character " + char + " not in library!!!")
+            decoded_level.append(parking_pieces[char])
         decoded_levels.append(decoded_level)
     return decoded_levels
 
+
+parking_pieces = {
+    'A': GridPieces.wallNESW,
+    'B': GridPieces.wallNSW,
+    'C': GridPieces.wallESW,
+    'D': GridPieces.wallNW,
+    'E': GridPieces.wallNES,
+    'F': GridPieces.wallNS,
+    'G': GridPieces.wallNE,
+    'H': GridPieces.wallN,
+    'I': GridPieces.wallNEW,
+    'J': GridPieces.wallSW,
+    'K': GridPieces.wallEW,
+    'L': GridPieces.wallW,
+    'M': GridPieces.wallES,
+    'N': GridPieces.wallS,
+    'O': GridPieces.wallE,
+    'P': GridPieces.nowall
+}
 
 # getRoute will get the file name of the .robroute (parking lot instruction set) as an input
 # As an output Route class object will be returned that is the basis for all the movements.
@@ -261,6 +268,7 @@ def get_coordinates(route, level, making_instructions=False):
 def get_parking_layout(route, first=True):
     lot_width = route.lot_size[1]
     lot_height = route.lot_size[0]
+    layout = route.lot_layout
     layout_array = []
     if first:
         machine_array = get_coordinates(route, 0)
@@ -270,7 +278,7 @@ def get_parking_layout(route, first=True):
     for i in range(0, lot_height):
         level = []
         for j in range(0, lot_width):
-            level.append("P")
+            level.append(layout[i][j].name)
         layout_array.append(level)
     return (json.dumps({'width': lot_width, 'height': lot_height, 'layout': layout_array,
                         'machines': machine_array}, separators=(',', ':')))
