@@ -37,10 +37,10 @@ GridSpace::Grid_Gurobi::Grid_Gurobi(const Grid & _G, const unsigned _t_max):
     for (short y=0; y<G.NS_sz(); ++y) {
         for (short x=0; x<G.EW_sz(); ++x) {
             XY xy{x,y};
-            onnode_vars   [xy].resize(t_max);
-            ndstat_vars   [xy].resize(t_max);
-            rvertical_vars[xy].resize(t_max);
-            rmv_vars      [xy].resize(t_max);
+            onnode_vars   [xy].resize(t_max+1);
+            ndstat_vars   [xy].resize(t_max+1);
+            rvertical_vars[xy].resize(t_max+1);
+            rmv_vars      [xy].resize(t_max+1);
         }
     }
     make_model();
@@ -102,10 +102,12 @@ void GridSpace::Grid_Gurobi::set_initial_state(const Stat_Vector_t & stat0)
     } // for y
 } // set_initial_state()
 
-void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t & state, Ignore_Robots_In_Terminal_State ignore_robots)
+void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t &, bool ignore_robots, bool ignore_C0, bool hardwire)
 {
     if (terminal_state_has_been_set) throw std::runtime_error("Grid_Gurobi::set_initial_state(): Attempt to set terminal state a 2nd time.");
     terminal_state_has_been_set = true;
+
+    constexpr the_cost = 10;
 
     for (short y=0; y<G.NS_sz(); ++y) {
         for (short x=0; x<G.EW_sz(); ++x) {
@@ -114,29 +116,40 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t & state, Ign
                 const Full_Stat s = state[xy];
 
                 for (    On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
-                    const double RHS = (s.on_node==i ? 1 : 0 );
-                    model.addConstr(     RHS == var(xy,t_max,i) );
+                    if ( !ignore_C0 || (i!=On_Node::empty && i!=On_Node::Car0) ) {
+                        if (hardwire) {
+                            const double RHS = (s.on_node==i ? 1 : 0 );
+                            model.addConstr(     RHS == var(xy,t_max,i) );
+                        } else {
+                            GRBLinExpr _x = var(xy,t_max,i);
+                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
+                            GRBVar x = _x.getVar(0);
+                            x.set( GRB_DoubleAttr_Obj, (s.on_node==i ? 0 : the_cost ) );
+                        }
+                    }
                 }
                 // rewared reaching the state through large negative cost
-                for (unsigned t=1; t<t_max; ++t) {
-                    GRBLinExpr _x = var(xy,t,s.on_node);
-                    if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
-                    // GRBVar x = _x.getVar(0);
-                    // x.set( GRB_DoubleAttr_Obj, x.get(GRB_DoubleAttr_Obj)   - 100. );
-                }
-
-                if (ignore_robots==Ignore_Robots_In_Terminal_State::No) {
+                if (!ignore_robots) {
                     for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
-                        const double RHS = (s.ndstat==i ? 1 : 0 );
-                        model.addConstr( RHS == var(xy,t_max,i) );
+                        if (hardwire) {
+                            const double RHS = (s.ndstat==i ? 1 : 0 );
+                            model.addConstr( RHS == var(xy,t_max,i) );
+                        } else {
+                        }
                     }
                     for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
-                        const double RHS = (s.r_vert==i ? 1 : 0 );
-                        model.addConstr( RHS == var(xy,t_max,i) );
+                        if (hardwire) {
+                            const double RHS = (s.r_vert==i ? 1 : 0 );
+                            model.addConstr( RHS == var(xy,t_max,i) );
+                        } else {
+                        }
                     }
                     for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
-                        const double RHS = (s.r_mv==i ? 1 : 0 );
-                        model.addConstr( RHS == var(xy,t_max,i) );
+                        if (hardwire) {
+                            const double RHS = (s.r_mv==i ? 1 : 0 );
+                            model.addConstr( RHS == var(xy,t_max,i) );
+                        } else {
+                        }
                     }
                 } // if (do robots)
             } // if exists
@@ -144,24 +157,44 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t & state, Ign
     } // for y
 } // set_terminal_state()
 
+//********************************************************************************************************************************************************************************************************
+
+void GridSpace::Grid_Gurobi::set_parameter(std::string name, int value) {
+    if       (name=="SolutionLimit"    )  model.getEnv().set(GRB_IntParam_SolutionLimit,     value);
+    else if  (name=="Presolve"         )  model.getEnv().set(GRB_IntParam_Presolve,          value);
+    else if  (name=="MIPFocus"         )  model.getEnv().set(GRB_IntParam_MIPFocus,          value);
+    else if  (name=="Cuts"             )  model.getEnv().set(GRB_IntParam_Cuts,              value);
+    else {
+        set_parameter(name,(double)value); // maybe user got the wrong function?
+        return;
+    }
+    std::cout<<"GridSpace::Grid_Gurobi::set_parameter(int): "<<name<<" ==> "<<value<<'\n';
+} //^ set_parameter(...,int)
+void GridSpace::Grid_Gurobi::set_parameter(std::string name, double value) {
+    if       (name=="TimeLimit"        )  model.getEnv().set(GRB_DoubleParam_TimeLimit,         value);
+    else if  (name=="Heuristics"       )  model.getEnv().set(GRB_DoubleParam_Heuristics,        value);
+    else if  (name=="ImproveStartNodes")  model.getEnv().set(GRB_DoubleParam_ImproveStartNodes, value);
+    else if  (name=="ImproveStartTime" )  model.getEnv().set(GRB_DoubleParam_ImproveStartTime,  value);
+    else {
+        std::cout<<std::string("GridSpace::Grid_Gurobi::set_parameter(): WARNING: unknown parameter ")+name+". IGNORED!"<<std::endl;
+        return;
+    }
+    std::cout<<"GridSpace::Grid_Gurobi::set_parameter(double): "<<name<<" ==> "<<value<<'\n';
+} //^ set_parameter(...,double)
 
 //********************************************************************************************************************************************************************************************************
-void GridSpace::Grid_Gurobi::optimize(const double heuristics, const int n_threads, const double time_limit, const int n_sols)
+
+void GridSpace::Grid_Gurobi::optimize()
 {
-    if (heuristics>=0. && heuristics<=1.) model.getEnv().set(GRB_DoubleParam_Heuristics, heuristics);
-    if (n_threads > 0)                    model.getEnv().set(GRB_IntParam_Threads,       n_threads);
-    if (time_limit > 0)                   model.getEnv().set(GRB_DoubleParam_TimeLimit,  time_limit);
-    if (n_sols > 0)                       model.getEnv().set(GRB_IntParam_SolutionLimit, n_sols);
-
-    model.getEnv().set(GRB_IntParam_Cuts,          0);
-    model.getEnv().set(GRB_DoubleParam_Heuristics, 0);
-
     Grid_Gurobi_Callback my_callback {*this};
     model.setCallback(&my_callback);
+
+    model.getEnv().set(GRB_IntParam_Threads, 1);
+
     model.optimize();
-} // optimize()
+} //^ optimize()
 
-
+//********************************************************************************************************************************************************************************************************
 
 std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Gurobi::get_solution()  const
 {
@@ -1913,6 +1946,7 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 // ************************************************************************************************************************
 
 void GridSpace::Grid_Gurobi_Callback::callback() {
+    return;
     switch (where) {
     case 0:
         // std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: POLLING  Periodic polling callback"<<std::endl;

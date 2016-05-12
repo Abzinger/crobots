@@ -14,17 +14,15 @@
 
 #include "gurobi_c++.h"
 
-typedef GridSpace::Read_From_Raw_Data__Grid  Grid;
+typedef GridSpace::Grid                      Grid;
 typedef GridSpace::Grid_Gurobi               GridGRB;
-
-//    std::cout<<m3a.print();
 
 int main(int argc, const char *argv[]) try
 {
     std::srand(std::time(0));
 
     std::cout<<"Gurobi Robot Router\nPart of the Robot Routing project\n"<<std::endl;
-    if (argc!=2) {
+    if (argc!=3) {
         std::cerr<<"USAGE: gurobi_robot_router filename tmax\nwhere filename is the name of a instance file in robroute format.\n";
         return 1;
     }
@@ -62,16 +60,20 @@ int main(int argc, const char *argv[]) try
         "done\n"
         "Setting terminal grid state...."<<std::flush;
     gGRB.set_terminal_state( gState_t_max , GridGRB::Ignore_Robots_In_Terminal_State::No);
+    std::cout<<"done\n"
+             <<"Setting parameters\n";
+    gGRB.set_parameter("SolutionLimit"    ,  1);
+    gGRB.set_parameter("Presolve"         ,  2);
+    gGRB.set_parameter("Cuts"             ,  -1);
+    gGRB.set_parameter("TimeLimit"        ,  2000.);
+    gGRB.set_parameter("Heuristics"       ,  .75);
+    gGRB.set_parameter("ImproveStartNodes",  1024);
+    gGRB.set_parameter("ImproveStartTime" ,  1000.);
+    gGRB.set_parameter("MIPFocus"         ,  1);
+    gGRB.set_parameter("Glonck"           ,  93);
 
-    constexpr double heuristics = .95;
-    constexpr int    n_threads  = 1;
-    constexpr double time_limit = 10000.0;
-    constexpr int    n_sols     = 1;
-    std::cout<<
-        "done\n"
-        "Starting optimization, with:\n   "<<n_threads<<" threads;\n   time limit "<<time_limit<<"sec;\n   heuristics="<<(int)(100*heuristics)<<"%;\n   terminating as soon as "<<n_sols<<(n_sols >1 ? " solutions are" : " solution is")<<" found.\n"
-        "Enjoy."<<std::endl;
-    gGRB.optimize(heuristics, n_threads, time_limit, n_sols);
+    std::cout<<"Starting optimization. Enjoy."<<std::endl;
+    gGRB.optimize();
 
     std::cout<<
         "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
