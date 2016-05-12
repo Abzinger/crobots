@@ -1,5 +1,13 @@
 body{
-	background: #74a2b0;
+	background: #3b3f41;
+}
+
+p {
+	color: #d2d2d2;
+}
+
+#themeChooser {
+	color: #d2d2d2;
 }
 
 select {
@@ -65,7 +73,7 @@ select :focus {
 	text-align:center;
 	color: white;
 	font-family:Tahoma, Geneva, sans-serif;
-	font-size:6em;
+	font-size: 6em;
 }
 
 .btn {
@@ -130,7 +138,7 @@ select :focus {
 .instr{
 	color:#fff;
 	min-height:100px;
-	height:auto;
+	width:auto;
 }
 
 .simulation{
@@ -147,13 +155,32 @@ select :focus {
 }
 
 .previews{
-	padding-top:10px;
-	padding-bottom:10px;
-	padding-right:10px;
+	padding-bottom:5px;
+	padding-right:30px;
 	float:left;
 	min-width:400px;
 }
 
 .controls{
 	display:block;
+}
+
+#hamburger{
+	position: absolute;
+	top: 10px;
+	left: 10px;
+}
+
+#homeBtn{
+	position: absolute;
+	top: 10px;
+	left: 50px;
+}
+
+#carOpacity{
+	text-align: center;
+}
+
+#themeChooser{
+	text-align: center;
 }

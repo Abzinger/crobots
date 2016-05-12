@@ -51,13 +51,11 @@ robotImg.src = './public/assets/robots/robot.png';
 var robotShadowImg = new Image();
 robotShadowImg.src = './public/assets/robots/robot_shadow.png';
 
-var noLineImg = new Image();
-
 var carImages = [];
 
-var routeInstructions = [];
+var PARKING_LOT_IMAGES = {};
 
-noLineImg.src = './public/assets/parking_lot/noline_grid.png';
+var routeInstructions = [];
 
 // Basically a function class that will hold robot and car objects, make them move, stop etc.
 function sprite(options) {
@@ -260,14 +258,6 @@ function addMachine(type, xGrid, yGrid, id) {
     robots.push(robot);
   }
 }
-
-// Sprite for parking lot.
-var noline = sprite({
-  context: canvas.getContext('2d'),
-  width: GRID_WIDTH,
-  height: GRID_HEIGHT,
-  image: noLineImg,
-});
 
 // stops all the movement in the canvas
 function stopAllMovement() {
@@ -550,6 +540,9 @@ function populateParkingLot(canvas, route, first = true) {
     canvas.width = CANVAS_WIDTH + (GRID_WIDTH / 2);
     CANVAS_HEIGHT = GRID_HEIGHT * GRID_H;
     canvas.height = CANVAS_HEIGHT + (GRID_HEIGHT / 2);
+    $('.previews').css('padding-top', GRID_HEIGHT / 2);
+    //Here comes the array of the things
+    addParkingImagesToCache('Dark');
     createParkingLayout();
     for (var i = 0; i < data.machines.length; i++) {
       addMachine(data.machines[i][0],
@@ -558,6 +551,41 @@ function populateParkingLot(canvas, route, first = true) {
         data.machines[i][3]);
     }
   });
+}
+
+
+function addParkingImagesToCache(themeName){
+  PARKING_LOT_IMAGES = {};
+  for (var i = 0; i < GRID_H; i++) {
+    for (var j = 0; j < GRID_W; j++) {
+      if (PARKING_LOT_IMAGES[LAYOUT[i][j]] == null){
+        var img = new Image();
+        if (themeName == 'Dark'){
+          img.src = './public/assets/parking_lot/darker/' + LAYOUT[i][j] + '.png';
+        } else if (themeName == 'Light') {
+          img.src = './public/assets/parking_lot/' + LAYOUT[i][j] + '.png';
+        }
+
+        PARKING_LOT_IMAGES[LAYOUT[i][j]] = img;
+      }
+    }
+  }
+}
+
+function setTheme(themeName){
+  if (themeName == 'Dark'){
+    addParkingImagesToCache(themeName);
+    $('body').css('background', '#3b3f41');
+    $('p').css('color', '#d2d2d2');
+    $('#themeChooser').css('color', '#d2d2d2');
+    $('#homeBtn').prop('src','/public/assets/home_light.png');
+  } else if (themeName == 'Light'){
+    addParkingImagesToCache(themeName);
+    $('body').css('background', '#8b95a2');
+    $('p').css('color', '#2c3034');
+    $('#themeChooser').css('color', '#2c3034');
+    $('#homeBtn').prop('src','/public/assets/home.png');
+  }
 }
 
 function setParkingLotScale(gridX, gridY, viewPortW, viewPortH) {
@@ -589,9 +617,7 @@ function getInstructions(route, realistic) {
 function createParkingLayout() {
   for (var i = 0; i < GRID_H; i++) {
     for (var j = 0; j < GRID_W; j++) {
-      if (LAYOUT[i][j] == 'P') {
-        ctx.drawImage(noLineImg, j * GRID_WIDTH, i * GRID_HEIGHT + (GRID_HEIGHT / 2));
-      }
+      ctx.drawImage(PARKING_LOT_IMAGES[LAYOUT[i][j]], j * GRID_WIDTH, i * GRID_HEIGHT + (GRID_HEIGHT / 2));
     }
   }
 

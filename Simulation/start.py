@@ -46,7 +46,7 @@ def instructions(route_number, realistic):
 
 # Error page
 @error(404)
-def error404():
+def error404(error):
     return 'Nothing here, sorry'
 
 

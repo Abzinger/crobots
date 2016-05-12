@@ -26,16 +26,37 @@ $(document).ready(function () {
   $('#selectRoute').click(function (event) {
     $('#routeChooser').fadeOut(500);
     $('#loading').fadeIn(500);
+    $('#previews').hide();
     var route = $('#routes').val();
     var realistic = $('#realistic').val();
+    if (realistic == 1){
+      $('#speedChooser').hide();
+    }
     addStartingEndingStates(route);
     getInstructions(route, realistic);
   });
+
+  $('#hamburger').click(function (event) {
+    $('#previews').toggle("slow");
+  });
+
+  $('#homeBtn').click(function (event) {
+    window.location.replace('/');
+  })
 
   $('#opacity').on('change', function () {
     $('#opVal').text($('#opacity').val() + '%');
     ALPHA = $('#opacity').val() / 100;
   });
+
+  $('#theme').change(
+    function(){
+        if ($(this).is(':checked')) {
+          setTheme('Dark');
+        } else {
+          setTheme('Light');
+        }
+    });
 
 });
 </script>
@@ -59,6 +80,9 @@ $(document).ready(function () {
 </div>
 
 <div id="simulation" class="simulation">
+  <input type="image" src="/public/assets/hamburger.png" width="25px" height="20px" id="hamburger"/>
+  <input type="image" src="/public/assets/home_light.png" width="25px" height="25px" id="homeBtn"/>
+
 	<div id="previews" class="previews">
 		<div id="startingPoint" class="verticalPreview">
 			<p>Visualization start state</p>
@@ -77,10 +101,10 @@ $(document).ready(function () {
       <input id="opacity" type="range" min="50" max="100" defaultValue="75">
       <p id="opVal">75%</p>
     </div>
-		<div id="controls" class="verticalPreview,controls">
-			<button class="btn" id="startSim">Start automatic visualization</button>
-			<button class="btn" id="nextStep">Step-by-step visualization</button>
-		</div>
+    <div id="themeChooser">
+      <input type="checkbox" id="theme" name="theme" value="Darktheme" checked="true" />
+      <label for="theme">Dark theme</label>
+    </div>
 		<div id="instructions" class="instructions">
 			<p id="instr" class="instr"> </p>
 		</div>
@@ -91,6 +115,10 @@ $(document).ready(function () {
 	<div class="verticalCanvas">
 		<canvas id="simCanvas" ></canvas>
 	</div>
+  <div id="controls" class="verticalPreview,controls">
+    <button class="btn" id="startSim">Start automatic visualization</button>
+    <button class="btn" id="nextStep">Step-by-step visualization</button>
+  </div>
 </div>
 
 
