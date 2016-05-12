@@ -59,12 +59,17 @@ int main(int argc, const char *argv[]) try
     std::cout<<
         "done\n"
         "Setting terminal grid state...."<<std::flush;
-    gGRB.set_terminal_state( gState_t_max, true, true, false);
+    {
+        constexpr bool ignore_robots = true;
+        constexpr bool ignore_C0     = true;
+        constexpr bool hardwire      = false;
+        gGRB.set_terminal_state( gState_t_max, ignore_robots, ignore_C0, hardwire);
+    }
     std::cout<<"done\n"
              <<"Setting parameters\n";
-    gGRB.set_parameter("SolutionLimit"    ,  1);
+    //gGRB.set_parameter("SolutionLimit"    ,  2000000000);
     gGRB.set_parameter("Presolve"         ,  2);
-    gGRB.set_parameter("Cuts"             ,  -1);
+    //gGRB.set_parameter("Cuts"             ,  -1);
     gGRB.set_parameter("TimeLimit"        ,  2000.);
     gGRB.set_parameter("Heuristics"       ,  .75);
     gGRB.set_parameter("ImproveStartNodes",  1024);

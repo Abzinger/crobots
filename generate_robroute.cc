@@ -142,8 +142,9 @@ int main(int argc, const char *argv[]) try
         }
         fillarg_begin = 3;
 
-        const char * const in_filename = argv[1];
+        const char * const in_filename = argv[2];
         std::ifstream in_file {in_filename};
+        if (! in_file) std::cerr<<"Could not open file "<<in_filename<<'\n'; 
         in_file.exceptions(in_file.exceptions() | std::ios_base::badbit | std::ios_base::failbit);
         std::string                                comments;
         std::vector< GridSpace::Stat_Vector_t >    fullsol;
