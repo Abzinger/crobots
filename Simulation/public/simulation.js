@@ -9,6 +9,8 @@ var ROUTE = '';
 
 var TEXT = '';
 
+var GRID = false;
+
 var ALPHA = 0.75;
 
 var STARTED = false;
@@ -428,7 +430,7 @@ function selectCar(e) {
 function moveMachine(machine, instruction, speed) {
   machine.moving = true;
   MOVING = true;
-  machine.lifting = true;
+  machine.lifting = false;
 
   switch (instruction) {
     case 'N':
@@ -478,7 +480,7 @@ function moveMachine(machine, instruction, speed) {
 
 // Function that will move all the machines one instruction step at a time.
 function moves(instructions, stepNr) {
-  if (stepNr < instructions.length) {
+  if (stepNr <= instructions.length) {
     var stepArray = instructions[stepNr];
     for (var i = 0; i < stepArray.length; i++) {
       moveMachine(getMachine(stepArray[i][0]), stepArray[i][1], stepArray[i][2]);
@@ -558,18 +560,23 @@ function addParkingImagesToCache(themeName){
   PARKING_LOT_IMAGES = {};
   for (var i = 0; i < GRID_H; i++) {
     for (var j = 0; j < GRID_W; j++) {
-      if (PARKING_LOT_IMAGES[LAYOUT[i][j]] == null){
+      if (PARKING_LOT_IMAGES[LAYOUT[i][j]] == null && PARKING_LOT_IMAGES[LAYOUT[i][j]] != 'nowall'){
         var img = new Image();
-        if (themeName == 'Dark'){
-          img.src = './public/assets/parking_lot/darker/' + LAYOUT[i][j] + '.png';
-        } else if (themeName == 'Light') {
-          img.src = './public/assets/parking_lot/' + LAYOUT[i][j] + '.png';
-        }
-
+        img.src = './public/assets/parking_lot/' + LAYOUT[i][j] + '.png';
         PARKING_LOT_IMAGES[LAYOUT[i][j]] = img;
       }
     }
   }
+  var img = new Image();
+  if (themeName == 'Dark'){
+    img.src = './public/assets/parking_lot/nowall.png';
+  } else if (themeName == 'Light') {
+    img.src = './public/assets/parking_lot/nowall_light.png';
+  }
+  PARKING_LOT_IMAGES['nowall'] = img;
+  var imgGrid = new Image();
+  imgGrid.src = './public/assets/parking_lot/grid.png';
+  PARKING_LOT_IMAGES['grid'] = imgGrid;
 }
 
 function setTheme(themeName){
@@ -617,7 +624,11 @@ function getInstructions(route, realistic) {
 function createParkingLayout() {
   for (var i = 0; i < GRID_H; i++) {
     for (var j = 0; j < GRID_W; j++) {
+      ctx.drawImage(PARKING_LOT_IMAGES['nowall'], j * GRID_WIDTH, i * GRID_HEIGHT + (GRID_HEIGHT / 2));
       ctx.drawImage(PARKING_LOT_IMAGES[LAYOUT[i][j]], j * GRID_WIDTH, i * GRID_HEIGHT + (GRID_HEIGHT / 2));
+      if (GRID){
+        ctx.drawImage(PARKING_LOT_IMAGES['grid'], j * GRID_WIDTH, i * GRID_HEIGHT + (GRID_HEIGHT / 2));
+      }
     }
   }
 

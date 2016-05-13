@@ -295,7 +295,7 @@ def get_json_route_list():
     routes = get_route_list()
     route_array = []
     for i in range(0, len(routes)):
-        route_array.append({'name': "Route " + str(i+1), 'value': str(i)})
+        route_array.append({'name': "Scenario " + str(i+1), 'value': str(i)})
     return json.dumps(route_array, separators=(',', ':'))
 
 

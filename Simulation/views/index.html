@@ -58,6 +58,15 @@ $(document).ready(function () {
         }
     });
 
+    $('#grid').change(
+      function(){
+          if ($(this).is(':checked')) {
+            GRID = true;
+          } else {
+            GRID = false;
+          }
+      });
+
 });
 </script>
 
@@ -104,6 +113,8 @@ $(document).ready(function () {
     <div id="themeChooser">
       <input type="checkbox" id="theme" name="theme" value="Darktheme" checked="true" />
       <label for="theme">Dark theme</label>
+      <input type="checkbox" id="grid" value="1" checked="true" />
+      <label for="grid">Grid</label>
     </div>
 		<div id="instructions" class="instructions">
 			<p id="instr" class="instr"> </p>
