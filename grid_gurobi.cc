@@ -78,13 +78,13 @@ void GridSpace::Grid_Gurobi::set_initial_state(const Stat_Vector_t & stat0)
                     const double RHS = (s.on_node==i ? 1 : 0 );
                     model.addConstr( RHS == var(xy,0,i) );
                 }
-                // punish not leaving the state through large cost
-                for (unsigned t=1; t<t_max; ++t) {
-                    GRBLinExpr _x = var(xy,t,s.on_node);
-                    if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_initial_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
-                    // GRBVar x = _x.getVar(0);
-                    // x.set( GRB_DoubleAttr_Obj, x.get(GRB_DoubleAttr_Obj) + 100. );
-                }
+                // // punish not leaving the state through large cost
+                // for (unsigned t=1; t<t_max; ++t) {
+                //     GRBLinExpr _x = var(xy,t,s.on_node);
+                //     if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_initial_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
+                //     // GRBVar x = _x.getVar(0);
+                //     // x.set( GRB_DoubleAttr_Obj, x.get(GRB_DoubleAttr_Obj) + 100. );
+                // }
                 for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
                     const double RHS = (s.ndstat==i ? 1 : 0 );
                     model.addConstr( RHS == var(xy,0,i) );
@@ -115,8 +115,8 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t & state, boo
             if ( G.exists(xy) )  {
                 const Full_Stat s = state[xy];
 
-                for (    On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
-                    if ( !ignore_C0 || (i!=On_Node::empty && i!=On_Node::Car0) ) {
+                if ( !ignore_C0 || (s.on_node!=On_Node::empty && s.on_node!=On_Node::Car0) ) {
+                    for (    On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
                         if (hardwire) {
                             const double RHS = (s.on_node==i ? 1 : 0 );
                             model.addConstr(     RHS == var(xy,t_max,i) );
@@ -127,8 +127,7 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t & state, boo
                             x.set( GRB_DoubleAttr_Obj, (s.on_node==i ? 0 : the_cost ) );
                         }
                     }
-                }
-                // reward reaching the state through large negative cost
+                } //^ if whether to ignore C0
                 if (!ignore_robots) {
                     for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
                         if (hardwire) {
@@ -188,7 +187,7 @@ void GridSpace::Grid_Gurobi::set_parameter(std::string name, double value) {
     else if  (name=="ImproveStartNodes")  model.getEnv().set(GRB_DoubleParam_ImproveStartNodes, value);
     else if  (name=="ImproveStartTime" )  model.getEnv().set(GRB_DoubleParam_ImproveStartTime,  value);
     else {
-        std::cout<<std::string("GridSpace::Grid_Gurobi::set_parameter(): WARNING: unknown parameter ")+name+". IGNORED!"<<std::endl;
+        std::cout<<std::string("GridSpace::Grid_Gurobi::set_parameter(): WARNING: unknown parameter ")+name+". IGNORED!   \t---WARNING---"<<std::endl;
         return;
     }
     std::cout<<"GridSpace::Grid_Gurobi::set_parameter(double): "<<name<<" ==> "<<value<<'\n';
@@ -394,13 +393,13 @@ void GridSpace::Grid_Gurobi::atom_vars(const XY v, const unsigned t)
     ndstat_vars[v][t] = var_array+offset;
     for (NdStat i=begin_NdStat(); i!=end_NdStat(); ++i) {
         std::sprintf(var_name_buffer, "ndst[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-        const double
-            cost_multiplier = (
-                i==NdStat::nobodyhome||i==NdStat::R_ready||i==NdStat::C0R_ready||i==NdStat::C1R_ready||i==NdStat::C2R_ready ?     0.    :    1.
-                );
-        const double cost = cost_multiplier * t ;
+        // const double
+        //     cost_multiplier = (
+        //         i==NdStat::nobodyhome||i==NdStat::R_ready||i==NdStat::C0R_ready||i==NdStat::C1R_ready||i==NdStat::C2R_ready ?     0.    :    1.
+        //         );
+        // const double cost = cost_multiplier * t ;
         // const double cost = 0. * cost_multiplier;
-        var_array[offset++] = model.addVar(        0,         1,        cost, GRB_BINARY,  var_name_buffer);
+        var_array[offset++] = model.addVar(        0,         1,           0, GRB_BINARY,  var_name_buffer);
         //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
     } // for (ndstat)
 
@@ -424,7 +423,7 @@ void GridSpace::Grid_Gurobi::atom_vars(const XY v, const unsigned t)
         default:                                                                                            cost = 0.;
         } // switch
 
-        var_array[offset++] = model.addVar(        0,         1,        cost, GRB_BINARY,  var_name_buffer);
+        var_array[offset++] = model.addVar(        0,         1,           0, GRB_BINARY,  var_name_buffer);
         //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
     } // for (r_move)
 

@@ -23,7 +23,7 @@ int main(int argc, const char *argv[]) try
         "with the -g option, only meta-data and the 1st grid are dumped.\n";
 
     const char * filename;
-    bool n_grids_to_dump = std::numeric_limits<int>::max;
+    int n_grids_to_dump = std::numeric_limits<int>::max();
     switch (argc) {
     case 2:
         filename = argv[1];
