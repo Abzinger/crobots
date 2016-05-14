@@ -153,7 +153,9 @@ function sprite(options) {
   };
 
   // Will add one pixel in desired direction. - on next update car is moving one pixel.
-  that.addPixel = function (dirX, dirY, updateShadow = true) {
+  that.addPixel = function (dirX, dirY, updateShadow) {
+    updateShadow = typeof updateShadow !== 'undefined' ? updateShadow : true;
+
     if (dirX == 1) {
       that.x += SPEED / SCALEFACTOR;
       if (updateShadow == true) {
@@ -524,7 +526,8 @@ function getMachine(id) {
 }
 
 // Populates the parking lot by asking the layout of the parking lot from server.
-function populateParkingLot(canvas, route, first = true) {
+function populateParkingLot(canvas, route, first) {
+  first = typeof first !== 'undefined' ? first : true;
   if (first == true) {
     var URL = '/Scenarios/' + route + '/Layout/1';
   } else {
