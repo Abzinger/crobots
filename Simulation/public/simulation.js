@@ -9,7 +9,7 @@ var ROUTE = '';
 
 var TEXT = '';
 
-var GRID = false;
+var GRID = true;
 
 var ALPHA = 0.75;
 
@@ -354,20 +354,24 @@ function renderMachines(machineArray) {
 canvas.addEventListener('mousedown', selectCar, false);
 
 $('#startSim').click(function () {
+  automaticMovement();
+});
+
+function automaticMovement(){
   $('#speedChooser').fadeOut(500);
   if (!MANUALSTEP) {
-    $(this).prop('disabled', true);
+    $('#startSim').prop('disabled', true);
     $('#nextStep').prop('disabled', false);
     $('#nextStep').html('Step-by-step visualization');
   } else {
     MANUALSTEP = false;
-    $(this).html('Switch to automatic movement');
+    $('#startSim').html('Switch to automatic movement');
   }
 
-  $(this).html('Movement in progress');
+  $('#startSim').html('Movement in progress');
   var step = Math.ceil((STEPS) / STEPCOUNT);
   moves(routeInstructions, step);
-});
+}
 
 $('#nextStep').click(function () {
   $('#startSim').html('Switch to automatic movement');
@@ -416,9 +420,7 @@ function selectCar(e) {
           cars[i].up = true;
         }
 
-        $('#controls').fadeOut(500);
-        $('#speedChooser').fadeOut(500);
-        moves(routeInstructions, 0);
+        automaticMovement();
       }
     }
   } else {
@@ -585,12 +587,14 @@ function setTheme(themeName){
     $('body').css('background', '#3b3f41');
     $('p').css('color', '#d2d2d2');
     $('#themeChooser').css('color', '#d2d2d2');
+    $('#speedChooser').css('color', '#d2d2d2');
     $('#homeBtn').prop('src','/public/assets/home_light.png');
   } else if (themeName == 'Light'){
     addParkingImagesToCache(themeName);
     $('body').css('background', '#8b95a2');
     $('p').css('color', '#2c3034');
     $('#themeChooser').css('color', '#2c3034');
+    $('#speedChooser').css('color', '#2c3034');
     $('#homeBtn').prop('src','/public/assets/home.png');
   }
 }
