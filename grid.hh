@@ -35,13 +35,13 @@ namespace GridSpace {
 
     inline XY blind_move(XY now, Direction d) {
         switch(d) {
-        case Direction::east:  blind_east(now);
-        case Direction::north: blind_north(now);
-        case Direction::west:  blind_west(now);
-        case Direction::south: blind_south(now);
+        case Direction::east:  return blind_east(now);
+        case Direction::north: return blind_north(now);
+        case Direction::west:  return blind_west(now);
+        case Direction::south: return blind_south(now);
         default: throw std::runtime_error("blind_move(): illegal direction");
         }
-    } // move()
+    } //^ blind_move()
 
 
     //******************************************************************************************************************************************************
@@ -81,6 +81,9 @@ namespace GridSpace {
         inline XY north(XY xy) const  { return ( query(xy).north ?    blind_north(xy) : nowhere ); }
         inline XY south(XY xy) const  { return ( query(xy).south ?    blind_south(xy) : nowhere ); }
         inline XY west (XY xy) const  { return ( query(xy).west  ?    blind_west (xy) : nowhere ); }
+
+        inline XY move (XY xy, Direction d) const;
+
 
         inline unsigned numo_slots() const  { if (numo_slots_storage>=0) return numo_slots_storage; numo_slots_storage=0;       for(short y=0; y<NS; ++y) for(short x=0;x<EW;++x) numo_slots_storage+=exists(x,y); return numo_slots_storage; }
 
@@ -138,6 +141,18 @@ int GridSpace::Grid::idx(short x, short y) const
 # endif
     return EW*y + x;
 } // Grid::idx()
+
+inline
+GridSpace::XY GridSpace::Grid::move (GridSpace::XY xy, GridSpace::Direction d) const
+{
+    switch(d) {
+    case Direction::east:  return east(xy);
+    case Direction::north: return north(xy);
+    case Direction::west:  return west(xy);
+    case Direction::south: return south(xy);
+    default: throw std::runtime_error("GridSpace::Grid::move(): illegal direction");
+    }
+} //^ move()
 
 #endif
 // ^grid.hh EOF

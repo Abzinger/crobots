@@ -11,29 +11,61 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <list>
+#include <utility>
+#include <unistd.h> // for getopt()
 
 #include "gurobi_c++.h"
 
 typedef GridSpace::Grid                      Grid;
 typedef GridSpace::Grid_Gurobi               GridGRB;
 
-int main(int argc, const char *argv[]) try
+static
+int parse_options(int argc, char *const*argv,
+                  const char *                                  *p_filename,
+                  int                                           *p_t_max,
+                  bool                                          *p_hardwire,
+                  bool                                          *p_punish_mismatch,
+                  bool                                          *p_early_exit,
+                  bool                                          *p_ignore_robots,
+                  bool                                          *p_ignore_C0,
+                  std::list< std::pair< std::string, int    > > *p_gurobi_int_parameters,
+                  std::list< std::pair< std::string, double > > *p_gurobi_double_parameters);
+
+
+int main(int argc, char *const*argv) try
 {
     std::srand(std::time(0));
+    std::cout<<"Gurobi Robot Router --- Part of the Robot Routing project"<<std::endl;
 
-    std::cout<<"Gurobi Robot Router\nPart of the Robot Routing project\n"<<std::endl;
-    if (argc!=3) {
-        std::cerr<<"USAGE: gurobi_robot_router filename tmax\nwhere filename is the name of a instance file in robroute format.\n";
-        return 1;
-    }
+    const char * filename;
+    int          t_max;
+    bool         hardwire        = false;
+    bool         punish_mismatch = false;
+    bool         early_exit      = false;
+    bool         ignore_robots = true;
+    bool         ignore_C0     = true;
+    std::list< std::pair< std::string, int    > > gurobi_int_parameters;
+    std::list< std::pair< std::string, double > > gurobi_double_parameters;
 
-    const char * const filename    = argv[1];
-    const int          t_max       = std::atoi(argv[2]);
+    const int errval=parse_options(argc,argv,
+                                   &filename, &t_max,
+                                   &hardwire, &punish_mismatch, &early_exit,
+                                   &ignore_robots, &ignore_C0,
+                                   &gurobi_int_parameters, &gurobi_double_parameters);
+    if (errval) return errval;
 
-    if (t_max < 1) return std::cerr<<"t_max must be at least 1\n", 2;
+    std::cout<<"File:                     "<<filename                        <<'\n'
+             <<"t_max:                    "<<t_max                           <<'\n'
+             <<"Hardwire terminal state:  "<<(hardwire ? "yes" : "no")       <<'\n'
+             <<"Punish state mismatch:    "<<(punish_mismatch ? "yes" : "no")<<'\n'
+             <<"Early exit:               "<<(early_exit ? "yes" : "no")     <<'\n'
+             <<"Ignoring robots:          "<<(ignore_robots ? "yes" : "no")  <<'\n'
+             <<"Ignoring type-0 cars:     "<<(ignore_C0 ? "yes" : "no")      <<'\n';
 
 
     std::ifstream file {filename};
+    if (!file) return std::cerr<<"Cannot open file "<<filename<<'\n', 2;
     file.exceptions(file.exceptions() | std::ios_base::badbit | std::ios_base::failbit);
     std::string                                comments;
     std::vector< GridSpace::Stat_Vector_t >    init_and_term;
@@ -48,34 +80,21 @@ int main(int argc, const char *argv[]) try
     std::cout<<"Terminal state:\n"
              <<GridSpace::print(gState_t_max);
 
-    std::cout<<"Now creating GuRoBi object w/ t_max="<<t_max<<" ...."<<std::flush;
+
     GridGRB gGRB {G, (unsigned)t_max};
-
-    std::cout<<
-        "done\n"
-        "Setting initial grid state...."<<std::flush;
-    gGRB.set_initial_state( gState_0 );
-
-    std::cout<<
-        "done\n"
-        "Setting terminal grid state...."<<std::flush;
-    {
-        constexpr bool ignore_robots = true;
-        constexpr bool ignore_C0     = true;
-        constexpr bool hardwire      = false;
-        gGRB.set_terminal_state( gState_t_max, ignore_robots, ignore_C0, hardwire);
-    }
-    std::cout<<"done\n"
-             <<"Setting parameters\n";
-    //gGRB.set_parameter("SolutionLimit"    ,  2000000000);
-    gGRB.set_parameter("Presolve"         ,  2);
-    //gGRB.set_parameter("Cuts"             ,  -1);
-    gGRB.set_parameter("TimeLimit"        ,  2000.);
-    gGRB.set_parameter("Heuristics"       ,  .75);
-    gGRB.set_parameter("ImproveStartNodes",  1024);
-    gGRB.set_parameter("ImproveStartTime" ,  1000.);
-    gGRB.set_parameter("MIPFocus"         ,  1);
-    gGRB.set_parameter("Glonck"           ,  93);
+    // My options::
+    gGRB.options().set_ignore_robots(ignore_robots);
+    gGRB.options().set_ignore_C0(ignore_C0);
+    gGRB.options().set_hardwire(hardwire);
+    gGRB.options().set_punish_mismatch(punish_mismatch);
+    gGRB.options().set_early_exit(early_exit);
+    // Initial, terminal states:
+    gGRB.set_initial_state( &gState_0 );
+    gGRB.set_terminal_state( &gState_t_max);
+    // Gurobi parameters:
+    std::cout<<"Gurobi parameters:\n";
+    for (auto it = gurobi_int_parameters.begin();    it != gurobi_int_parameters.end();    ++it)  gGRB.set_GRBparameter(it->first,it->second);
+    for (auto it = gurobi_double_parameters.begin(); it != gurobi_double_parameters.end(); ++it)  gGRB.set_GRBparameter(it->first,it->second);
 
     std::cout<<"Starting optimization. Enjoy."<<std::endl;
     gGRB.optimize();
@@ -137,7 +156,106 @@ catch(...) {
     std::cout<<std::endl;
     std::cerr<<"Unknown exception caught by main()\n";
 }
-
 // main()
+
+
+
+int parse_options(int argc, char *const*argv,
+                  const char *                                  *p_filename,
+                  int                                           *p_t_max,
+                  bool                                          *p_hardwire,
+                  bool                                          *p_punish_mismatch,
+                  bool                                          *p_early_exit,
+                  bool                                          *p_ignore_robots,
+                  bool                                          *p_ignore_C0,
+                  std::list< std::pair< std::string, int    > > *p_gurobi_int_parameters,
+                  std::list< std::pair< std::string, double > > *p_gurobi_double_parameters)
+{
+    const char usgMsg[] =
+        "USAGE: gurobi_robot_router [-w] [-h] [-c cpusecs] [-i ign] {-g gurobiParameter=value}   -f filename  -t t_max\n"
+        " where  filename    is the name of a instance file in robroute format;\n"
+        "        t_max       is the maximum time.\n"
+        "Options:\n"
+        " -w       The terminal state is hardwired into the model\n"
+        "          (otherwise it is in the objecive function).\n"
+        " -x       exit as soon as a solution with matching terminal state is found\n"
+        " -p       punish mismatch of the terminal state in times before t_max\n"
+        " -i ign   In the terminal state, ignore:\n"
+        "          nothing,                       if ign=0;\n"
+        "          the positions of the robots,   if ign=R;\n"
+        "          the positions of type-0 cars,  if ign=C0.\n"
+        " -g       Use this to pass parameters directly to Gurobi\n"
+        "          (-g ? for a list).\n"
+        "\n"
+        " -h       Display this help.\n";
+
+    *p_filename = nullptr;
+    *p_t_max    = -2000000;
+
+    auto gurobi_parameter_list = GridGRB::list_GRBparameters();
+    const char * options = "hwpxf:t:i:g:";
+    for (char arg=getopt(argc, argv, options); arg!=-1; arg=getopt(argc, argv, options) ) {
+        switch (arg) {
+        case 'h': std::cout<<usgMsg;                   return 1;
+        case 'f': *p_filename = optarg;                break;
+        case 't': *p_t_max    = std::atoi(optarg);     break;
+        case 'w': *p_hardwire = true;                  break;
+        case 'p': *p_punish_mismatch = true;           break;
+        case 'x': *p_early_exit = true;                break;
+        case 'i': if (std::string(optarg)=="0")  *p_ignore_robots=false, *p_ignore_C0=false;
+            else  if (std::string(optarg)=="R")  *p_ignore_robots=true;
+            else  if (std::string(optarg)=="C0") *p_ignore_C0=true;
+            else return std::cerr<<"Unknown parameter "<<optarg<<" to option -i\n",2;
+            break;
+        case 'g':
+            if (std::string(optarg)=="?") {
+                std::cerr<<"Accepted Gurobi parameters:\n";
+                for (auto it=gurobi_parameter_list.begin(); it!=gurobi_parameter_list.end(); ++it)  std::cerr<<"   "<<*it<<'\n';
+                return 1;
+            } else {
+                std::string name  = "";
+                std::string value = "";
+                char * i;
+                for (i=optarg; *i && *i!='='; ++i)  name += *i;
+                if (*i!='=') return std::cerr<<"Unable to parse -g option "<<optarg<<'\n',3;
+                ++i;
+                if (*i=='-') ++i, value+='-';
+                if (*i==0) return std::cerr<<"Unable to parse -g option "<<optarg<<'\n',3;
+                bool has_point = false;
+                for ( ; ('0'<=*i && *i<='9') || *i=='.';  ++i) {
+                    value += *i;
+                    if (*i=='.') {
+                        if (has_point) return std::cerr<<"Unable to parse -g option "<<optarg<<'\n',3;
+                        has_point=true;
+                    }
+                } //^ for value
+                if (*i!=0) return std::cerr<<"Unable to parse -g option "<<optarg<<'\n',3;
+                if (! gurobi_parameter_list.count(name) ) return std::cerr<<"Unknown parameter name ``"<<optarg<<"'' in -g option (use -g ? for a list)\n",3;
+                if (has_point) {
+                    std::pair< std::string , double >  the_parameter;
+                    the_parameter.first = name;
+                    the_parameter.second = std::stod(value);
+                    p_gurobi_double_parameters->push_back( the_parameter );
+                } else {
+                    std::pair< std::string , int >  the_parameter;
+                    the_parameter.first = name;
+                    the_parameter.second = std::stoi(value);
+                    p_gurobi_int_parameters->push_back( the_parameter );
+                }
+            } //^ if/else
+            break;
+        case -1: break;
+        default: return std::cerr<<"Something's wrong with the options!\n",2;
+        } //^ case
+    } //^ for args
+
+    if (!*p_filename)       return std::cerr<<"Missing filename (-h for help)\n", 1;
+    if (*p_t_max < -100000) return std::cerr<<"Missing t_max (-h for help)\n", 1;
+    if (*p_t_max < 1)       return std::cerr<<"t_max must be at least 1\n", 2;
+
+    return 0;
+} //^ parse_options()
+
+
 
 // EOF gurobi_robot_router.cc

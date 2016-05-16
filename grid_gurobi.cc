@@ -12,6 +12,7 @@ namespace GridSpace {
         Grid_Gurobi & my_daddy;
         Grid_Gurobi_Callback(Grid_Gurobi& daddy): my_daddy(daddy) {}
         virtual void callback();
+        bool terminal_status_matches();
     };
 
 } //^ namespace
@@ -26,8 +27,8 @@ GridSpace::Grid_Gurobi::Grid_Gurobi(const Grid & _G, const unsigned _t_max):
     p_genv                     {new GRBEnv},
     p_model                    {new GRBModel{*p_genv}},
     model                      {*p_model},
-    initial_state_has_been_set {false},
-    terminal_state_has_been_set{false},
+    p_initial_state            {nullptr},
+    p_terminal_state           {nullptr},
     onnode_vars                {_G},
     ndstat_vars                {_G},
     rvertical_vars             {_G},
@@ -63,16 +64,16 @@ GridSpace::Grid_Gurobi::~Grid_Gurobi()
 } //    ~Grid_Gurobi
 
 //********************************************************************************************************************************************************************************************************
-void GridSpace::Grid_Gurobi::set_initial_state(const Stat_Vector_t & stat0)
+void GridSpace::Grid_Gurobi::set_initial_state(const Stat_Vector_t *p_stat0)
 {
-    if (initial_state_has_been_set) throw std::runtime_error("Grid_Gurobi::set_initial_state(): Attempt to set initial state a 2nd time.");
-    initial_state_has_been_set = true;
+    if (p_initial_state) throw std::runtime_error("Grid_Gurobi::set_initial_state(): Attempt to set initial state a 2nd time.");
+    p_initial_state = p_stat0;
 
     for (short y=0; y<G.NS_sz(); ++y) {
         for (short x=0; x<G.EW_sz(); ++x) {
             XY xy {x,y};
             if ( G.exists(xy) )  {
-                const Full_Stat s = stat0[xy];
+                const Full_Stat s = (*p_stat0)[xy];
 
                 for (On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
                     const double RHS = (s.on_node==i ? 1 : 0 );
@@ -100,66 +101,75 @@ void GridSpace::Grid_Gurobi::set_initial_state(const Stat_Vector_t & stat0)
             } // if exists
         } // for x
     } // for y
-} // set_initial_state()
+} //^ set_initial_state()
 
-void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t & state, bool ignore_robots, bool ignore_C0, bool hardwire)
+void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t * p_state)
 {
-    if (terminal_state_has_been_set) throw std::runtime_error("Grid_Gurobi::set_initial_state(): Attempt to set terminal state a 2nd time.");
-    terminal_state_has_been_set = true;
+    if (p_terminal_state) throw std::runtime_error("Grid_Gurobi::set_initial_state(): Attempt to set terminal state a 2nd time.");
+    p_terminal_state = p_state;
 
-    constexpr double the_cost = 1;
+    const double mismatch_cost__t_max = ( my_opts.punish_mismatch ? 10.*t_max   : 1. );
+    const double mismatch_cost__t     = ( my_opts.punish_mismatch ? 1.          : 0. );
 
     for (short y=0; y<G.NS_sz(); ++y) {
         for (short x=0; x<G.EW_sz(); ++x) {
             XY xy {x,y};
             if ( G.exists(xy) )  {
-                const Full_Stat s = state[xy];
+                const Full_Stat s = (*p_state)[xy];
 
-                if ( !ignore_C0 || (s.on_node!=On_Node::empty && s.on_node!=On_Node::Car0) ) {
+                if ( s.on_node!=On_Node::empty && ( !my_opts.ignore_C0 || s.on_node!=On_Node::Car0 ) ) {
                     for (    On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
-                        if (hardwire) {
+                        if (my_opts.hardwire) {
                             const double RHS = (s.on_node==i ? 1 : 0 );
                             model.addConstr(     RHS == var(xy,t_max,i) );
                         } else {
-                            GRBLinExpr _x = var(xy,t_max,i);
-                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
-                            GRBVar x = _x.getVar(0);
-                            x.set( GRB_DoubleAttr_Obj, (s.on_node==i ? 0 : the_cost ) );
-                        }
-                    }
+                            for (unsigned t = 1 + (1-my_opts.punish_mismatch)*(t_max-1); t<=t_max; ++t) {
+                                GRBLinExpr _x = var(xy,t,i);
+                                if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
+                                GRBVar x = _x.getVar(0);
+                                x.set( GRB_DoubleAttr_Obj, (s.on_node==i ? 0 : (t==t_max ? mismatch_cost__t_max : mismatch_cost__t) ) );
+                            } //^ for t
+                        } //^ if/else
+                    } //^ for stat
                 } //^ if whether to ignore C0
-                if (!ignore_robots) {
+                if (!my_opts.ignore_robots) {
                     for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
-                        if (hardwire) {
+                        if (my_opts.hardwire) {
                             const double RHS = (s.ndstat==i ? 1 : 0 );
                             model.addConstr( RHS == var(xy,t_max,i) );
                         } else {
-                            GRBLinExpr _x = var(xy,t_max,i);
-                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
-                            GRBVar x = _x.getVar(0);
-                            x.set( GRB_DoubleAttr_Obj, (s.ndstat==i ? 0 : the_cost ) );
+                            for (unsigned t = 1 + (1-my_opts.punish_mismatch)*(t_max-1); t<=t_max; ++t) {
+                                GRBLinExpr _x = var(xy,t,i);
+                                if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this NdStat variable (GRBLinExpr has !=1 terms).");
+                                GRBVar x = _x.getVar(0);
+                                x.set( GRB_DoubleAttr_Obj, (s.ndstat==i ? 0 : (t==t_max ? mismatch_cost__t_max : mismatch_cost__t) ) );
+                            } //^ for
                         }
                     }
                     for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
-                        if (hardwire) {
+                        if (my_opts.hardwire) {
                             const double RHS = (s.r_vert==i ? 1 : 0 );
                             model.addConstr( RHS == var(xy,t_max,i) );
                         } else {
-                            GRBLinExpr _x = var(xy,t_max,i);
-                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
-                            GRBVar x = _x.getVar(0);
-                            x.set( GRB_DoubleAttr_Obj, (s.r_vert==i ? 0 : the_cost ) );
+                            for (unsigned t = 1 + (1-my_opts.punish_mismatch)*(t_max-1); t<=t_max; ++t) {
+                                GRBLinExpr _x = var(xy,t,i);
+                                if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this R_Vertical variable (GRBLinExpr has !=1 terms).");
+                                GRBVar x = _x.getVar(0);
+                                x.set( GRB_DoubleAttr_Obj, (s.r_vert==i ? 0 : (t==t_max ? mismatch_cost__t_max : mismatch_cost__t) ) );
+                            } //^ for
                         }
                     }
                     for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
-                        if (hardwire) {
+                        if (my_opts.hardwire) {
                             const double RHS = (s.r_mv==i ? 1 : 0 );
                             model.addConstr( RHS == var(xy,t_max,i) );
                         } else {
-                            GRBLinExpr _x = var(xy,t_max,i);
-                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
-                            GRBVar x = _x.getVar(0);
-                            x.set( GRB_DoubleAttr_Obj, (s.r_mv==i ? 0 : the_cost ) );
+                            for (unsigned t = 1 + (1-my_opts.punish_mismatch)*(t_max-1); t<=t_max; ++t) {
+                                GRBLinExpr _x = var(xy,t,i);
+                                if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
+                                GRBVar x = _x.getVar(0);
+                                x.set( GRB_DoubleAttr_Obj, (s.r_mv==i ? 0 : (t==t_max ? mismatch_cost__t_max : mismatch_cost__t) ) );
+                            } //^ for
                         }
                     }
                 } // if (do robots)
@@ -170,28 +180,41 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t & state, boo
 
 //********************************************************************************************************************************************************************************************************
 
-void GridSpace::Grid_Gurobi::set_parameter(std::string name, int value) {
+std::set<std::string> GridSpace::Grid_Gurobi::list_GRBparameters() {
+    std::set<std::string> the_pars;
+    the_pars.insert("SolutionLimit");
+    the_pars.insert("Presolve");
+    the_pars.insert("MIPFocus");
+    the_pars.insert("Cuts");
+    the_pars.insert("TimeLimit");
+    the_pars.insert("Heuristics");
+    the_pars.insert("ImproveStartNodes");
+    the_pars.insert("ImproveStartTime");
+    return the_pars;
+} //^ list_GRBparameters()
+
+void GridSpace::Grid_Gurobi::set_GRBparameter(std::string name, int value) {
     if       (name=="SolutionLimit"    )  model.getEnv().set(GRB_IntParam_SolutionLimit,     value);
     else if  (name=="Presolve"         )  model.getEnv().set(GRB_IntParam_Presolve,          value);
     else if  (name=="MIPFocus"         )  model.getEnv().set(GRB_IntParam_MIPFocus,          value);
     else if  (name=="Cuts"             )  model.getEnv().set(GRB_IntParam_Cuts,              value);
     else {
-        set_parameter(name,(double)value); // maybe user got the wrong function?
+        set_GRBparameter(name,(double)value); // maybe user got the wrong function?
         return;
     }
-    std::cout<<"GridSpace::Grid_Gurobi::set_parameter(int): "<<name<<" ==> "<<value<<'\n';
-} //^ set_parameter(...,int)
-void GridSpace::Grid_Gurobi::set_parameter(std::string name, double value) {
+    std::cout<<"GridSpace::Grid_Gurobi::set_GRBparameter(int): "<<name<<" ==> "<<value<<'\n';
+} //^ set_GRBparameter(...,int)
+void GridSpace::Grid_Gurobi::set_GRBparameter(std::string name, double value) {
     if       (name=="TimeLimit"        )  model.getEnv().set(GRB_DoubleParam_TimeLimit,         value);
     else if  (name=="Heuristics"       )  model.getEnv().set(GRB_DoubleParam_Heuristics,        value);
     else if  (name=="ImproveStartNodes")  model.getEnv().set(GRB_DoubleParam_ImproveStartNodes, value);
     else if  (name=="ImproveStartTime" )  model.getEnv().set(GRB_DoubleParam_ImproveStartTime,  value);
     else {
-        std::cout<<std::string("GridSpace::Grid_Gurobi::set_parameter(): WARNING: unknown parameter ")+name+". IGNORED!   \t---WARNING---"<<std::endl;
+        std::cout<<std::string("GridSpace::Grid_Gurobi::set_GRBparameter(): WARNING: unknown parameter ")+name+". IGNORED!   \t---WARNING---"<<std::endl;
         return;
     }
-    std::cout<<"GridSpace::Grid_Gurobi::set_parameter(double): "<<name<<" ==> "<<value<<'\n';
-} //^ set_parameter(...,double)
+    std::cout<<"GridSpace::Grid_Gurobi::set_GRBparameter(double): "<<name<<" ==> "<<value<<'\n';
+} //^ set_GRBparameter(...,double)
 
 //********************************************************************************************************************************************************************************************************
 
@@ -273,7 +296,7 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Gurobi::get_solution()  
                 } // for x
             } // for y
         } // for t
-        
+
         return fullsol;
     } // if  there's a solution
     else return std::vector< Stat_Vector_t >{};
@@ -338,7 +361,8 @@ GRBLinExpr GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const R_Mov
     if (v==nowhere) return 0;
     else {
         if (! G.exists(v) ) throw std::range_error  ("Grid_Gurobi::var(R_Move): node does not exist.");
-        return rmv_vars[v][t][(int)where];
+        const Direction d = get_direction(where);
+        return ( G.move(v,d)==nowhere ?    (GRBLinExpr)0.   :   (GRBLinExpr)rmv_vars[v][t][(int)where]  );
     }
 } // var()
 
@@ -372,6 +396,9 @@ void GridSpace::Grid_Gurobi::make_vars()
 
 void GridSpace::Grid_Gurobi::atom_vars(const XY v, const unsigned t)
 {
+    auto vartype = GRB_BINARY;
+    // auto vartype = GRB_CONTINUOUS;
+
     // how many vars per node,time ---in total?
     constexpr int total_size = (int)On_Node::SIZE + (int)NdStat::SIZE + (int)R_Vertical::SIZE + (int)R_Move::SIZE;
 
@@ -386,45 +413,34 @@ void GridSpace::Grid_Gurobi::atom_vars(const XY v, const unsigned t)
     onnode_vars[v][t] = var_array+offset;
     for (On_Node i=begin_On_Node(); i!=end_On_Node(); ++i) {
         std::sprintf(var_name_buffer, "onnd[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-        var_array[offset++] = model.addVar(        0,         1,          0., GRB_BINARY,  var_name_buffer);
+        var_array[offset++] = model.addVar(        0,         1,          0.,    vartype,  var_name_buffer);
         //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
     }
 
     ndstat_vars[v][t] = var_array+offset;
     for (NdStat i=begin_NdStat(); i!=end_NdStat(); ++i) {
         std::sprintf(var_name_buffer, "ndst[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-        // const double
-        //     cost_multiplier = (
-        //         i==NdStat::nobodyhome||i==NdStat::R_ready||i==NdStat::C0R_ready||i==NdStat::C1R_ready||i==NdStat::C2R_ready ?     0.    :    1.
-        //         );
-        // const double cost = cost_multiplier * t ;
-        // const double cost = 0. * cost_multiplier;
-        var_array[offset++] = model.addVar(        0,         1,           0, GRB_BINARY,  var_name_buffer);
+        var_array[offset++] = model.addVar(        0,         1,           0,    vartype,  var_name_buffer);
         //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
     } // for (ndstat)
 
     rvertical_vars[v][t] = var_array+offset;
     for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
         std::sprintf(var_name_buffer, "rvrt[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-        var_array[offset++] = model.addVar(0,1,0.,GRB_BINARY, var_name_buffer);
+        var_array[offset++] = model.addVar(0,1,0.,vartype, var_name_buffer);
     }
 
 
     rmv_vars[v][t] = var_array+offset;
     for (R_Move i=begin_R_Move(); i!=end_R_Move(); ++i) {
-        std::sprintf(var_name_buffer, "rmv[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-
-        double cost = -1.e+99;
-        switch (i) {
-        case R_Move::accE:    case R_Move::accN:    case R_Move::accW:    case R_Move::accS:
-        case R_Move::w0_accE: case R_Move::w0_accN: case R_Move::w0_accW: case R_Move::w0_accS:
-        case R_Move::w1_accE: case R_Move::w1_accN: case R_Move::w1_accW: case R_Move::w1_accS:
-        case R_Move::w2_accE: case R_Move::w2_accN: case R_Move::w2_accW: case R_Move::w2_accS:             cost = 0.;   break ;
-        default:                                                                                            cost = 0.;
-        } // switch
-
-        var_array[offset++] = model.addVar(        0,         1,           0, GRB_BINARY,  var_name_buffer);
-        //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
+        const Direction d = get_direction(i);
+        if ( G.move(v,d)!=nowhere ) {
+            std::sprintf(var_name_buffer, "rmv[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
+            var_array[offset++] = model.addVar(        0,         1,           0,    vartype,  var_name_buffer);
+            //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
+        } else {
+            ++offset;
+        }
     } // for (r_move)
 
     // dumbness check
@@ -1957,21 +1973,21 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 // ************************************************************************************************************************
 
 void GridSpace::Grid_Gurobi_Callback::callback() {
-    return;
     switch (where) {
     case 0:
-        // std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: POLLING  Periodic polling callback"<<std::endl;
         break;
+        std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: POLLING  Periodic polling callback"<<std::endl;
     case 1:
-        // std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: PRESOLVE Currently performing presolve"<<std::endl;
-        // std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
-        // std::cout<<"CALLBACK: The number of columns removed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_COLDEL)<<std::endl;
-        // std::cout<<"CALLBACK: The number of rows removed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_ROWDEL)<<std::endl;
-        // std::cout<<"CALLBACK: The number of constraint senses changed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_SENCHG)<<std::endl;
-        // std::cout<<"CALLBACK: The number of variable bounds changed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_BNDCHG)<<std::endl;
-        // std::cout<<"CALLBACK: The number of coefficients changed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_COECHG)<<std::endl;
         break;
+        std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: PRESOLVE Currently performing presolve"<<std::endl;
+        std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
+        std::cout<<"CALLBACK: The number of columns removed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_COLDEL)<<std::endl;
+        std::cout<<"CALLBACK: The number of rows removed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_ROWDEL)<<std::endl;
+        std::cout<<"CALLBACK: The number of constraint senses changed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_SENCHG)<<std::endl;
+        std::cout<<"CALLBACK: The number of variable bounds changed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_BNDCHG)<<std::endl;
+        std::cout<<"CALLBACK: The number of coefficients changed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_COECHG)<<std::endl;
     case 2:
+        break;
         std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: SIMPLEX  Currently in simplex"<<std::endl;
         std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
         std::cout<<"CALLBACK: Current simplex iteration count: "<<getDoubleInfo(GRB_CB_SPX_ITRCNT)<<std::endl;
@@ -1979,8 +1995,8 @@ void GridSpace::Grid_Gurobi_Callback::callback() {
         std::cout<<"CALLBACK: Current primal infeasibility: "<<getDoubleInfo(GRB_CB_SPX_PRIMINF)<<std::endl;
         std::cout<<"CALLBACK: Current dual infeasibility: "<<getDoubleInfo(GRB_CB_SPX_DUALINF)<<std::endl;
         std::cout<<"CALLBACK: Is problem current perturbed? "<<getIntInfo(GRB_CB_SPX_ISPERT)<<std::endl;
-        break;
     case 3:
+        break;
         std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: MIP      Currently in MIP"<<std::endl;
         std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
         std::cout<<"CALLBACK: Current best objective: "<<getDoubleInfo(GRB_CB_MIP_OBJBST)<<std::endl;
@@ -1990,8 +2006,21 @@ void GridSpace::Grid_Gurobi_Callback::callback() {
         std::cout<<"CALLBACK: Current count of cutting planes applied: "<<getIntInfo(GRB_CB_MIP_CUTCNT)<<std::endl;
         std::cout<<"CALLBACK: Current unexplored node count: "<<getDoubleInfo(GRB_CB_MIP_NODLFT)<<std::endl;
         std::cout<<"CALLBACK: Current simplex iteration count: "<<getDoubleInfo(GRB_CB_MIP_ITRCNT)<<std::endl;
-        break;
     case 4:
+        if ( my_daddy.my_opts.exit_when_better >= getDoubleInfo(GRB_CB_MIPSOL_OBJ) ) {
+            std::cout<<"CALLBACK: found a solution which is at least as good as given parameter. Aborting."<<std::endl;
+            abort();
+        }
+        if ( my_daddy.my_opts.early_exit ) {
+            if (my_daddy.my_opts.hardwire) {
+                std::cout<<"CALLBACK: found a solution with matching terminal state (hardwired). Aborting."<<std::endl;
+                abort();
+            } else if (terminal_status_matches()) {
+                std::cout<<"CALLBACK: found a solution with matching terminal state (not hardwired). Aborting."<<std::endl;
+                abort();
+            }
+        }
+        break;
         std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: MIPSOL   Found a new MIP incumbent"<<std::endl;
         std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
         std::cout<<"CALLBACK: Objective value for new solution: "<<getDoubleInfo(GRB_CB_MIPSOL_OBJ)<<std::endl;
@@ -1999,8 +2028,8 @@ void GridSpace::Grid_Gurobi_Callback::callback() {
         std::cout<<"CALLBACK: Current best objective bound: "<<getDoubleInfo(GRB_CB_MIPSOL_OBJBND)<<std::endl;
         std::cout<<"CALLBACK: Current explored node count: "<<getDoubleInfo(GRB_CB_MIPSOL_NODCNT)<<std::endl;
         std::cout<<"CALLBACK: Current count of feasible solutions found: "<<getIntInfo(GRB_CB_MIPSOL_SOLCNT)<<std::endl;
-        break;
     case 5:
+        break;
         std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: MIPNODE  Currently exploring a MIP node"<<std::endl;
         std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
         std::cout<<"CALLBACK: Optimization status of current MIP node: "<<getIntInfo(GRB_CB_MIPNODE_STATUS)<<std::endl;
@@ -2040,13 +2069,13 @@ void GridSpace::Grid_Gurobi_Callback::callback() {
         std::cout<<"CALLBACK: Current best objective bound: "<<getDoubleInfo(GRB_CB_MIPNODE_OBJBND)<<std::endl;
         std::cout<<"CALLBACK: Current explored node count: "<<getDoubleInfo(GRB_CB_MIPNODE_NODCNT)<<std::endl;
         std::cout<<"CALLBACK: Current count of feasible solutions found: "<<getIntInfo(GRB_CB_MIPNODE_SOLCNT)<<std::endl;
-        break;
     case 6:
+        break;
         // std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: MESSAGE  Printing a log message"<<std::endl;
         // std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
         // std::cout<<"CALLBACK: The message that is being printed: "<<getStringInfo(GRB_CB_MSG_STRING)<<std::endl;
-        break;
     case 7:
+        break;
         std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: BARRIER  Currently in barrier"<<std::endl;
         std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
         std::cout<<"CALLBACK: Current barrier iteration count: "<<getIntInfo(GRB_CB_BARRIER_ITRCNT)<<std::endl;
@@ -2055,9 +2084,58 @@ void GridSpace::Grid_Gurobi_Callback::callback() {
         std::cout<<"CALLBACK: Primal infeasibility for current barrier iterate: "<<getDoubleInfo(GRB_CB_BARRIER_PRIMINF)<<std::endl;
         std::cout<<"CALLBACK: Dual infeasibility for current barrier iterate: "<<getDoubleInfo(GRB_CB_BARRIER_DUALINF)<<std::endl;
         std::cout<<"CALLBACK: Complementarity violation for current barrier iterate: "<<getDoubleInfo(GRB_CB_BARRIER_COMPL)<<std::endl;
-        break;
-    default: std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: WEIRD   You're not supposed to be here!!!"<<std::endl;
+    default:
+        std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: WEIRD   You're not supposed to be here!!!"<<std::endl;
     }
 } //^ callback()
+
+
+bool GridSpace::Grid_Gurobi_Callback::terminal_status_matches()
+{
+    for (short y=0; y<my_daddy.G.NS_sz(); ++y) {
+        for (short x=0; x<my_daddy.G.EW_sz(); ++x) {
+            XY xy {x,y};
+            if ( my_daddy.G.exists(xy) )  {
+                const Full_Stat s = (*my_daddy.p_terminal_state)[xy];
+
+                if ( s.on_node!=On_Node::empty && ( !my_daddy.my_opts.ignore_C0 || s.on_node!=On_Node::Car0 ) ) {
+                    for (    On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
+                        const double RHS = (s.on_node==i ? 1 : 0 );
+                        GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
+                        if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
+                        GRBVar x = _x.getVar(0);
+                        if ( std::fabs(getSolution(x) - RHS) > .1 )   return false;
+                    } //^ for stat
+                } //^ if whether to ignore C0
+                if (!my_daddy.my_opts.ignore_robots) {
+                    for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
+                        const double RHS = (s.ndstat==i ? 1 : 0 );
+                        GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
+                        if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this NdStat variable (GRBLinExpr has !=1 terms).");
+                        GRBVar x = _x.getVar(0);
+                        if ( std::fabs(getSolution(x) - RHS) > .1 )   return false;
+                    } //^ for
+                    for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
+                        const double RHS = (s.r_vert==i ? 1 : 0 );
+                        GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
+                        if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this R_Vertical variable (GRBLinExpr has !=1 terms).");
+                        GRBVar x = _x.getVar(0);
+                        if ( std::fabs(getSolution(x) - RHS) > .1 )   return false;
+                    } //^ for
+                    for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
+                        const double RHS = (s.r_mv==i ? 1 : 0 );
+                        GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
+                        if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
+                        GRBVar x = _x.getVar(0);
+                        if ( std::fabs(getSolution(x) - RHS) > .1 )   return false;
+                    } //^ for
+                } // if (do robots)
+            } // if exists
+        } // for x
+    } // for y
+    return true;
+} //^ terminal_status_matches()
+
+
 
 // EOF grid_gurobi.cc
