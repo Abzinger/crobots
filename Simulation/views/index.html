@@ -58,8 +58,51 @@ $(document).ready(function () {
         }
     });
 
+    $('#grid').change(
+      function(){
+          if ($(this).is(':checked')) {
+            GRID = true;
+          } else {
+            GRID = false;
+          }
+      });
+
+      $('#help').click(
+        function() {
+          $('.helpOverlay').fadeIn(500);
+        }
+      );
+
+      $('#closeHelp').click(
+        function() {
+          $('.helpOverlay').fadeOut(500);
+        }
+      );
 });
 </script>
+
+<p id="help">?</p>
+
+<div class="helpOverlay">
+  <p>Instructions to use the application</p>
+  <ul>
+    <li>Choose the scenario.</li>
+    <li>Choose either realistic or speed choosing mode.</li>
+    <li>Click „Choose scenario“ button.</li>
+    <li>To see settings, press hamburger menu on the top left corner of the screen.</li>
+    <li>Change opacity by clicking or dragging the opacity slider.</li>
+    <li>Toggle the grid button for the application to show or hide the screen,</li>
+    <li>If speed selection mode was selected, choose the speed by checking one of the checkboxes.</li>
+    <li>Click the theme button to toggle between light and dark theme of the visualization,</li>
+    <li>To start the automatic visualization, press either on „Start automatic visualization“ button or on any of the cars shown on the main visualization screen on the right of settings.</li>
+    <li>To start step-by-step visualization, press on „Step-by-step visualization“. After every step has been finished, the button has to be pressed again for next visualization step.</li>
+    <li>The visualization can be resumed automatically and vice versa at any time during visualization.</li>
+    <li>To go back to the scenario selection, press on the robot icon on the top left of the screen.</li>
+    <li>User guide can be accessed at any time by clicking on question mark on top right corner of the screen.</li>
+  </ul>
+  <button class="btn" id="closeHelp">Close help</button>
+
+</div>
 
 <div class="overlay">
 	<div id="loading" class="centered">
@@ -104,6 +147,8 @@ $(document).ready(function () {
     <div id="themeChooser">
       <input type="checkbox" id="theme" name="theme" value="Darktheme" checked="true" />
       <label for="theme">Dark theme</label>
+      <input type="checkbox" id="grid" value="1" checked="true" />
+      <label for="grid">Grid</label>
     </div>
 		<div id="instructions" class="instructions">
 			<p id="instr" class="instr"> </p>

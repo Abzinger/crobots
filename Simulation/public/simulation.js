@@ -9,6 +9,8 @@ var ROUTE = '';
 
 var TEXT = '';
 
+var GRID = true;
+
 var ALPHA = 0.75;
 
 var STARTED = false;
@@ -151,7 +153,9 @@ function sprite(options) {
   };
 
   // Will add one pixel in desired direction. - on next update car is moving one pixel.
-  that.addPixel = function (dirX, dirY, updateShadow = true) {
+  that.addPixel = function (dirX, dirY, updateShadow) {
+    updateShadow = typeof updateShadow !== 'undefined' ? updateShadow : true;
+
     if (dirX == 1) {
       that.x += SPEED / SCALEFACTOR;
       if (updateShadow == true) {
@@ -352,20 +356,24 @@ function renderMachines(machineArray) {
 canvas.addEventListener('mousedown', selectCar, false);
 
 $('#startSim').click(function () {
+  automaticMovement();
+});
+
+function automaticMovement(){
   $('#speedChooser').fadeOut(500);
   if (!MANUALSTEP) {
-    $(this).prop('disabled', true);
+    $('#startSim').prop('disabled', true);
     $('#nextStep').prop('disabled', false);
     $('#nextStep').html('Step-by-step visualization');
   } else {
     MANUALSTEP = false;
-    $(this).html('Switch to automatic movement');
+    $('#startSim').html('Switch to automatic movement');
   }
 
-  $(this).html('Movement in progress');
+  $('#startSim').html('Movement in progress');
   var step = Math.ceil((STEPS) / STEPCOUNT);
   moves(routeInstructions, step);
-});
+}
 
 $('#nextStep').click(function () {
   $('#startSim').html('Switch to automatic movement');
@@ -414,9 +422,7 @@ function selectCar(e) {
           cars[i].up = true;
         }
 
-        $('#controls').fadeOut(500);
-        $('#speedChooser').fadeOut(500);
-        moves(routeInstructions, 0);
+        automaticMovement();
       }
     }
   } else {
@@ -428,7 +434,7 @@ function selectCar(e) {
 function moveMachine(machine, instruction, speed) {
   machine.moving = true;
   MOVING = true;
-  machine.lifting = true;
+  machine.lifting = false;
 
   switch (instruction) {
     case 'N':
@@ -478,7 +484,7 @@ function moveMachine(machine, instruction, speed) {
 
 // Function that will move all the machines one instruction step at a time.
 function moves(instructions, stepNr) {
-  if (stepNr < instructions.length) {
+  if (stepNr <= instructions.length) {
     var stepArray = instructions[stepNr];
     for (var i = 0; i < stepArray.length; i++) {
       moveMachine(getMachine(stepArray[i][0]), stepArray[i][1], stepArray[i][2]);
@@ -520,7 +526,8 @@ function getMachine(id) {
 }
 
 // Populates the parking lot by asking the layout of the parking lot from server.
-function populateParkingLot(canvas, route, first = true) {
+function populateParkingLot(canvas, route, first) {
+  first = typeof first !== 'undefined' ? first : true;
   if (first == true) {
     var URL = '/Scenarios/' + route + '/Layout/1';
   } else {
@@ -558,18 +565,23 @@ function addParkingImagesToCache(themeName){
   PARKING_LOT_IMAGES = {};
   for (var i = 0; i < GRID_H; i++) {
     for (var j = 0; j < GRID_W; j++) {
-      if (PARKING_LOT_IMAGES[LAYOUT[i][j]] == null){
+      if (PARKING_LOT_IMAGES[LAYOUT[i][j]] == null && PARKING_LOT_IMAGES[LAYOUT[i][j]] != 'nowall'){
         var img = new Image();
-        if (themeName == 'Dark'){
-          img.src = './public/assets/parking_lot/darker/' + LAYOUT[i][j] + '.png';
-        } else if (themeName == 'Light') {
-          img.src = './public/assets/parking_lot/' + LAYOUT[i][j] + '.png';
-        }
-
+        img.src = './public/assets/parking_lot/' + LAYOUT[i][j] + '.png';
         PARKING_LOT_IMAGES[LAYOUT[i][j]] = img;
       }
     }
   }
+  var img = new Image();
+  if (themeName == 'Dark'){
+    img.src = './public/assets/parking_lot/nowall.png';
+  } else if (themeName == 'Light') {
+    img.src = './public/assets/parking_lot/nowall_light.png';
+  }
+  PARKING_LOT_IMAGES['nowall'] = img;
+  var imgGrid = new Image();
+  imgGrid.src = './public/assets/parking_lot/grid.png';
+  PARKING_LOT_IMAGES['grid'] = imgGrid;
 }
 
 function setTheme(themeName){
@@ -578,12 +590,14 @@ function setTheme(themeName){
     $('body').css('background', '#3b3f41');
     $('p').css('color', '#d2d2d2');
     $('#themeChooser').css('color', '#d2d2d2');
+    $('#speedChooser').css('color', '#d2d2d2');
     $('#homeBtn').prop('src','/public/assets/home_light.png');
   } else if (themeName == 'Light'){
     addParkingImagesToCache(themeName);
     $('body').css('background', '#8b95a2');
     $('p').css('color', '#2c3034');
     $('#themeChooser').css('color', '#2c3034');
+    $('#speedChooser').css('color', '#2c3034');
     $('#homeBtn').prop('src','/public/assets/home.png');
   }
 }
@@ -617,7 +631,11 @@ function getInstructions(route, realistic) {
 function createParkingLayout() {
   for (var i = 0; i < GRID_H; i++) {
     for (var j = 0; j < GRID_W; j++) {
+      ctx.drawImage(PARKING_LOT_IMAGES['nowall'], j * GRID_WIDTH, i * GRID_HEIGHT + (GRID_HEIGHT / 2));
       ctx.drawImage(PARKING_LOT_IMAGES[LAYOUT[i][j]], j * GRID_WIDTH, i * GRID_HEIGHT + (GRID_HEIGHT / 2));
+      if (GRID){
+        ctx.drawImage(PARKING_LOT_IMAGES['grid'], j * GRID_WIDTH, i * GRID_HEIGHT + (GRID_HEIGHT / 2));
+      }
     }
   }
 
@@ -651,4 +669,6 @@ function changeSpeed(speed) {
 }
 
 $('#simulation').hide();
+$('.helpOverlay').hide();
+
 carImages = getCarImgs();
