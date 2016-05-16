@@ -669,4 +669,6 @@ function changeSpeed(speed) {
 }
 
 $('#simulation').hide();
+$('.helpOverlay').hide();
+
 carImages = getCarImgs();

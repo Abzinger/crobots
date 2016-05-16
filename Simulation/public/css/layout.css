@@ -47,8 +47,34 @@ select :focus {
     bottom:0;
 		background-color: #f0f0f0;
     background-color:rgba(0, 0, 0, 0.85);
-    z-index:9999;
+    z-index:50;
     color:white;
+}
+
+.helpOverlay {
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+		background-color: #f0f0f0;
+    background-color:rgba(0, 0, 0, 0.75);
+    z-index:60;
+    color:white;
+		text-align:center;
+		color: white;
+		font-family:Tahoma, Geneva, sans-serif;
+}
+
+.helpOverlay ul {
+	font-size: 1.5em;
+	list-style-type: none;
+	text-align: center;
+}
+
+.helpOverlay p {
+	font-size: 4em;
+	text-align: center;
 }
 
 .inlinePreview{
@@ -179,6 +205,16 @@ select :focus {
 	position: absolute;
 	top: 10px;
 	left: 50px;
+}
+
+#help{
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	font-size: 6em;
+	z-index: 55;
+	padding-top: 0;
+	margin-top: 0;
 }
 
 #carOpacity{
