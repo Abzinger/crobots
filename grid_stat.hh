@@ -12,23 +12,23 @@
 namespace GridSpace {
 
     enum class On_Node : char { empty,  Car0,  Car1,  Car2,
-	    SIZE};
+            SIZE};
     enum class NdStat  : char { nobodyhome,
-	    R_ready,   R_moving,   R_vertical,
-	    C0R_ready, C0R_moving,
-	    C1R_ready, C1R_moving,
-	    C2R_ready, C2R_moving,
-	    SIZE};
+            R_ready,   R_moving,   R_vertical,
+            C0R_ready, C0R_moving,
+            C1R_ready, C1R_moving,
+            C2R_ready, C2R_moving,
+            SIZE};
     enum class R_Vertical  : char { lift, l1, l2, l3, l4, drop,
-	    SIZE};
+            SIZE};
     enum class R_Move  : char { accE, mvE0, accN, mvN1, mvN0, accW, mvW0, accS, mvS1, mvS0,
-	    w0_accE, w0_mvE1, w0_mvE0,   w0_accN, w0_mvN1, w0_mvN2, w0_mvN3, w0_mvN0,   w0_accW, w0_mvW1, w0_mvW0,   w0_accS, w0_mvS1, w0_mvS2, w0_mvS3, w0_mvS0,
-	    w1_accE, w1_mvE1, w1_mvE0,   w1_accN, w1_mvN1, w1_mvN2, w1_mvN3, w1_mvN0,   w1_accW, w1_mvW1, w1_mvW0,   w1_accS, w1_mvS1, w1_mvS2, w1_mvS3, w1_mvS0,
-	    w2_accE, w2_mvE1, w2_mvE0,   w2_accN, w2_mvN1, w2_mvN2, w2_mvN3, w2_mvN0,   w2_accW, w2_mvW1, w2_mvW0,   w2_accS, w2_mvS1, w2_mvS2, w2_mvS3, w2_mvS0,
-	    SIZE};
+            w0_accE, w0_mvE1, w0_mvE0,   w0_accN, w0_mvN1, w0_mvN2, w0_mvN3, w0_mvN0,   w0_accW, w0_mvW1, w0_mvW0,   w0_accS, w0_mvS1, w0_mvS2, w0_mvS3, w0_mvS0,
+            w1_accE, w1_mvE1, w1_mvE0,   w1_accN, w1_mvN1, w1_mvN2, w1_mvN3, w1_mvN0,   w1_accW, w1_mvW1, w1_mvW0,   w1_accS, w1_mvS1, w1_mvS2, w1_mvS3, w1_mvS0,
+            w2_accE, w2_mvE1, w2_mvE0,   w2_accN, w2_mvN1, w2_mvN2, w2_mvN3, w2_mvN0,   w2_accW, w2_mvW1, w2_mvW0,   w2_accS, w2_mvS1, w2_mvS2, w2_mvS3, w2_mvS0,
+            SIZE};
 
-    inline
-    Direction get_direction(R_Move);
+    inline    Direction get_direction(R_Move);
+    inline    unsigned  get_ETA      (R_Move);
 
     const char* to_string(On_Node);     // don't give "SIZE" to these!
     const char* to_string(NdStat);
@@ -36,12 +36,12 @@ namespace GridSpace {
     const char* to_string(R_Move);
 
     struct Full_Stat {
-	On_Node     on_node;
-	NdStat      ndstat;
-	R_Vertical  r_vert;
+        On_Node     on_node;
+        NdStat      ndstat;
+        R_Vertical  r_vert;
         R_Move      r_mv;
-	inline Full_Stat(): on_node{On_Node::SIZE}, ndstat{NdStat::SIZE}, r_vert{R_Vertical::SIZE}, r_mv{R_Move::SIZE} {} // B.S. init
-	inline Full_Stat(On_Node, NdStat, R_Vertical, R_Move);
+        inline Full_Stat(): on_node{On_Node::SIZE}, ndstat{NdStat::SIZE}, r_vert{R_Vertical::SIZE}, r_mv{R_Move::SIZE} {} // B.S. init
+        inline Full_Stat(On_Node, NdStat, R_Vertical, R_Move);
     };
 
 
@@ -50,10 +50,10 @@ namespace GridSpace {
 
     struct Grid_Stat: public Stat_Vector_t
     {
-	Grid_Stat(const Grid_Stat &)             = delete;
-	Grid_Stat & operator=(const Grid_Stat &) = delete;
+        Grid_Stat(const Grid_Stat &)             = delete;
+        Grid_Stat & operator=(const Grid_Stat &) = delete;
     protected:
-	Grid_Stat(const Grid & _G): Stat_Vector_t{_G} {}
+        Grid_Stat(const Grid & _G): Stat_Vector_t{_G} {}
     }; // struct Grid_Stat
 
 
@@ -64,7 +64,7 @@ namespace GridSpace {
 
     // Grid_Stat random
     struct Random__Grid_Stat: public Grid_Stat {
-	Random__Grid_Stat(const Grid & _G, std::array<unsigned,(unsigned)On_Node::SIZE> car_type_numbers, unsigned n_robots);
+        Random__Grid_Stat(const Grid & _G, std::array<unsigned,(unsigned)On_Node::SIZE> car_type_numbers, unsigned n_robots);
     };
 
     struct Read_From_Raw_Data__Grid_Stat: public Grid_Stat {
@@ -140,10 +140,79 @@ GridSpace::Direction GridSpace::get_direction(GridSpace::R_Move where)
     case R_Move::w2_mvS2:  return Direction::south;
     case R_Move::w2_mvS3:  return Direction::south;
     case R_Move::w2_mvS0:  return Direction::south;
-    case R_Move::SIZE:     throw std::range_error  ("GridSpace::to_string(R_Move): out of range");
-    default:               throw std::runtime_error("GridSpace::to_string(R_Move): BAD BUG");
+    case R_Move::SIZE:     throw std::range_error  ("GridSpace::get_direction(R_Move): out of range");
+    default:               throw std::runtime_error("GridSpace::get_direction(R_Move): BAD BUG");
     }
-} // get_direction()
+} //^ get_direction()
+
+
+
+inline
+unsigned GridSpace::get_ETA(GridSpace::R_Move where)
+{
+    switch(where) {
+    case R_Move::accE   :  return 1;
+    case R_Move::mvE0   :  return 1;
+    case R_Move::accN   :  return 2;
+    case R_Move::mvN0   :  return 2;
+    case R_Move::mvN1   :  return 1;
+    case R_Move::accW   :  return 1;
+    case R_Move::mvW0   :  return 1;
+    case R_Move::accS   :  return 2;
+    case R_Move::mvS0   :  return 2;
+    case R_Move::mvS1   :  return 1;
+    case R_Move::w0_accE:  return 2;
+    case R_Move::w0_mvE0:  return 2;
+    case R_Move::w0_mvE1:  return 1;
+    case R_Move::w0_accN:  return 4;
+    case R_Move::w0_mvN0:  return 4;
+    case R_Move::w0_mvN1:  return 3;
+    case R_Move::w0_mvN2:  return 2;
+    case R_Move::w0_mvN3:  return 1;
+    case R_Move::w0_accW:  return 2;
+    case R_Move::w0_mvW0:  return 2;
+    case R_Move::w0_mvW1:  return 1;
+    case R_Move::w0_accS:  return 4;
+    case R_Move::w0_mvS0:  return 4;
+    case R_Move::w0_mvS1:  return 3;
+    case R_Move::w0_mvS2:  return 2;
+    case R_Move::w0_mvS3:  return 1;
+    case R_Move::w1_accE:  return 2;
+    case R_Move::w1_mvE0:  return 2;
+    case R_Move::w1_mvE1:  return 1;
+    case R_Move::w1_accN:  return 4;
+    case R_Move::w1_mvN0:  return 4;
+    case R_Move::w1_mvN1:  return 3;
+    case R_Move::w1_mvN2:  return 2;
+    case R_Move::w1_mvN3:  return 1;
+    case R_Move::w1_accW:  return 2;
+    case R_Move::w1_mvW0:  return 2;
+    case R_Move::w1_mvW1:  return 1;
+    case R_Move::w1_accS:  return 4;
+    case R_Move::w1_mvS0:  return 4;
+    case R_Move::w1_mvS1:  return 3;
+    case R_Move::w1_mvS2:  return 2;
+    case R_Move::w1_mvS3:  return 1;
+    case R_Move::w2_accE:  return 2;
+    case R_Move::w2_mvE0:  return 2;
+    case R_Move::w2_mvE1:  return 1;
+    case R_Move::w2_accN:  return 4;
+    case R_Move::w2_mvN0:  return 4;
+    case R_Move::w2_mvN1:  return 3;
+    case R_Move::w2_mvN2:  return 2;
+    case R_Move::w2_mvN3:  return 1;
+    case R_Move::w2_accW:  return 2;
+    case R_Move::w2_mvW0:  return 2;
+    case R_Move::w2_mvW1:  return 1;
+    case R_Move::w2_accS:  return 4;
+    case R_Move::w2_mvS0:  return 4;
+    case R_Move::w2_mvS1:  return 3;
+    case R_Move::w2_mvS2:  return 2;
+    case R_Move::w2_mvS3:  return 1;
+    case R_Move::SIZE:     throw std::range_error  ("GridSpace::get_ETA(R_Move): out of range");
+    default:               throw std::runtime_error("GridSpace::get_ETA(R_Move): BAD BUG");
+    }
+} //^ get_ETA()
 
 
 

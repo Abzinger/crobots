@@ -40,11 +40,11 @@ int main(int argc, char *const*argv) try
 
     const char * filename;
     int          t_max;
-    bool         hardwire        = false;
-    bool         punish_mismatch = false;
-    bool         early_exit      = false;
-    bool         ignore_robots = true;
-    bool         ignore_C0     = true;
+    bool         hardwire;
+    bool         punish_mismatch;
+    bool         early_exit;
+    bool         ignore_robots;
+    bool         ignore_C0;
     std::list< std::pair< std::string, int    > > gurobi_int_parameters;
     std::list< std::pair< std::string, double > > gurobi_double_parameters;
 
@@ -177,11 +177,11 @@ int parse_options(int argc, char *const*argv,
         "        t_max       is the maximum time.\n"
         "Options:\n"
         " -w       The terminal state is hardwired into the model\n"
-        "          (otherwise it is in the objecive function).\n"
+        "          (default: it's in the objecive function).\n"
         " -x       exit as soon as a solution with matching terminal state is found\n"
         " -p       punish mismatch of the terminal state in times before t_max\n"
         " -i ign   In the terminal state, ignore:\n"
-        "          nothing,                       if ign=0;\n"
+        "          nothing (default),             if ign=0;\n"
         "          the positions of the robots,   if ign=R;\n"
         "          the positions of type-0 cars,  if ign=C0.\n"
         " -g       Use this to pass parameters directly to Gurobi\n"
@@ -191,6 +191,13 @@ int parse_options(int argc, char *const*argv,
 
     *p_filename = nullptr;
     *p_t_max    = -2000000;
+
+    // defaults:
+    *p_hardwire        = false;
+    *p_punish_mismatch = false;
+    *p_early_exit      = false;
+    *p_ignore_robots   = false;
+    *p_ignore_C0       = false;
 
     auto gurobi_parameter_list = GridGRB::list_GRBparameters();
     const char * options = "hwpxf:t:i:g:";

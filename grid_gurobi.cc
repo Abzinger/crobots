@@ -264,7 +264,7 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Gurobi::get_solution()  
                                 ndstat=i;
                             }
                         } // for  NdStat
- 
+
                         R_Vertical r_vert = R_Vertical::SIZE;
                         for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
                             GRBLinExpr _x = var(v,t,i);
@@ -280,10 +280,14 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Gurobi::get_solution()  
 
                         R_Move r_mv = R_Move::SIZE;
                         for (R_Move     i=begin_R_Move();     i!=end_R_Move();     ++i) {
-                            GRBLinExpr _x = var(v,t,i);
-                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::get_solution(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
-                            GRBVar x = _x.getVar(0);
-                            const double val = x.get(GRB_DoubleAttr_X);
+                            const Direction d = get_direction(i);
+                            double val = 0.;
+                            if ( G.move(v,d)!=nowhere ) {
+                                GRBLinExpr _x = var(v,t,i);
+                                if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::get_solution(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
+                                GRBVar x = _x.getVar(0);
+                                val = x.get(GRB_DoubleAttr_X);
+                            }
                             if (val>.1 && val<.9) throw std::runtime_error("Grid_Gurobi::get_solution(): This R_Move variable doesn't appear to be integral.");
                             if (val > .5) {
                                 if (r_mv!=R_Move::SIZE) throw std::runtime_error("Grid_Gurobi::get_solution(): There seem to be >1 R_Move variables with value 1.");
@@ -420,7 +424,8 @@ void GridSpace::Grid_Gurobi::atom_vars(const XY v, const unsigned t)
     ndstat_vars[v][t] = var_array+offset;
     for (NdStat i=begin_NdStat(); i!=end_NdStat(); ++i) {
         std::sprintf(var_name_buffer, "ndst[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-        var_array[offset++] = model.addVar(        0,         1,           0,    vartype,  var_name_buffer);
+        double cost = (  i==NdStat::R_ready || i==NdStat::nobodyhome  ?  0.  :  t/(100.*t_max)  );
+        var_array[offset++] = model.addVar(        0,         1,        cost,    vartype,  var_name_buffer);
         //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
     } // for (ndstat)
 
