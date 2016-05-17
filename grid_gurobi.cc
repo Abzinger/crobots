@@ -161,17 +161,20 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t * p_state)
                         }
                     }
                     for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
-                        if (my_opts.hardwire) {
-                            const double RHS = (s.r_mv==i ? 1 : 0 );
-                            model.addConstr( RHS == var(xy,t_max,i) );
-                        } else {
-                            for (unsigned t = 1 + (1-my_opts.punish_mismatch)*(t_max-1); t<=t_max; ++t) {
-                                GRBLinExpr _x = var(xy,t,i);
-                                if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
-                                GRBVar x = _x.getVar(0);
-                                x.set( GRB_DoubleAttr_Obj, (s.r_mv==i ? 0 : (t==t_max ? mismatch_cost__t_max : mismatch_cost__t) ) );
-                            } //^ for
-                        }
+                        const Direction d = get_direction(i);
+                        if ( G.move(xy,d)!=nowhere ) {
+                            if (my_opts.hardwire) {
+                                const double RHS = (s.r_mv==i ? 1 : 0 );
+                                model.addConstr( RHS == var(xy,t_max,i) );
+                            } else {
+                                for (unsigned t = 1 + (1-my_opts.punish_mismatch)*(t_max-1); t<=t_max; ++t) {
+                                    GRBLinExpr _x = var(xy,t,i);
+                                    if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
+                                    GRBVar x = _x.getVar(0);
+                                    x.set( GRB_DoubleAttr_Obj, (s.r_mv==i ? 0 : (t==t_max ? mismatch_cost__t_max : mismatch_cost__t) ) );
+                                } //^ for
+                            } //^ if/else
+                        } //^ if dir exists
                     }
                 } // if (do robots)
             } // if exists
