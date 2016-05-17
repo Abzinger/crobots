@@ -180,21 +180,34 @@ parking_pieces = {
     'P': GridPieces.nowall
 }
 
+
 # getRoute will get the file name of the .robroute (parking lot instruction set) as an input
 # As an output Route class object will be returned that is the basis for all the movements.
 def get_route(file_name):
     with open(file_name, "r") as robot_route_file:
         array = []
         for line in robot_route_file:
-            array.append(line)
+            line = line.strip()
+            if len(line) != 0:
+                if line[0] != '#':
+                    array.append(line)
 
-    lot_size = list(map(int, array[4].rstrip().split(" ")))
-    parking_lot_layout = get_parking_lot(lot_size, array[5].rstrip())
-    instructions_length = int(array[6])
-    instructions_array = array[7:(instructions_length + 7)]
+    lot_size = list(map(int, array[0].rstrip().split(" ")))
+    parking_lot_layout = get_parking_lot(lot_size, array[1].rstrip())
+    no_access_spaces = []
+    for i in range (0, len(parking_lot_layout)):
+        for j in range (0, len(parking_lot_layout[i])):
+            if parking_lot_layout[i][j] == GridPieces.wallNESW:
+                no_access_spaces.append(i * len(parking_lot_layout[i]) + j)
+    no_access_space = GridState(OnNode.NO, NodeStatus.NO, RobotVertical.NO, RobotMove.NO)
+    instructions_length = int(array[2])
+    instructions_array = array[3:(instructions_length + 3)]
     decoded_instructions = []
-    for instruction_lines in instructions_array:
-        decoded_instructions.append(grid_states(instruction_lines.rstrip()))
+    for instruction_line in instructions_array:
+        line_states = grid_states(instruction_line.rstrip())
+        for i in range (0, len(no_access_spaces)):
+            line_states.insert(no_access_spaces[i], no_access_space)
+        decoded_instructions.append(line_states)
     return Route(lot_size, parking_lot_layout, decoded_instructions)
 
 
@@ -295,7 +308,8 @@ def get_json_route_list():
     routes = get_route_list()
     route_array = []
     for i in range(0, len(routes)):
-        route_array.append({'name': "Scenario " + str(i+1), 'value': str(i)})
+        route_name = routes[i].split("\\")[1].split(".")[0]
+        route_array.append({'name': "Scenario " + route_name, 'value': str(i)})
     return json.dumps(route_array, separators=(',', ':'))
 
 
@@ -794,13 +808,13 @@ def print_grid(route, level):
         instr = ""
         for j in range(0, route.lot_size[1]):
             instr += "|"
-            instr += instructions[i * 10 + j].on_node.name
+            instr += instructions[i * route.lot_size[0] + j].on_node.name
             instr += "|"
-            instr += instructions[i * 10 + j].nd_stat.name
+            instr += instructions[i * route.lot_size[0] + j].nd_stat.name
             instr += "|"
-            instr += instructions[i * 10 + j].r_vertical.name
+            instr += instructions[i * route.lot_size[0] + j].r_vertical.name
             instr += "|"
-            instr += instructions[i * 10 + j].r_move.name
+            instr += instructions[i * route.lot_size[0] + j].r_move.name
             instr += "\t"
         instr += "\n"
         parking_lot += instr
@@ -814,4 +828,3 @@ def write_instructions(route):
     for i in range(0, len(route.instructions_array)):
         f.write(print_grid(route, i))
     f.close()
-

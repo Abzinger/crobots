@@ -55,4 +55,5 @@ def error404(error):
 def get_favicon():
     return static_file('favicon.ico', root="./public/assets")
 
+FileReader.write_instructions(FileReader.get_route(FileReader.get_route_list()[10]))
 run(host='localhost', port=8080, debug=True)
