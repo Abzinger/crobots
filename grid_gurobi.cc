@@ -5,6 +5,7 @@
 #include "gurobi_c++.h"
 #include <stdexcept>
 #include <cstdio>
+#include <cmath>
 
 namespace GridSpace {
 
