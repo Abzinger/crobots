@@ -111,8 +111,8 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t * p_state)
     const double mismatch_cost__t_max = ( my_opts.punish_mismatch ? 10.*t_max   : 1. );
     const double mismatch_cost__t     = ( my_opts.punish_mismatch ? 1.          : 0. );
 
-    for (short y=0; y<G.NS_sz(); ++y) {
-        for (short x=0; x<G.EW_sz(); ++x) {
+    for (short y=0; y<G.NS; ++y) {
+        for (short x=0; x<G.EW; ++x) {
             XY xy {x,y};
             if ( G.exists(xy) )  {
                 const Full_Stat s = (*p_state)[xy];
