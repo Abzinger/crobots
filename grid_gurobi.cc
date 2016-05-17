@@ -2133,10 +2133,15 @@ bool GridSpace::Grid_Gurobi_Callback::terminal_status_matches()
                     } //^ for
                     for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
                         const double RHS = (s.r_mv==i ? 1 : 0 );
-                        GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
-                        if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
-                        GRBVar x = _x.getVar(0);
-                        if ( std::fabs(getSolution(x) - RHS) > .1 )   return false;
+                        double val = 0.;
+                        const Direction d = get_direction(i);
+                        if ( my_daddy.G.move(xy,d)!=nowhere ) {
+                            GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
+                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
+                            GRBVar x = _x.getVar(0);
+                            val = getSolution(x);
+                        }
+                        if ( std::fabs(val - RHS) > .1 )   return false;
                     } //^ for
                 } // if (do robots)
             } // if exists
