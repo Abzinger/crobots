@@ -319,7 +319,6 @@ function simulationLoop() {
   renderMachines(cars);
 
   TESTSTEP++;
-
   if (TESTSTEP == 100) {
     var endingImage = canvasToImage(canvas);
     endingImage.id = 'end';
@@ -335,6 +334,8 @@ function simulationLoop() {
     document.getElementById('startingPoint').appendChild(startingImage);
     $('#simulation').fadeIn(500);
     $('.overlay').fadeOut(500);
+    setTheme('Light');
+
   }
 
   var thisLoop = new Date();
@@ -549,7 +550,7 @@ function populateParkingLot(canvas, route, first) {
     canvas.height = CANVAS_HEIGHT + (GRID_HEIGHT / 2);
     $('.previews').css('padding-top', GRID_HEIGHT / 2);
     //Here comes the array of the things
-    addParkingImagesToCache('Dark');
+    addParkingImagesToCache('Light');
     createParkingLayout();
     for (var i = 0; i < data.machines.length; i++) {
       addMachine(data.machines[i][0],
@@ -567,7 +568,12 @@ function addParkingImagesToCache(themeName){
     for (var j = 0; j < GRID_W; j++) {
       if (PARKING_LOT_IMAGES[LAYOUT[i][j]] == null && PARKING_LOT_IMAGES[LAYOUT[i][j]] != 'nowall'){
         var img = new Image();
-        img.src = './public/assets/parking_lot/' + LAYOUT[i][j] + '.png';
+        if (themeName == 'Light'){
+          img.src = './public/assets/parking_lot/' + LAYOUT[i][j] + '_light.png';
+        } else {
+          img.src = './public/assets/parking_lot/' + LAYOUT[i][j] + '.png';
+        }
+
         PARKING_LOT_IMAGES[LAYOUT[i][j]] = img;
       }
     }
@@ -580,7 +586,11 @@ function addParkingImagesToCache(themeName){
   }
   PARKING_LOT_IMAGES['nowall'] = img;
   var imgGrid = new Image();
-  imgGrid.src = './public/assets/parking_lot/grid.png';
+  if (themeName == 'Light'){
+    imgGrid.src = './public/assets/parking_lot/grid_light.png';
+  } else {
+    imgGrid.src = './public/assets/parking_lot/grid.png';
+  }
   PARKING_LOT_IMAGES['grid'] = imgGrid;
 }
 
@@ -651,7 +661,6 @@ function canvasToImage(canvas) {
 function addStartingEndingStates(route) {
   ROUTE = route;
   populateParkingLot(canvas, route, false);
-
   simulationLoop();
 }
 

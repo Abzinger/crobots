@@ -58,12 +58,16 @@ class TestGetParkingLayout(unittest.TestCase):
     def test_scenario_6_has_11_machines(self):
         self.assertEqual(len(json.loads(fr.get_parking_layout(fr.get_route(fr.get_route_list()[5])))["machines"]), 11)
 
+    def test_scenario_7_has_10_machines_get_last_step(self):
+        self.assertEqual(len(json.loads(fr.get_parking_layout(fr.get_route(fr.get_route_list()[6])), False)["machines"]), 11)
+
     def test_scenario_8_has_not_10_machines(self):
         self.assertNotEqual(len(json.loads(fr.get_parking_layout(fr.get_route(fr.get_route_list()[5])))["machines"]), 10)
 
 
 if __name__ == '__main__':
     unittest.main()
+
 
 
 
