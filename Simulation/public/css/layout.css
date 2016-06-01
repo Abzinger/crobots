@@ -224,3 +224,17 @@ select :focus {
 #themeChooser{
 	text-align: center;
 }
+
+#licensing{
+	font-size:0.5em;
+	padding-top: 10px;
+}
+
+#licensing p{
+	font-size: 1em;
+}
+
+#licensing a{
+	color: white;
+
+}
