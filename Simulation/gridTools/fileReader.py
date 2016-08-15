@@ -199,7 +199,7 @@ def get_route(file_name):
         for j in range (0, len(parking_lot_layout[i])):
             if parking_lot_layout[i][j] == GridPieces.wallNESW:
                 no_access_spaces.append(i * len(parking_lot_layout[i]) + j)
-    no_access_space = GridState(OnNode.NO, NodeStatus.NO, RobotVertical.NO, RobotMove.NO)
+    no_access_space = GridState(OnNode.em, NodeStatus.NO, RobotVertical.NO, RobotMove.NO)
     instructions_length = int(array[2])
     instructions_array = array[3:(instructions_length + 3)]
     decoded_instructions = []
@@ -385,7 +385,7 @@ def get_realistic_instructions(route):
                             instructions = [machine_id, 'N', 2]
                     elif (state.r_move == RobotMove.w0_accN or
                             state.r_move == RobotMove.w1_accN or
-                            state.r_move == RobotMove.w1_accN):
+                            state.r_move == RobotMove.w2_accN):
                             instructions = [machine_id, 'S', 8]
                             acceleration = True
                     elif (state.r_move == RobotMove.w0_mvN0 or
@@ -403,7 +403,7 @@ def get_realistic_instructions(route):
                             instructions = [machine_id, 'S', 4]
                     elif (state.r_move == RobotMove.w0_accS or
                             state.r_move == RobotMove.w1_accS or
-                            state.r_move == RobotMove.w1_accS):
+                            state.r_move == RobotMove.w2_accS):
                             instructions = [machine_id, 'N', 8]
                             acceleration = True
                     elif (state.r_move == RobotMove.w0_mvS0 or
@@ -487,12 +487,12 @@ def get_realistic_instructions(route):
                             state.r_move == RobotMove.w1_mvN3 or
                             state.r_move == RobotMove.w2_mvN0 or
                             state.r_move == RobotMove.w2_mvN1 or
-                            state.r_move == RobotMove.w2_mvN2):
+                            state.r_move == RobotMove.w2_mvN2 or
+                            state.r_move == RobotMove.w2_mvN3):
                             instructions = [machine_id, 'S', 4]
-                    elif (state.r_move == RobotMove.w2_mvN3 or
-                            state.r_move == RobotMove.w0_accN or
+                    elif (state.r_move == RobotMove.w0_accN or
                             state.r_move == RobotMove.w1_accN or
-                            state.r_move == RobotMove.w1_accN):
+                            state.r_move == RobotMove.w2_accN):
                             instructions = [machine_id, 'S', 8]
                             acceleration = True
                     elif (state.r_move == RobotMove.w0_mvS0 or
@@ -510,7 +510,7 @@ def get_realistic_instructions(route):
                             instructions = [machine_id, 'N', 4]
                     elif (state.r_move == RobotMove.w0_accS or
                             state.r_move == RobotMove.w1_accS or
-                            state.r_move == RobotMove.w1_accS):
+                            state.r_move == RobotMove.w2_accS):
                             instructions = [machine_id, 'N', 8]
                             acceleration = True
                     elif (state.r_move == RobotMove.w0_mvE0 or
@@ -557,7 +557,6 @@ def get_realistic_instructions(route):
 
             if len(instructions) == 3:
                 instructions_array[i].append(instructions)
-
 
             if state_holder is not None:
                 if len(instructions) != 0:
@@ -642,7 +641,7 @@ def get_instructions(route):
                             state.r_move == RobotMove.w2_mvN3 or
                             state.r_move == RobotMove.w0_accN or
                             state.r_move == RobotMove.w1_accN or
-                            state.r_move == RobotMove.w1_accN):
+                            state.r_move == RobotMove.w2_accN):
                             instructions_array[i].append([machine_id, 'S', 4])
                     elif (state.r_move == RobotMove.w0_mvS0 or
                             state.r_move == RobotMove.w0_mvS1 or
@@ -658,7 +657,7 @@ def get_instructions(route):
                             state.r_move == RobotMove.w2_mvS3 or
                             state.r_move == RobotMove.w0_accS or
                             state.r_move == RobotMove.w1_accS or
-                            state.r_move == RobotMove.w1_accS):
+                            state.r_move == RobotMove.w2_accS):
                             instructions_array[i].append([machine_id, 'N', 4])
                     elif (state.r_move == RobotMove.w0_accE or
                             state.r_move == RobotMove.w0_mvE0 or
@@ -728,7 +727,7 @@ def get_instructions(route):
                             state.r_move == RobotMove.w2_mvN3 or
                             state.r_move == RobotMove.w0_accN or
                             state.r_move == RobotMove.w1_accN or
-                            state.r_move == RobotMove.w1_accN):
+                            state.r_move == RobotMove.w2_accN):
                             instructions_array[i].append([machine_id, 'S', 4])
                     elif (state.r_move == RobotMove.w0_mvS0 or
                             state.r_move == RobotMove.w0_mvS1 or
@@ -744,7 +743,7 @@ def get_instructions(route):
                             state.r_move == RobotMove.w2_mvS3 or
                             state.r_move == RobotMove.w0_accS or
                             state.r_move == RobotMove.w1_accS or
-                            state.r_move == RobotMove.w1_accS):
+                            state.r_move == RobotMove.w2_accS):
                             instructions_array[i].append([machine_id, 'N', 4])
                     elif (state.r_move == RobotMove.w0_accE or
                             state.r_move == RobotMove.w0_mvE0 or
@@ -804,17 +803,18 @@ def get_machine_state(machines, y, x, machine_type):
 def print_grid(route, level):
     instructions = route.instructions_array[level]
     parking_lot = ""
+
     for i in range(0, route.lot_size[0]):
         instr = ""
         for j in range(0, route.lot_size[1]):
             instr += "|"
-            instr += instructions[i * route.lot_size[0] + j].on_node.name
+            instr += instructions[i * route.lot_size[1] + j].on_node.name
             instr += "|"
-            instr += instructions[i * route.lot_size[0] + j].nd_stat.name
+            instr += instructions[i * route.lot_size[1] + j].nd_stat.name
             instr += "|"
-            instr += instructions[i * route.lot_size[0] + j].r_vertical.name
+            instr += instructions[i * route.lot_size[1] + j].r_vertical.name
             instr += "|"
-            instr += instructions[i * route.lot_size[0] + j].r_move.name
+            instr += instructions[i * route.lot_size[1] + j].r_move.name
             instr += "\t"
         instr += "\n"
         parking_lot += instr
