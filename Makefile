@@ -9,7 +9,7 @@ CCCDEBUGFLAGS= -O
 #CCCDEBUGFLAGS= -g -O0 -fno-inline -fno-eliminate-unused-debug-types
 CCCFLAGS=-Wall -std=c++11 -I $(DOTS_CODE) -I $(GUROBI) $(CCCDEBUGFLAGS)
 
-SOURCES = grid.cc example_grids.cc grid_stat.cc grid_properties.cc robroute.cc grid_gurobi.cc gurobi_robot_router.cc visualize_robroute.cc dump_robroute.cc robroute2json.cc generate_robroute.cc
+SOURCES = CNF.cc grid.cc example_grids.cc grid_stat.cc grid_properties.cc robroute.cc grid_gurobi.cc gurobi_robot_router.cc visualize_robroute.cc dump_robroute.cc robroute2json.cc generate_robroute.cc
 OBJECTS = $(SOURCES:.cc=.o)
 EXECS   = gurobi_robot_router visualize_robroute dump_robroute robroute2json generate_robroute
 
