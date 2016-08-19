@@ -7,17 +7,6 @@
 #include <cstdio>
 #include <cmath>
 
-namespace GridSpace {
-
-    struct Grid_Gurobi_Callback: public GRBCallback {
-        Grid_Gurobi & my_daddy;
-        Grid_Gurobi_Callback(Grid_Gurobi& daddy): my_daddy(daddy) {}
-        virtual void callback();
-        bool terminal_status_matches();
-    };
-
-} //^ namespace
-
 // *****************************************************************************************************************************
 // *    Grid_Gurobi  member functions
 // *****************************************************************************************************************************
@@ -25,8 +14,7 @@ namespace GridSpace {
 GridSpace::Grid_Gurobi::Grid_Gurobi(const Grid & _G, const unsigned _t_max):
     G                          {_G},
     t_max                      {_t_max},
-    p_genv                     {new GRBEnv},
-    p_model                    {new GRBModel{*p_genv}},
+    p_model                    {new CNF::Model},
     model                      {*p_model},
     p_initial_state            {nullptr},
     p_terminal_state           {nullptr},
@@ -61,7 +49,6 @@ GridSpace::Grid_Gurobi::~Grid_Gurobi()
     } // for t
     // delete model & env
     delete p_model;
-    delete p_genv;
 } //    ~Grid_Gurobi
 
 //********************************************************************************************************************************************************************************************************
@@ -108,9 +95,6 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t * p_state)
 {
     if (p_terminal_state) throw std::runtime_error("Grid_Gurobi::set_initial_state(): Attempt to set terminal state a 2nd time.");
     p_terminal_state = p_state;
-
-    const double mismatch_cost__t_max = ( my_opts.punish_mismatch ? 10.*t_max   : 1. );
-    const double mismatch_cost__t     = ( my_opts.punish_mismatch ? 1.          : 0. );
 
     for (short y=0; y<G.NS; ++y) {
         for (short x=0; x<G.EW; ++x) {
@@ -181,44 +165,6 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t * p_state)
         } // for x
     } // for y
 } // set_terminal_state()
-
-//********************************************************************************************************************************************************************************************************
-
-std::set<std::string> GridSpace::Grid_Gurobi::list_GRBparameters() {
-    std::set<std::string> the_pars;
-    the_pars.insert("SolutionLimit");
-    the_pars.insert("Presolve");
-    the_pars.insert("MIPFocus");
-    the_pars.insert("Cuts");
-    the_pars.insert("TimeLimit");
-    the_pars.insert("Heuristics");
-    the_pars.insert("ImproveStartNodes");
-    the_pars.insert("ImproveStartTime");
-    return the_pars;
-} //^ list_GRBparameters()
-
-void GridSpace::Grid_Gurobi::set_GRBparameter(std::string name, int value) {
-    if       (name=="SolutionLimit"    )  model.getEnv().set(GRB_IntParam_SolutionLimit,     value);
-    else if  (name=="Presolve"         )  model.getEnv().set(GRB_IntParam_Presolve,          value);
-    else if  (name=="MIPFocus"         )  model.getEnv().set(GRB_IntParam_MIPFocus,          value);
-    else if  (name=="Cuts"             )  model.getEnv().set(GRB_IntParam_Cuts,              value);
-    else {
-        set_GRBparameter(name,(double)value); // maybe user got the wrong function?
-        return;
-    }
-    std::cout<<"GridSpace::Grid_Gurobi::set_GRBparameter(int): "<<name<<" ==> "<<value<<'\n';
-} //^ set_GRBparameter(...,int)
-void GridSpace::Grid_Gurobi::set_GRBparameter(std::string name, double value) {
-    if       (name=="TimeLimit"        )  model.getEnv().set(GRB_DoubleParam_TimeLimit,         value);
-    else if  (name=="Heuristics"       )  model.getEnv().set(GRB_DoubleParam_Heuristics,        value);
-    else if  (name=="ImproveStartNodes")  model.getEnv().set(GRB_DoubleParam_ImproveStartNodes, value);
-    else if  (name=="ImproveStartTime" )  model.getEnv().set(GRB_DoubleParam_ImproveStartTime,  value);
-    else {
-        std::cout<<std::string("GridSpace::Grid_Gurobi::set_GRBparameter(): WARNING: unknown parameter ")+name+". IGNORED!   \t---WARNING---"<<std::endl;
-        return;
-    }
-    std::cout<<"GridSpace::Grid_Gurobi::set_GRBparameter(double): "<<name<<" ==> "<<value<<'\n';
-} //^ set_GRBparameter(...,double)
 
 //********************************************************************************************************************************************************************************************************
 
@@ -318,7 +264,7 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Gurobi::get_solution()  
 
 
 inline
-GRBLinExpr GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const On_Node what) const
+CNF::Var GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const On_Node what) const
 {
     if ((unsigned)what == (unsigned)On_Node::SIZE) throw std::range_error  ("Grid_Gurobi::var(On_Node): On_Node argument is out of range");
     if ((unsigned)what >  (unsigned)On_Node::SIZE) throw std::runtime_error("Grid_Gurobi::var(On_Node): On_Node argument is broken (BAD BUG)");
@@ -333,7 +279,7 @@ GRBLinExpr GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const On_No
 } // var()
 
 inline
-GRBLinExpr GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const NdStat who) const
+CNF::Var GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const NdStat who) const
 {
     if ((unsigned)who == (unsigned)NdStat::SIZE) throw std::range_error  ("Grid_Gurobi::var(NdStat): NdStat argument is out of range");
     if ((unsigned)who >  (unsigned)NdStat::SIZE) throw std::runtime_error("Grid_Gurobi::var(NdStat): NdStat argument is broken (BAD BUG)");
@@ -348,7 +294,7 @@ GRBLinExpr GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const NdSta
 } // var()
 
 inline
-GRBLinExpr GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const R_Vertical vert) const
+CNF::Var GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const R_Vertical vert) const
 {
     if ((unsigned)vert == (unsigned)R_Vertical::SIZE) throw std::range_error  ("Grid_Gurobi::var(R_Vertical): R_Vertical argument is out of range");
     if ((unsigned)vert >  (unsigned)R_Vertical::SIZE) throw std::runtime_error("Grid_Gurobi::var(R_Vertical): R_Vertical argument is broken (BAD BUG)");
@@ -361,7 +307,7 @@ GRBLinExpr GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const R_Ver
 } // var()
 
 inline
-GRBLinExpr GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const R_Move where) const
+CNF::Var GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const R_Move where) const
 {
     if ((unsigned)where == (unsigned)R_Move::SIZE) throw std::range_error  ("Grid_Gurobi::var(R_Move): R_Move argument is out of range");
     if ((unsigned)where >  (unsigned)R_Move::SIZE) throw std::runtime_error("Grid_Gurobi::var(R_Move): R_Move argument is broken (BAD BUG)");
@@ -411,7 +357,7 @@ void GridSpace::Grid_Gurobi::atom_vars(const XY v, const unsigned t)
     constexpr int total_size = (int)On_Node::SIZE + (int)NdStat::SIZE + (int)R_Vertical::SIZE + (int)R_Move::SIZE;
 
     // allocate the mem
-    GRBVar * var_array = new GRBVar[total_size];
+    CNF::Var * var_array = new GRBVar[total_size];
 
     // store the vars
     char var_name_buffer[1024];  // for the variable names
