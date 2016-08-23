@@ -446,19 +446,19 @@ void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_car2        = var(v,       t,    On_Node::Car2);
 	
 	Clause c;
-	c = Here_now_empty      or Here_now_car0       or Here_now_car1  or Here_now_car2;
+	c = Here_now_empty             or Here_now_car0              or Here_now_car1       or Here_now_car2;
 	m.addClause(c);
-	c = not(Here_now_empty) or not(Here_now_car0);
+	c = not(Here_now_empty)        or not(Here_now_car0);
 	m.addClause(c);
-	c = not(Here_now_empty) or not(Here_now_car1);
+	c = not(Here_now_empty)        or not(Here_now_car1);
 	m.addClause(c);
-	c = not(Here_now_empty) or not(Here_now_car2);
+	c = not(Here_now_empty)        or not(Here_now_car2);
 	m.addClause(c);
-	c = not(ere_now_car0)   or not(Here_now_car1);
+	c = not(ere_now_car0)          or not(Here_now_car1);
 	m.addClause(c);
-	c = not(Here_now_car0)  or not(Here_now_car2);
+	c = not(Here_now_car0)         or not(Here_now_car2);
 	m.addClause(c);
-	c = not(Here_now_car1)  or not(Here_now_car2);
+	c = not(Here_now_car1)         or not(Here_now_car2);
 	m.addClause(c);
 	
 	CNF::Var Here_now_nobodyhome       = var(v,       t,    NdStat::nobodyhome  );
@@ -472,10 +472,7 @@ void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_C2R_moving       = var(v,       t,    NdStat::C2R_moving  );
 	CNF::Var Here_now_R_vertical       = var(v,       t,    NdStat::R_vertical  );
 	
-	c = Here_now_nobodyhome
-	  or Here_now_R_ready     or Here_now_C0R_ready  or Here_now_C1R_ready  or Here_now_C2R_ready
-	  or Here_now_R_moving    or Here_now_C0R_moving or Here_now_C1R_moving or Here_now_C2R_moving
-	  or Here_now_R_vertical;
+	c = Here_now_nobodyhome                                                                                                    or Here_now_R_ready        or Here_now_C0R_ready         or Here_now_C1R_ready  or Here_now_C2R_ready                  or Here_now_R_moving       or Here_now_C0R_moving        or Here_now_C1R_moving or Here_now_C2R_moving                 or Here_now_R_vertical;
 	m.addClause(c);      
 	c = not(Here_now_nobodyhome) or not(Here_now_R_ready);
 	m.addClause(c);
@@ -681,120 +678,120 @@ void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
 	CNF::Var  Here_now_R_mvS1 = var(v,    t,     R_Move::mvS1);
 	CNF::Var  Here_now_R_mvS0 = var(v,    t,     R_Move::mvS0);
 	// necessarly
-	c = not(Here_now_R_moving)                                                                                                 or Here_now_R_accE      or                    Here_now_R_mvE0                                                          or Here_now_R_accW      or                    Here_now_R_mvW0                                                          or Here_now_R_accN      or Here_now_R_mvN1 or Here_now_R_mvN0                                                          or Here_now_R_accS      or Here_now_R_mvS1 or Here_now_R_mvS0;
+	c = not(Here_now_R_moving)                                                                                                 or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
 	m.addClause(c);
 	// sufficient
 	// 10 choose 1
-	c = Here_now_R_moving                                                                                                      or not(Here_now_R_accE) or                    Here_now_R_mvE0                                                          or Here_now_R_accW      or                    Here_now_R_mvW0                                                          or Here_now_R_accN      or Here_now_R_mvN1 or Here_now_R_mvN0                                                          or Here_now_R_accS      or Here_now_R_mvS1 or Here_now_R_mvS0;
+	c = Here_now_R_moving                                                                                                      or not(Here_now_R_accE) or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
 	m.addClause(c);
-	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                    not(Here_now_R_mvE0)                                                     or Here_now_R_accW      or                    Here_now_R_mvW0                                                          or Here_now_R_accN      or Here_now_R_mvN1 or Here_now_R_mvN0                                                          or Here_now_R_accS      or Here_now_R_mvS1 or Here_now_R_mvS0;
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         not(Here_now_R_mvE0)                                                or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
 	m.addClause(c);
-	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                    Here_now_R_mvE0                                                          or not(Here_now_R_accW) or                    Here_now_R_mvW0                                                          or Here_now_R_accN      or Here_now_R_mvN1 or Here_now_R_mvN0                                                          or Here_now_R_accS      or Here_now_R_mvS1 or Here_now_R_mvS0;
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or not(Here_now_R_accW) or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
 	m.addClause(c);
-	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                    Here_now_R_mvE0                                                          or Here_now_R_accW      or                    not(Here_now_R_mvW0)                                                     or Here_now_R_accN      or Here_now_R_mvN1 or Here_now_R_mvN0                                                          or Here_now_R_accS      or Here_now_R_mvS1 or Here_now_R_mvS0;
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         not(Here_now_R_mvW0)                                                or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
 	m.addClause(c);
-	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                    Here_now_R_mvE0                                                          or Here_now_R_accW      or                    Here_now_R_mvW0                                                          or not(Here_now_R_accN) or Here_now_R_mvN1 or Here_now_R_mvN0                                                          or Here_now_R_accS      or Here_now_R_mvS1 or Here_now_R_mvS0;
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or not(Here_now_R_accN) or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
 	m.addClause(c);
 	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or not(Here_now_R_mvN1) or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
 	m.addClause(c);
-	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                    Here_now_R_mvE0                                                          or Here_now_R_accW      or                    Here_now_R_mvW0                                                          or Here_now_R_accN      or Here_now_R_mvN1 or not(Here_now_R_mvN0)                                                     or Here_now_R_accS      or Here_now_R_mvS1 or Here_now_R_mvS0;
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or not(Here_now_R_mvN0)                                                or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
 	m.addClause(c);
-	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                    Here_now_R_mvE0                                                          or Here_now_R_accW      or                    Here_now_R_mvW0                                                          or Here_now_R_accN      or Here_now_R_mvN1 or Here_now_R_mvN0                                                          or not(Here_now_R_accS) or Here_now_R_mvS1 or Here_now_R_mvS0;
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or not(Here_now_R_accS) or Here_now_R_mvS1      or Here_now_R_mvS0;
 	m.addClause(c);
-	c = Here_now_R_moving                                                                                                      or Here_now_R_accE or                         Here_now_R_mvE0                                                          or Here_now_R_accW or                         Here_now_R_mvW0                                                          or Here_now_R_accN or Here_now_R_mvN1      or Here_now_R_mvN0                                                          or Here_now_R_accS or not(Here_now_R_mvS1) or Here_now_R_mvS0;
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or not(Here_now_R_mvS1) or Here_now_R_mvS0;
 	m.addClause(c);
-	c = Here_now_R_moving                                                                                                      or  Here_now_R_accE or                    Here_now_R_mvE0                                                              or  Here_now_R_accW or                    Here_now_R_mvW0                                                              or  Here_now_R_accN or Here_now_R_mvN1 or Here_now_R_mvN0                                                              or  Here_now_R_accS or Here_now_R_mvS1 or not(Here_now_R_mvS0);
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or not(Here_now_R_mvS0);
 	m.addClause(c);
 	//10 choose 2
-	c = not(Here_now_R_accE) or not(Here_now_R_mvE0);
+	c = not(Here_now_R_accE)    or not(Here_now_R_mvE0);
 	m.addClause(c);
-	c = not(Here_now_R_accE) or not(Here_now_R_accW);
+	c = not(Here_now_R_accE)    or not(Here_now_R_accW);
 	m.addClause(c);
-	c = not(Here_now_R_accE) or not(Here_now_R_mvW0);
+	c = not(Here_now_R_accE)    or not(Here_now_R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_R_accE) or not(Here_now_R_accN);
+	c = not(Here_now_R_accE)    or not(Here_now_R_accN);
 	m.addClause(c);
-	c = not(Here_now_R_accE) or not(Here_now_R_mvN1);
+	c = not(Here_now_R_accE)    or not(Here_now_R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_R_accE) or not(Here_now_R_mvN0);
+	c = not(Here_now_R_accE)    or not(Here_now_R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_R_accE) or not(Here_now_R_accS);
+	c = not(Here_now_R_accE)    or not(Here_now_R_accS);
 	m.addClause(c);
-	c = not(Here_now_R_accE) or not(Here_now_R_mvS1);
+	c = not(Here_now_R_accE)    or not(Here_now_R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_R_accE) or not(Here_now_R_mvS0);
+	c = not(Here_now_R_accE)    or not(Here_now_R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_R_mvE0) or not(Here_now_R_accW);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_accW);
 	m.addClause(c);
-	c = not(Here_now_R_mvE0) or not(Here_now_R_mvW0);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_R_mvE0) or not(Here_now_R_accN);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_accN);
 	m.addClause(c);
-	c = not(Here_now_R_mvE0) or not(Here_now_R_mvN1);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_R_mvE0) or not(Here_now_R_mvN0);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_R_mvE0) or not(Here_now_R_accS);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_accS);
 	m.addClause(c);
-	c = not(Here_now_R_mvE0) or not(Here_now_R_mvS1);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_R_mvE0) or not(Here_now_R_mvS0);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_R_accW) or not(Here_now_R_mvW0);
+	c = not(Here_now_R_accW)    or not(Here_now_R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_R_accW) or not(Here_now_R_accN);
+	c = not(Here_now_R_accW)    or not(Here_now_R_accN);
 	m.addClause(c);
-	c = not(Here_now_R_accW) or not(Here_now_R_mvN1);
+	c = not(Here_now_R_accW)    or not(Here_now_R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_R_accW) or not(Here_now_R_mvN0);
+	c = not(Here_now_R_accW)    or not(Here_now_R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_R_accW) or not(Here_now_R_accS);
+	c = not(Here_now_R_accW)    or not(Here_now_R_accS);
 	m.addClause(c);
-	c = not(Here_now_R_accW) or not(Here_now_R_mvS1);
+	c = not(Here_now_R_accW)    or not(Here_now_R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_R_accW) or not(Here_now_R_mvS0);
+	c = not(Here_now_R_accW)    or not(Here_now_R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_R_mvW0) or not(Here_now_R_accN);
+	c = not(Here_now_R_mvW0)    or not(Here_now_R_accN);
 	m.addClause(c);
-	c = not(Here_now_R_mvW0) or not(Here_now_R_mvN1);
+	c = not(Here_now_R_mvW0)    or not(Here_now_R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_R_mvW0) or not(Here_now_R_mvN0);
+	c = not(Here_now_R_mvW0)    or not(Here_now_R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_R_mvW0) or not(Here_now_R_accS);
+	c = not(Here_now_R_mvW0)    or not(Here_now_R_accS);
 	m.addClause(c);
-	c = not(Here_now_R_mvW0) or not(Here_now_R_mvS1);
+	c = not(Here_now_R_mvW0)    or not(Here_now_R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_R_mvW0) or not(Here_now_R_mvS0);
+	c = not(Here_now_R_mvW0)    or not(Here_now_R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_R_accN) or not(Here_now_R_mvN1);
+	c = not(Here_now_R_accN)    or not(Here_now_R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_R_accN) or not(Here_now_R_mvN0);
+	c = not(Here_now_R_accN)    or not(Here_now_R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_R_accN) or not(Here_now_R_accS);
+	c = not(Here_now_R_accN)    or not(Here_now_R_accS);
 	m.addClause(c);
-	c = not(Here_now_R_accN) or not(Here_now_R_mvS1);
+	c = not(Here_now_R_accN)    or not(Here_now_R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_R_accN) or not(Here_now_R_mvS0);
+	c = not(Here_now_R_accN)    or not(Here_now_R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_R_mvN1) or not(Here_now_R_mvN0);
+	c = not(Here_now_R_mvN1)    or not(Here_now_R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_R_mvN1) or not(Here_now_R_accS);
+	c = not(Here_now_R_mvN1)    or not(Here_now_R_accS);
 	m.addClause(c);
-	c = not(Here_now_R_mvN1) or not(Here_now_R_mvS1);
+	c = not(Here_now_R_mvN1)    or not(Here_now_R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_R_mvN1) or not(Here_now_R_mvS0);
+	c = not(Here_now_R_mvN1)    or not(Here_now_R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_R_mvN0) or not(Here_now_R_accS);
+	c = not(Here_now_R_mvN0)    or not(Here_now_R_accS);
 	m.addClause(c);
-	c = not(Here_now_R_mvN0) or not(Here_now_R_mvS1);
+	c = not(Here_now_R_mvN0)    or not(Here_now_R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_R_mvN0) or not(Here_now_R_mvS0);
+	c = not(Here_now_R_mvN0)    or not(Here_now_R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_R_accS) or not(Here_now_R_mvS1);
+	c = not(Here_now_R_accS)    or not(Here_now_R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_R_accS) or not(Here_now_R_mvS0);
+	c = not(Here_now_R_accS)    or not(Here_now_R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_R_mvS1) or not(Here_now_R_mvS0);
+	c = not(Here_now_R_mvS1)    or not(Here_now_R_mvS0);
 	m.addClause(c);
 
 	// Car 0
@@ -817,350 +814,284 @@ void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_C0R_mvS0 = var(v,    t,     R_Move::w0_mvS0);
 
 	//necceraly
-	c = not(Here_now_C0R_moving)
-	                 or  Here_now_C0R_accE or Here_now_C0R_mvE1 or Here_now_C0R_mvE0 or
-                         Here_now_C0R_accW or Here_now_C0R_mvW1 or Here_now_C0R_mvW0 or
-                         Here_now_C0R_accN or Here_now_C0R_mvN1 or Here_now_C0R_mvN2 or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS or Here_now_C0R_mvS1 or Here_now_C0R_mvS2 or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = not(Here_now_C0R_moving)               or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
 	// sufficient
 	// 16 choose 1
-	c = Here_now_C0R_moving or
-	                 not(Here_now_C0R_accE) or Here_now_C0R_mvE1 or Here_now_C0R_mvE0 or
-                         Here_now_C0R_accW      or Here_now_C0R_mvW1 or Here_now_C0R_mvW0 or
-                         Here_now_C0R_accN      or Here_now_C0R_mvN1 or Here_now_C0R_mvN2 or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS      or Here_now_C0R_mvS1 or Here_now_C0R_mvS2 or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           not(Here_now_C0R_accE)    or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-		         Here_now_C0R_accE or not(Here_now_C0R_mvE1) or Here_now_C0R_mvE0 or
-                         Here_now_C0R_accW or Here_now_C0R_mvW1      or Here_now_C0R_mvW0 or
-                         Here_now_C0R_accN or Here_now_C0R_mvN1      or Here_now_C0R_mvN2 or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS or Here_now_C0R_mvS1      or Here_now_C0R_mvS2 or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or not(Here_now_C0R_mvE1) or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE or Here_now_C0R_mvE1 or not(Here_now_C0R_mvE0) or
-                         Here_now_C0R_accW or Here_now_C0R_mvW1 or Here_now_C0R_mvW0      or
-                         Here_now_C0R_accN or Here_now_C0R_mvN1 or Here_now_C0R_mvN2      or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS or Here_now_C0R_mvS1 or Here_now_C0R_mvS2      or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or not(Here_now_C0R_mvE0) or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE      or Here_now_C0R_mvE1 or Here_now_C0R_mvE0 or
-	                 not(Here_now_C0R_accW) or Here_now_C0R_mvW1 or Here_now_C0R_mvW0 or
-                         Here_now_C0R_accN      or Here_now_C0R_mvN1 or Here_now_C0R_mvN2 or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS      or Here_now_C0R_mvS1 or Here_now_C0R_mvS2 or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       not(Here_now_C0R_accW)    or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE or Here_now_C0R_mvE1      or Here_now_C0R_mvE0 or
-	                 Here_now_C0R_accW or not(Here_now_C0R_mvW1) or Here_now_C0R_mvW0 or
-                         Here_now_C0R_accN or Here_now_C0R_mvN1      or Here_now_C0R_mvN2 or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS or Here_now_C0R_mvS1      or Here_now_C0R_mvS2 or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or not(Here_now_C0R_mvW1) or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE or Here_now_C0R_mvE1 or Here_now_C0R_mvE0      or
-	                 Here_now_C0R_accW or Here_now_C0R_mvW1 or not(Here_now_C0R_mvW0) or
-                         Here_now_C0R_accN or Here_now_C0R_mvN1 or Here_now_C0R_mvN2      or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS or Here_now_C0R_mvS1 or Here_now_C0R_mvS2      or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or not(Here_now_C0R_mvW0) or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE      or Here_now_C0R_mvE1 or Here_now_C0R_mvE0 or
-                         Here_now_C0R_accW      or Here_now_C0R_mvW1 or Here_now_C0R_mvW0 or
-	                 not(Here_now_C0R_accN) or Here_now_C0R_mvN1 or Here_now_C0R_mvN2 or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS      or Here_now_C0R_mvS1 or Here_now_C0R_mvS2 or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       not(Here_now_C0R_accN)    or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE or Here_now_C0R_mvE1      or Here_now_C0R_mvE0 or
-                         Here_now_C0R_accW or Here_now_C0R_mvW1      or Here_now_C0R_mvW0 or
-	                 Here_now_C0R_accN or not(Here_now_C0R_mvN1) or Here_now_C0R_mvN2 or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS or Here_now_C0R_mvS1      or Here_now_C0R_mvS2 or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or not(Here_now_C0R_mvN1) or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE or Here_now_C0R_mvE1 or Here_now_C0R_mvE0      or
-                         Here_now_C0R_accW or Here_now_C0R_mvW1 or Here_now_C0R_mvW0      or
-	                 Here_now_C0R_accN or Here_now_C0R_mvN1 or not(Here_now_C0R_mvN2) or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS or Here_now_C0R_mvS1 or Here_now_C0R_mvS2 or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or not(Here_now_C0R_mvN2) or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE or Here_now_C0R_mvE1 or Here_now_C0R_mvE0 or
-                         Here_now_C0R_accW or Here_now_C0R_mvW1 or Here_now_C0R_mvW0 or
-	                 Here_now_C0R_accN or Here_now_C0R_mvN1 or Here_now_C0R_mvN2 or not(Here_now_C0R_mvN3) or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS or Here_now_C0R_mvS1 or Here_now_C0R_mvS2 or Here_now_C0R_mvS3      or Here_now_C0R_mvS0;
+	
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or not(Here_now_C0R_mvN3)                or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE or Here_now_C0R_mvE1 or Here_now_C0R_mvE0 or
-                         Here_now_C0R_accW or Here_now_C0R_mvW1 or Here_now_C0R_mvW0 or
-	                 Here_now_C0R_accN or Here_now_C0R_mvN1 or Here_now_C0R_mvN2 or Here_now_C0R_mvN3 or not(Here_now_C0R_mvN0) or
-	                 Here_now_C0R_accS or Here_now_C0R_mvS1 or Here_now_C0R_mvS2 or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or not(Here_now_C0R_mvN0) or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE      or Here_now_C0R_mvE1 or Here_now_C0R_mvE0 or
-                         Here_now_C0R_accW      or Here_now_C0R_mvW1 or Here_now_C0R_mvW0 or
-                         Here_now_C0R_accN      or Here_now_C0R_mvN1 or Here_now_C0R_mvN2 or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 not(Here_now_C0R_accS) or Here_now_C0R_mvS1 or Here_now_C0R_mvS2 or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0     or                                        Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0     or                                        Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2     or Here_now_C0R_mvN3                      or Here_now_C0R_mvN0      or                                                                                           not(Here_now_C0R_accS)    or Here_now_C0R_mvS1      or Here_now_C0R_mvS2     or Here_now_C0R_mvS3                      or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE or Here_now_C0R_mvE1      or Here_now_C0R_mvE0 or
-                         Here_now_C0R_accW or Here_now_C0R_mvW1      or Here_now_C0R_mvW0 or
-                         Here_now_C0R_accN or Here_now_C0R_mvN1      or Here_now_C0R_mvN2 or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS or not(Here_now_C0R_mvS1) or Here_now_C0R_mvS2 or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0     or                                        Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0     or                                        Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2     or Here_now_C0R_mvN3                      or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or not(Here_now_C0R_mvS1) or Here_now_C0R_mvS2     or Here_now_C0R_mvS3                      or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE or Here_now_C0R_mvE1 or Here_now_C0R_mvE0      or
-                         Here_now_C0R_accW or Here_now_C0R_mvW1 or Here_now_C0R_mvW0      or
-                         Here_now_C0R_accN or Here_now_C0R_mvN1 or Here_now_C0R_mvN2      or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS or Here_now_C0R_mvS1 or not(Here_now_C0R_mvS2) or Here_now_C0R_mvS3 or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or not(Here_now_C0R_mvS2) or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving or
-	                 Here_now_C0R_accE or Here_now_C0R_mvE1 or Here_now_C0R_mvE0 or
-                         Here_now_C0R_accW or Here_now_C0R_mvW1 or Here_now_C0R_mvW0 or
-                         Here_now_C0R_accN or Here_now_C0R_mvN1 or Here_now_C0R_mvN2 or Here_now_C0R_mvN3      or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS or Here_now_C0R_mvS1 or Here_now_C0R_mvS2 or not(Here_now_C0R_mvS3) or Here_now_C0R_mvS0;
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or not(Here_now_C0R_mvS3)                or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving
-	                 or  Here_now_C0R_accE or Here_now_C0R_mvE1 or Here_now_C0R_mvE0 or
-                         Here_now_C0R_accW or Here_now_C0R_mvW1 or Here_now_C0R_mvW0 or
-                         Here_now_C0R_accN or Here_now_C0R_mvN1 or Here_now_C0R_mvN2 or Here_now_C0R_mvN3 or Here_now_C0R_mvN0 or
-	                 Here_now_C0R_accS or Here_now_C0R_mvS1 or Here_now_C0R_mvS2 or Here_now_C0R_mvS3 or not(Here_now_C0R_mvS0);
+	c = Here_now_C0R_moving                    or                                                                                           or  Here_now_C0R_accE     or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or not(Here_now_C0R_mvS0);
 	m.addClause(c);
 	// 16 choose 2
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_mvE1);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvE1);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_mvE0);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvE0);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_accW);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_accW);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_mvW1);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvW1);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_mvW0);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_accN);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_accN);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_mvN1);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_mvN2);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_mvN3);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_mvN0);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_accS);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_accS);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_mvS1);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_accE) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_mvE0);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvE0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_accW);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_accW);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_mvW1);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvW1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_mvW0);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_accN);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_accN);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_mvN1);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_mvN2);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_mvN3);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_mvN0);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_accS);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_accS);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_mvS1);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_accW);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_accW);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_mvW1);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvW1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_mvW0);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_accN);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_accN);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_mvN1);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_mvN2);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_mvN3);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_mvN0);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_accS);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_accS);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_mvS1);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE0) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_accW) or not(Here_now_C0R_mvW1);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvW1);
 	m.addClause(c);
-	c = not(Here_now_C0R_accW) or not(Here_now_C0R_mvW0);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C0R_accW) or not(Here_now_C0R_accN);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_accN);
 	m.addClause(c);
-	c = not(Here_now_C0R_accW) or not(Here_now_C0R_mvN1);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C0R_accW) or not(Here_now_C0R_mvN2);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C0R_accW) or not(Here_now_C0R_mvN3);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C0R_accW) or not(Here_now_C0R_mvN0);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C0R_accW) or not(Here_now_C0R_accS);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_accS);
 	m.addClause(c);
-	c = not(Here_now_C0R_accW) or not(Here_now_C0R_mvS1);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C0R_accW) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_accW) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_accW) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW1) or not(Here_now_C0R_mvW0);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW1) or not(Here_now_C0R_accN);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_accN);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW1) or not(Here_now_C0R_mvN1);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW1) or not(Here_now_C0R_mvN2);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW1) or not(Here_now_C0R_mvN3);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW1) or not(Here_now_C0R_mvN0);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW1) or not(Here_now_C0R_accS);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_accS);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW1) or not(Here_now_C0R_mvS1);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW1) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW1) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW1) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW0) or not(Here_now_C0R_accN);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_accN);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW0) or not(Here_now_C0R_mvN1);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW0) or not(Here_now_C0R_mvN2);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW0) or not(Here_now_C0R_mvN3);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW0) or not(Here_now_C0R_mvN0);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW0) or not(Here_now_C0R_accS);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_accS);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW0) or not(Here_now_C0R_mvS1);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW0) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW0) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvW0) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_accN) or not(Here_now_C0R_mvN1);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C0R_accN) or not(Here_now_C0R_mvN2);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C0R_accN) or not(Here_now_C0R_mvN3);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C0R_accN) or not(Here_now_C0R_mvN0);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C0R_accN) or not(Here_now_C0R_accS);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_accS);
 	m.addClause(c);
-	c = not(Here_now_C0R_accN) or not(Here_now_C0R_mvS1);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C0R_accN) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_accN) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_accN) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN1) or not(Here_now_C0R_mvN2);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN1) or not(Here_now_C0R_mvN3);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN1) or not(Here_now_C0R_mvN0);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN1) or not(Here_now_C0R_accS);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_accS);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN1) or not(Here_now_C0R_mvS1);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN1) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN1) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN1) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN2) or not(Here_now_C0R_mvN3);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN2) or not(Here_now_C0R_mvN0);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN2) or not(Here_now_C0R_accS);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_accS);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN2) or not(Here_now_C0R_mvS1);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN2) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN2) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN2) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN3) or not(Here_now_C0R_mvN0);
+	c = not(Here_now_C0R_mvN3)                 or not(Here_now_C0R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN3) or not(Here_now_C0R_accS);
+	c = not(Here_now_C0R_mvN3)                 or not(Here_now_C0R_accS);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN3) or not(Here_now_C0R_mvS1);
+	c = not(Here_now_C0R_mvN3)                 or not(Here_now_C0R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN3) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_mvN3)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN3) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_mvN3)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN3) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_mvN3)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN0) or not(Here_now_C0R_accS);
+	c = not(Here_now_C0R_mvN0)                 or not(Here_now_C0R_accS);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN0) or not(Here_now_C0R_mvS1);
+	c = not(Here_now_C0R_mvN0)                 or not(Here_now_C0R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN0) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_mvN0)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN0) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_mvN0)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvN0) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_mvN0)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_accS) or not(Here_now_C0R_mvS1);
+	c = not(Here_now_C0R_accS)                 or not(Here_now_C0R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C0R_accS) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_accS)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_accS) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_accS)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_accS) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_accS)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvS1) or not(Here_now_C0R_mvS2);
+	c = not(Here_now_C0R_mvS1)                 or not(Here_now_C0R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvS1) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_mvS1)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvS1) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_mvS1)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvS2) or not(Here_now_C0R_mvS3);
+	c = not(Here_now_C0R_mvS2)                 or not(Here_now_C0R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvS2) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_mvS2)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvS3) or not(Here_now_C0R_mvS0);
+	c = not(Here_now_C0R_mvS3)                 or not(Here_now_C0R_mvS0);
 	m.addClause(c);
 	
         // Car 1
@@ -1183,350 +1114,282 @@ void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_C1R_mvS0 = var(v,    t,     R_Move::w1_mvS0);
 
 	//necceraly
-	c = not(Here_now_C1R_moving) or
-	                 Here_now_C1R_accE or Here_now_C1R_mvE1 or Here_now_C1R_mvE0 or
-                         Here_now_C1R_accW or Here_now_C1R_mvW1 or Here_now_C1R_mvW0 or
-                         Here_now_C1R_accN or Here_now_C1R_mvN1 or Here_now_C1R_mvN2 or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS or Here_now_C1R_mvS1 or Here_now_C1R_mvS2 or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = not(Here_now_C1R_moving)               or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
 	// sufficient
 	// 16 choose 1
-	c = Here_now_C1R_moving or
-	                 not(Here_now_C1R_accE) or Here_now_C1R_mvE1 or Here_now_C1R_mvE0 or
-                         Here_now_C1R_accW      or Here_now_C1R_mvW1 or Here_now_C1R_mvW0 or
-                         Here_now_C1R_accN      or Here_now_C1R_mvN1 or Here_now_C1R_mvN2 or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS      or Here_now_C1R_mvS1 or Here_now_C1R_mvS2 or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           not(Here_now_C1R_accE)    or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-		         Here_now_C1R_accE or not(Here_now_C1R_mvE1) or Here_now_C1R_mvE0 or
-                         Here_now_C1R_accW or Here_now_C1R_mvW1      or Here_now_C1R_mvW0 or
-                         Here_now_C1R_accN or Here_now_C1R_mvN1      or Here_now_C1R_mvN2 or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS or Here_now_C1R_mvS1      or Here_now_C1R_mvS2 or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or not(Here_now_C1R_mvE1) or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE or Here_now_C1R_mvE1 or not(Here_now_C1R_mvE0) or
-                         Here_now_C1R_accW or Here_now_C1R_mvW1 or Here_now_C1R_mvW0      or
-                         Here_now_C1R_accN or Here_now_C1R_mvN1 or Here_now_C1R_mvN2      or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS or Here_now_C1R_mvS1 or Here_now_C1R_mvS2      or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or not(Here_now_C1R_mvE0)  or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE      or Here_now_C1R_mvE1 or Here_now_C1R_mvE0 or
-	                 not(Here_now_C1R_accW) or Here_now_C1R_mvW1 or Here_now_C1R_mvW0 or
-                         Here_now_C1R_accN      or Here_now_C1R_mvN1 or Here_now_C1R_mvN2 or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS      or Here_now_C1R_mvS1 or Here_now_C1R_mvS2 or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      not(Here_now_C1R_accW)    or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE or Here_now_C1R_mvE1      or Here_now_C1R_mvE0 or
-	                 Here_now_C1R_accW or not(Here_now_C1R_mvW1) or Here_now_C1R_mvW0 or
-                         Here_now_C1R_accN or Here_now_C1R_mvN1      or Here_now_C1R_mvN2 or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS or Here_now_C1R_mvS1      or Here_now_C1R_mvS2 or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or not(Here_now_C1R_mvW1) or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE or Here_now_C1R_mvE1 or Here_now_C1R_mvE0      or
-	                 Here_now_C1R_accW or Here_now_C1R_mvW1 or not(Here_now_C1R_mvW0) or
-                         Here_now_C1R_accN or Here_now_C1R_mvN1 or Here_now_C1R_mvN2      or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS or Here_now_C1R_mvS1 or Here_now_C1R_mvS2      or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or not(Here_now_C1R_mvW0)  or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE      or Here_now_C1R_mvE1 or Here_now_C1R_mvE0 or
-                         Here_now_C1R_accW      or Here_now_C1R_mvW1 or Here_now_C1R_mvW0 or
-	                 not(Here_now_C1R_accN) or Here_now_C1R_mvN1 or Here_now_C1R_mvN2 or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS      or Here_now_C1R_mvS1 or Here_now_C1R_mvS2 or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      not(Here_now_C1R_accN)    or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE or Here_now_C1R_mvE1      or Here_now_C1R_mvE0 or
-                         Here_now_C1R_accW or Here_now_C1R_mvW1      or Here_now_C1R_mvW0 or
-	                 Here_now_C1R_accN or not(Here_now_C1R_mvN1) or Here_now_C1R_mvN2 or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS or Here_now_C1R_mvS1      or Here_now_C1R_mvS2 or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or not(Here_now_C1R_mvN1) or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE or Here_now_C1R_mvE1 or Here_now_C1R_mvE0      or
-                         Here_now_C1R_accW or Here_now_C1R_mvW1 or Here_now_C1R_mvW0      or
-	                 Here_now_C1R_accN or Here_now_C1R_mvN1 or not(Here_now_C1R_mvN2) or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS or Here_now_C1R_mvS1 or Here_now_C1R_mvS2      or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or not(Here_now_C1R_mvN2)  or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE or Here_now_C1R_mvE1 or Here_now_C1R_mvE0 or
-                         Here_now_C1R_accW or Here_now_C1R_mvW1 or Here_now_C1R_mvW0 or
-	                 Here_now_C1R_accN or Here_now_C1R_mvN1 or Here_now_C1R_mvN2 or not(Here_now_C1R_mvN3) or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS or Here_now_C1R_mvS1 or Here_now_C1R_mvS2 or Here_now_C1R_mvS3      or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or not(Here_now_C1R_mvN3)               or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE or Here_now_C1R_mvE1 or Here_now_C1R_mvE0 or
-                         Here_now_C1R_accW or Here_now_C1R_mvW1 or Here_now_C1R_mvW0 or
-	                 Here_now_C1R_accN or Here_now_C1R_mvN1 or Here_now_C1R_mvN2 or Here_now_C1R_mvN3 or not(Here_now_C1R_mvN0) or
-	                 Here_now_C1R_accS or Here_now_C1R_mvS1 or Here_now_C1R_mvS2 or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or not(Here_now_C1R_mvN0) or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE      or Here_now_C1R_mvE1 or Here_now_C1R_mvE0 or
-                         Here_now_C1R_accW      or Here_now_C1R_mvW1 or Here_now_C1R_mvW0 or
-                         Here_now_C1R_accN      or Here_now_C1R_mvN1 or Here_now_C1R_mvN2 or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 not(Here_now_C1R_accS) or Here_now_C1R_mvS1 or Here_now_C1R_mvS2 or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           not(Here_now_C1R_accS)    or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE or Here_now_C1R_mvE1      or Here_now_C1R_mvE0 or
-                         Here_now_C1R_accW or Here_now_C1R_mvW1      or Here_now_C1R_mvW0 or
-                         Here_now_C1R_accN or Here_now_C1R_mvN1      or Here_now_C1R_mvN2 or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS or not(Here_now_C1R_mvS1) or Here_now_C1R_mvS2 or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or not(Here_now_C1R_mvS1) or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE or Here_now_C1R_mvE1 or Here_now_C1R_mvE0      or
-                         Here_now_C1R_accW or Here_now_C1R_mvW1 or Here_now_C1R_mvW0      or
-                         Here_now_C1R_accN or Here_now_C1R_mvN1 or Here_now_C1R_mvN2      or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS or Here_now_C1R_mvS1 or not(Here_now_C1R_mvS2) or Here_now_C1R_mvS3 or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or not(Here_now_C1R_mvS2)  or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE or Here_now_C1R_mvE1 or Here_now_C1R_mvE0 or
-                         Here_now_C1R_accW or Here_now_C1R_mvW1 or Here_now_C1R_mvW0 or
-                         Here_now_C1R_accN or Here_now_C1R_mvN1 or Here_now_C1R_mvN2 or Here_now_C1R_mvN3      or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS or Here_now_C1R_mvS1 or Here_now_C1R_mvS2 or not(Here_now_C1R_mvS3) or Here_now_C1R_mvS0;
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or not(Here_now_C1R_mvS3)               or Here_now_C1R_mvS0;
 	m.addClause(c);
-	c = Here_now_C1R_moving or
-	                 Here_now_C1R_accE or Here_now_C1R_mvE1 or Here_now_C1R_mvE0 or
-                         Here_now_C1R_accW or Here_now_C1R_mvW1 or Here_now_C1R_mvW0 or
-                         Here_now_C1R_accN or Here_now_C1R_mvN1 or Here_now_C1R_mvN2 or Here_now_C1R_mvN3 or Here_now_C1R_mvN0 or
-	                 Here_now_C1R_accS or Here_now_C1R_mvS1 or Here_now_C1R_mvS2 or Here_now_C1R_mvS3 or not(Here_now_C1R_mvS0);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or not(Here_now_C1R_mvS0);
 	m.addClause(c);
 	// 16 choose 2
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_mvE1);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvE1);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_mvE0);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvE0);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_accW);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_accW);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_mvW1);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvW1);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_mvW0);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_accN);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_accN);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_mvN1);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_mvN2);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_mvN3);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_mvN0);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_accS);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_accS);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_mvS1);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvS1);
 	m.addClause(c)
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_accE) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_mvE0);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvE0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_accW);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_accW);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_mvW1);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvW1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_mvW0);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_accN);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_accN);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_mvN1);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_mvN2);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_mvN3);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_mvN0);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_accS);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_accS);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_mvS1);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE1) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_accW);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_accW);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_mvW1);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvW1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_mvW0);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_accN);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_accN);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_mvN1);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_mvN2);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_mvN3);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_mvN0);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_accS);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_accS);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_mvS1);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c); 
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvE0) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvW1);
 	m.addClause(c);
-	c = not(Here_now_C1R_accW) or not(Here_now_C1R_mvW1);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C1R_accW) or not(Here_now_C1R_mvW0);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_accN);
 	m.addClause(c);
-	c = not(Here_now_C1R_accW) or not(Here_now_C1R_accN);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C1R_accW) or not(Here_now_C1R_mvN1);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C1R_accW) or not(Here_now_C1R_mvN2);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C1R_accW) or not(Here_now_C1R_mvN3);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C1R_accW) or not(Here_now_C1R_mvN0);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_accS);
 	m.addClause(c);
-	c = not(Here_now_C1R_accW) or not(Here_now_C1R_accS);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C1R_accW) or not(Here_now_C1R_mvS1);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_accW) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_accW) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_accW) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW1) or not(Here_now_C1R_mvW0);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_accN);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW1) or not(Here_now_C1R_accN);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW1) or not(Here_now_C1R_mvN1);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW1) or not(Here_now_C1R_mvN2);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW1) or not(Here_now_C1R_mvN3);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW1) or not(Here_now_C1R_mvN0);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_accS);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW1) or not(Here_now_C1R_accS);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW1) or not(Here_now_C1R_mvS1);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW1) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW1) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW1) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_accN);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW0) or not(Here_now_C1R_accN);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW0) or not(Here_now_C1R_mvN1);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW0) or not(Here_now_C1R_mvN2);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW0) or not(Here_now_C1R_mvN3);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW0) or not(Here_now_C1R_mvN0);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_accS);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW0) or not(Here_now_C1R_accS);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW0) or not(Here_now_C1R_mvS1);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW0) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW0) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvW0) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C1R_accN) or not(Here_now_C1R_mvN1);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C1R_accN) or not(Here_now_C1R_mvN2);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C1R_accN) or not(Here_now_C1R_mvN3);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C1R_accN) or not(Here_now_C1R_mvN0);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_accS);
 	m.addClause(c);
-	c = not(Here_now_C1R_accN) or not(Here_now_C1R_accS);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C1R_accN) or not(Here_now_C1R_mvS1);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_accN) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_accN) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_accN) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN1) or not(Here_now_C1R_mvN2);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN1) or not(Here_now_C1R_mvN3);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN1) or not(Here_now_C1R_mvN0);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_accS);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN1) or not(Here_now_C1R_accS);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN1) or not(Here_now_C1R_mvS1);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN1) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN1) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN1) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN2) or not(Here_now_C1R_mvN3);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN2) or not(Here_now_C1R_mvN0);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_accS);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN2) or not(Here_now_C1R_accS);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN2) or not(Here_now_C1R_mvS1);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN2) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN2) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN2) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_mvN3)                 or not(Here_now_C1R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN3) or not(Here_now_C1R_mvN0);
+	c = not(Here_now_C1R_mvN3)                 or not(Here_now_C1R_accS);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN3) or not(Here_now_C1R_accS);
+	c = not(Here_now_C1R_mvN3)                 or not(Here_now_C1R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN3) or not(Here_now_C1R_mvS1);
+	c = not(Here_now_C1R_mvN3)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN3) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_mvN3)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN3) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_mvN3)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN3) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_mvN0)                 or not(Here_now_C1R_accS);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN0) or not(Here_now_C1R_accS);
+	c = not(Here_now_C1R_mvN0)                 or not(Here_now_C1R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN0) or not(Here_now_C1R_mvS1);
+	c = not(Here_now_C1R_mvN0)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN0) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_mvN0)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN0) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_mvN0)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvN0) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_accS)                 or not(Here_now_C1R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C1R_accS) or not(Here_now_C1R_mvS1);
+	c = not(Here_now_C1R_accS)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_accS) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_accS)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_accS) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_accS)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_accS) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_mvS1)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvS1) or not(Here_now_C1R_mvS2);
+	c = not(Here_now_C1R_mvS1)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvS1) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_mvS1)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvS1) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_mvS2)                 or not(Here_now_C1R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvS2) or not(Here_now_C1R_mvS3);
+	c = not(Here_now_C1R_mvS2)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C1R_mvS2) or not(Here_now_C1R_mvS0);
-	m.addClause(c);
-	c = not(Here_now_C1R_mvS3) or not(Here_now_C1R_mvS0);
+	c = not(Here_now_C1R_mvS3)                 or not(Here_now_C1R_mvS0);
 	m.addClause(c);
         // Car 2
 
@@ -1548,355 +1411,289 @@ void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_C2R_mvS0 = var(v,    t,     R_Move::w2_mvS0);
 
 	//necceraly
-	c = not(Here_now_C2R_moving) or
-	                 Here_now_C2R_accE or Here_now_C2R_mvE1 or Here_now_C2R_mvE0 or
-                         Here_now_C2R_accW or Here_now_C2R_mvW1 or Here_now_C2R_mvW0 or
-                         Here_now_C2R_accN or Here_now_C2R_mvN1 or Here_now_C2R_mvN2 or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS or Here_now_C2R_mvS1 or Here_now_C2R_mvS2 or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = not(Here_now_C2R_moving)               or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
 	// sufficient
 	// 16 choose 1
-	c = Here_now_C2R_moving or
-	                 not(Here_now_C2R_accE) or Here_now_C2R_mvE1 or Here_now_C2R_mvE0 or
-                         Here_now_C2R_accW      or Here_now_C2R_mvW1 or Here_now_C2R_mvW0 or
-                         Here_now_C2R_accN      or Here_now_C2R_mvN1 or Here_now_C2R_mvN2 or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS      or Here_now_C2R_mvS1 or Here_now_C2R_mvS2 or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           not(Here_now_C2R_accE)    or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-		         Here_now_C2R_accE or not(Here_now_C2R_mvE1) or Here_now_C2R_mvE0 or
-                         Here_now_C2R_accW or Here_now_C2R_mvW1      or Here_now_C2R_mvW0 or
-                         Here_now_C2R_accN or Here_now_C2R_mvN1      or Here_now_C2R_mvN2 or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS or Here_now_C2R_mvS1      or Here_now_C2R_mvS2 or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or not(Here_now_C2R_mvE1) or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE or Here_now_C2R_mvE1 or not(Here_now_C2R_mvE0) or
-                         Here_now_C2R_accW or Here_now_C2R_mvW1 or Here_now_C2R_mvW0      or
-                         Here_now_C2R_accN or Here_now_C2R_mvN1 or Here_now_C2R_mvN2      or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS or Here_now_C2R_mvS1 or Here_now_C2R_mvS2      or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or not(Here_now_C2R_mvE0) or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE      or Here_now_C2R_mvE1 or Here_now_C2R_mvE0 or
-	                 not(Here_now_C0R_accW) or Here_now_C2R_mvW1 or Here_now_C2R_mvW0 or
-                         Here_now_C2R_accN      or Here_now_C2R_mvN1 or Here_now_C2R_mvN2 or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS      or Here_now_C2R_mvS1 or Here_now_C2R_mvS2 or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       not(Here_now_C0R_accW)    or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE or Here_now_C2R_mvE1      or Here_now_C2R_mvE0 or
-	                 Here_now_C2R_accW or not(Here_now_C2R_mvW1) or Here_now_C2R_mvW0 or
-                         Here_now_C2R_accN or Here_now_C2R_mvN1      or Here_now_C2R_mvN2 or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS or Here_now_C2R_mvS1      or Here_now_C2R_mvS2 or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or not(Here_now_C2R_mvW1) or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE or Here_now_C2R_mvE1 or Here_now_C2R_mvE0      or
-	                 Here_now_C2R_accW or Here_now_C2R_mvW1 or not(Here_now_C2R_mvW0) or
-                         Here_now_C2R_accN or Here_now_C2R_mvN1 or Here_now_C2R_mvN2      or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS or Here_now_C2R_mvS1 or Here_now_C2R_mvS2      or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or not(Here_now_C2R_mvW0) or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE      or Here_now_C2R_mvE1 or Here_now_C2R_mvE0 or
-                         Here_now_C2R_accW      or Here_now_C2R_mvW1 or Here_now_C2R_mvW0 or
-	                 not(Here_now_C2R_accN) or Here_now_C2R_mvN1 or Here_now_C2R_mvN2 or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS      or Here_now_C2R_mvS1 or Here_now_C2R_mvS2 or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       not(Here_now_C2R_accN)    or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE or Here_now_C2R_mvE1      or Here_now_C2R_mvE0 or
-                         Here_now_C2R_accW or Here_now_C2R_mvW1      or Here_now_C2R_mvW0 or
-	                 Here_now_C2R_accN or not(Here_now_C2R_mvN1) or Here_now_C2R_mvN2 or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS or Here_now_C2R_mvS1      or Here_now_C2R_mvS2 or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or not(Here_now_C2R_mvN1) or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE or Here_now_C2R_mvE1 or Here_now_C2R_mvE0      or
-                         Here_now_C2R_accW or Here_now_C2R_mvW1 or Here_now_C2R_mvW0      or
-	                 Here_now_C2R_accN or Here_now_C2R_mvN1 or not(Here_now_C2R_mvN2) or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS or Here_now_C2R_mvS1 or Here_now_C2R_mvS2      or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or not(Here_now_C2R_mvN2) or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE or Here_now_C2R_mvE1 or Here_now_C2R_mvE0 or
-                         Here_now_C2R_accW or Here_now_C2R_mvW1 or Here_now_C2R_mvW0 or
-	                 Here_now_C2R_accN or Here_now_C2R_mvN1 or Here_now_C2R_mvN2 or not(Here_now_C2R_mvN3) or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS or Here_now_C2R_mvS1 or Here_now_C2R_mvS2 or Here_now_C2R_mvS3      or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or not(Here_now_C2R_mvN3)                or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE or Here_now_C2R_mvE1 or Here_now_C2R_mvE0 or
-                         Here_now_C2R_accW or Here_now_C2R_mvW1 or Here_now_C2R_mvW0 or
-	                 Here_now_C2R_accN or Here_now_C2R_mvN1 or Here_now_C2R_mvN2 or Here_now_C2R_mvN3 or not(Here_now_C2R_mvN0) or
-	                 Here_now_C2R_accS or Here_now_C2R_mvS1 or Here_now_C2R_mvS2 or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or not(Here_now_C2R_mvN0) or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE      or Here_now_C2R_mvE1 or Here_now_C2R_mvE0 or
-                         Here_now_C2R_accW      or Here_now_C2R_mvW1 or Here_now_C2R_mvW0 or
-                         Here_now_C2R_accN      or Here_now_C2R_mvN1 or Here_now_C2R_mvN2 or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 not(Here_now_C2R_accS) or Here_now_C2R_mvS1 or Here_now_C2R_mvS2 or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           not(Here_now_C2R_accS)    or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE or Here_now_C2R_mvE1      or Here_now_C2R_mvE0 or
-                         Here_now_C2R_accW or Here_now_C2R_mvW1      or Here_now_C2R_mvW0 or
-                         Here_now_C2R_accN or Here_now_C2R_mvN1      or Here_now_C2R_mvN2 or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS or not(Here_now_C2R_mvS1) or Here_now_C2R_mvS2 or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or not(Here_now_C2R_mvS1) or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE or Here_now_C2R_mvE1 or Here_now_C2R_mvE0      or
-                         Here_now_C2R_accW or Here_now_C2R_mvW1 or Here_now_C2R_mvW0      or
-                         Here_now_C2R_accN or Here_now_C2R_mvN1 or Here_now_C2R_mvN2      or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS or Here_now_C2R_mvS1 or not(Here_now_C2R_mvS2) or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or not(Here_now_C2R_mvS2) or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE or Here_now_C2R_mvE1 or Here_now_C2R_mvE0 or
-                         Here_now_C2R_accW or Here_now_C2R_mvW1 or Here_now_C2R_mvW0 or
-                         Here_now_C2R_accN or Here_now_C2R_mvN1 or Here_now_C2R_mvN2 or Here_now_C2R_mvN3      or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS or Here_now_C2R_mvS1 or Here_now_C2R_mvS2 or not(Here_now_C2R_mvS3) or Here_now_C2R_mvS0;
+	c = Here_now_C2R_moving or                                                                                                              Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or not(Here_now_C2R_mvS3)                or Here_now_C2R_mvS0;
 	m.addClause(c);
-	c = Here_now_C2R_moving or
-	                 Here_now_C2R_accE or Here_now_C2R_mvE1 or Here_now_C2R_mvE0 or
-                         Here_now_C2R_accW or Here_now_C2R_mvW1 or Here_now_C2R_mvW0 or
-                         Here_now_C2R_accN or Here_now_C2R_mvN1 or Here_now_C2R_mvN2 or Here_now_C2R_mvN3 or Here_now_C2R_mvN0 or
-	                 Here_now_C2R_accS or Here_now_C2R_mvS1 or Here_now_C2R_mvS2 or Here_now_C2R_mvS3 or not(Here_now_C2R_mvS0);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or not(Here_now_C2R_mvS0);
 	m.addClause(c);
 	// 16 choose 2
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_mvE1);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvE1);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_mvE0);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvE0);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_accW);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_accW);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_mvW1);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvW1);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_mvW0);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_accN);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_accN);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_mvN1);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_mvN2);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_mvN3);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_mvN0);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_accS);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_accS);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_mvS1);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_accE) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_mvE0);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvE0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_accW);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_accW);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_mvW1);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvW1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_mvW0);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_accN);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_accN);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_mvN1);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_mvN2);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_mvN3);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_mvN0);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C0R_mvE1) or not(Here_now_C2R_accS);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C2R_accS);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_mvS1);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE1) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_accW);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_accW);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_mvW1);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvW1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_mvW0);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_accN);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_accN);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_mvN1);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_mvN2);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_mvN3);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_mvN0);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_accS);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_accS);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_mvS1);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvE0) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_accW) or not(Here_now_C2R_mvW1);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvW1);
 	m.addClause(c);
-	c = not(Here_now_C2R_accW) or not(Here_now_C2R_mvW0);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C2R_accW) or not(Here_now_C2R_accN);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_accN);
 	m.addClause(c);
-	c = not(Here_now_C2R_accW) or not(Here_now_C2R_mvN1);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C2R_accW) or not(Here_now_C2R_mvN2);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C2R_accW) or not(Here_now_C2R_mvN3);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C2R_accW) or not(Here_now_C2R_mvN0);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C2R_accW) or not(Here_now_C2R_accS);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_accS);
 	m.addClause(c);
-	c = not(Here_now_C2R_accW) or not(Here_now_C2R_mvS1);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C2R_accW) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_accW) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_accW) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW1) or not(Here_now_C2R_mvW0);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvW0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW1) or not(Here_now_C2R_accN);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_accN);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW1) or not(Here_now_C2R_mvN1);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW1) or not(Here_now_C2R_mvN2);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW1) or not(Here_now_C2R_mvN3);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW1) or not(Here_now_C2R_mvN0);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW1) or not(Here_now_C2R_accS);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_accS);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW1) or not(Here_now_C2R_mvS1);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW1) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW1) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW1) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW0) or not(Here_now_C2R_accN);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_accN);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW0) or not(Here_now_C2R_mvN1);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW0) or not(Here_now_C2R_mvN2);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW0) or not(Here_now_C2R_mvN3);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW0) or not(Here_now_C2R_mvN0);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW0) or not(Here_now_C2R_accS);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_accS);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW0) or not(Here_now_C2R_mvS1);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW0) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW0) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvW0) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_accN) or not(Here_now_C2R_mvN1);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvN1);
 	m.addClause(c);
-	c = not(Here_now_C2R_accN) or not(Here_now_C2R_mvN2);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C2R_accN) or not(Here_now_C2R_mvN3);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C2R_accN) or not(Here_now_C2R_mvN0);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C2R_accN) or not(Here_now_C2R_accS);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_accS);
 	m.addClause(c);
-	c = not(Here_now_C2R_accN) or not(Here_now_C2R_mvS1);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C2R_accN) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_accN) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_accN) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN1) or not(Here_now_C2R_mvN2);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvN2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN1) or not(Here_now_C2R_mvN3);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN1) or not(Here_now_C2R_mvN0);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN1) or not(Here_now_C2R_accS);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_accS);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN1) or not(Here_now_C2R_mvS1);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN1) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN1) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN1) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN2) or not(Here_now_C2R_mvN3);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_mvN3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN2) or not(Here_now_C2R_mvN0);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN2) or not(Here_now_C2R_accS);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_accS);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN2) or not(Here_now_C2R_mvS1);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN2) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN2) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN2) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN3) or not(Here_now_C2R_mvN0);
+	c = not(Here_now_C2R_mvN3)                 or not(Here_now_C2R_mvN0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN3) or not(Here_now_C2R_accS);
+	c = not(Here_now_C2R_mvN3)                 or not(Here_now_C2R_accS);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN3) or not(Here_now_C2R_mvS1);
+	c = not(Here_now_C2R_mvN3)                 or not(Here_now_C2R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN3) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_mvN3)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN3) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_mvN3)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN3) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_mvN3)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN0) or not(Here_now_C2R_accS);
+	c = not(Here_now_C2R_mvN0)                 or not(Here_now_C2R_accS);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN0) or not(Here_now_C2R_mvS1);
+	c = not(Here_now_C2R_mvN0)                 or not(Here_now_C2R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN0) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_mvN0)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN0) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_mvN0)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvN0) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_mvN0)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_accS) or not(Here_now_C2R_mvS1);
+	c = not(Here_now_C2R_accS)                 or not(Here_now_C2R_mvS1);
 	m.addClause(c);
-	c = not(Here_now_C2R_accS) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_accS)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_accS) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_accS)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_accS) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_accS)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvS1) or not(Here_now_C2R_mvS2);
+	c = not(Here_now_C2R_mvS1)                 or not(Here_now_C2R_mvS2);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvS1) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_mvS1)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvS1) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_mvS1)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvS2) or not(Here_now_C2R_mvS3);
+	c = not(Here_now_C2R_mvS2)                 or not(Here_now_C2R_mvS3);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvS2) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_mvS2)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
-	c = not(Here_now_C2R_mvS3) or not(Here_now_C2R_mvS0);
+	c = not(Here_now_C2R_mvS3)                 or not(Here_now_C2R_mvS0);
 	m.addClause(c);
     } // endof B A S I C
 
     // M O V E M E N T
     {
+        Model m;
+	Clause c;
         CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
 	CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
 	CNF::Var Here_now_R_accE    = var(v,    t,     R_Move::accE);
@@ -2948,14 +2745,7 @@ void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
 
 
         // At most one robot moving towards this node:
-	c = E_now_R_accW  or E_now_R_mvW0
-	or  W_now_R_accE  or W_now_R_mvE0
-	or  N_now_R_accS  or N_now_R_mvS0  or N_now_R_mvS1
-	or  S_now_R_accN  or S_now_R_mvN0  or S_now_R_mvN1
-        or  E_now_CR_accW or E_now_CR_mvW0 or E_now_CR_mvW1
-	or  W_now_CR_accE or W_now_CR_mvE0 or W_now_CR_mvE1
-	or  N_now_CR_accS or N_now_CR_mvS0 or N_now_CR_mvS1 or N_now_CR_mvS2 or N_now_CR_mvS3
-	or  S_now_CR_accN or S_now_CR_mvN0 or S_now_CR_mvN1 or S_now_CR_mvN2 or S_now_CR_mvN3;
+	c = E_now_R_accW  or E_now_R_mvW0                                                                                      or  W_now_R_accE  or W_now_R_mvE0                                                                                      or  N_now_R_accS  or N_now_R_mvS0  or N_now_R_mvS1                                                                     or  S_now_R_accN  or S_now_R_mvN0  or S_now_R_mvN1                                                                     or  E_now_CR_accW or E_now_CR_mvW0 or E_now_CR_mvW1                                                                    or  W_now_CR_accE or W_now_CR_mvE0 or W_now_CR_mvE1                                                                    or  N_now_CR_accS or N_now_CR_mvS0 or N_now_CR_mvS1 or N_now_CR_mvS2 or N_now_CR_mvS3                                  or  S_now_CR_accN or S_now_CR_mvN0 or S_now_CR_mvN1 or S_now_CR_mvN2 or S_now_CR_mvN3;
 	m.addClause(c);
 	// 26 choose 2
 	c = not(E_now_R_accW) or not(E_now_R_mvW0);
@@ -3687,6 +3477,8 @@ void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
 
     // L I F T I N G + D R O P P I N G
     {
+        Model m;
+	Clause c;
         CNF::Var Here_now_empty       = var(v,       t,    On_Node::empty);
 
 	CNF::Var Here_now_R_ready     = var(v,       t,    NdStat::R_ready);
@@ -3724,6 +3516,8 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 
     // B A S I C S
     {
+        Model m;
+	Clause c;
         CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
 	CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
 	CNF::Var Here_now_R_accE    = var(v,    t,     R_Move::accE);
@@ -3909,6 +3703,8 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 
     // M O V E M E N T
     {
+        Model m;
+	Clause c;
         CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
 	CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
 	CNF::Var Here_now_R_accE    = var(v,    t,     R_Move::accE);
@@ -6244,6 +6040,8 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 
     // L I F T I N G + D R O P P I N G
     { // Lifting process
+        Model m;
+	Clause c;
         CNF::Var Here_now_empty            = var(v,       t,    On_Node::empty);
 	CNF::Var Here_now_C0               = var(v,       t,    On_Node::Car0);
 	CNF::Var Here_now_C1               = var(v,       t,    On_Node::Car1);
@@ -6324,6 +6122,8 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 	m.addClause(c); //
     }
     { // Dropping process
+        Model m;
+	Clause c;
         CNF::Var Here_now_C0R_ready        = var(v,       t,    NdStat::C0R_ready);
 	CNF::Var Here_now_C1R_ready        = var(v,       t,    NdStat::C1R_ready);
 	CNF::Var Here_now_C2R_ready        = var(v,       t,    NdStat::C2R_ready);
@@ -6373,6 +6173,8 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 	m.addClause(c); //
     }
     {// Lift/drop and  PARKED cars
+        Model m;
+	Clause c;
         CNF::Var Here_now_R_lifting4  = var(v,       t,      R_Vertical::l4);
 	CNF::Var Here_now_R_drop      = var(v,       t,      R_Vertical::drop);
 	CNF::Var Here_now_empty       = var(v,       t,      On_Node::empty);
