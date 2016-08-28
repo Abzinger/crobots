@@ -1,11 +1,12 @@
 // grid_gurobi.cc C++11
 // Part of the robots project
 // Author: Dirk Oliver Theis
-#include "grid_gurobi.hh"
+#include "grid_sat.hh"
 #include "gurobi_c++.h"
 #include <stdexcept>
 #include <cstdio>
 #include <cmath>
+#include "CNF.hh"
 
 // *****************************************************************************************************************************
 // *    Grid_Gurobi  member functions
@@ -439,13 +440,13 @@ void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
 {
       // B A S I C
       {
-	Model m;
+	CNF::Model m;
 	CNF::Var Here_now_empty       = var(v,       t,    On_Node::empty);
 	CNF::Var Here_now_car0        = var(v,       t,    On_Node::Car0);
 	CNF::Var Here_now_car1        = var(v,       t,    On_Node::Car1);
 	CNF::Var Here_now_car2        = var(v,       t,    On_Node::Car2);
 	
-	Clause c;
+	CNF::Clause c;
 	c = Here_now_empty             or Here_now_car0              or Here_now_car1       or Here_now_car2;
 	m.addClause(c);
 	c = not(Here_now_empty)        or not(Here_now_car0);
@@ -1692,8 +1693,8 @@ void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
 
     // M O V E M E N T
     {
-        Model m;
-	Clause c;
+        CNF::Model m;
+	CNF::Clause c;
         CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
 	CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
 	CNF::Var Here_now_R_accE    = var(v,    t,     R_Move::accE);
@@ -3477,8 +3478,8 @@ void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
 
     // L I F T I N G + D R O P P I N G
     {
-        Model m;
-	Clause c;
+        CNF::Model m;
+	CNF::Clause c;
         CNF::Var Here_now_empty       = var(v,       t,    On_Node::empty);
 
 	CNF::Var Here_now_R_ready     = var(v,       t,    NdStat::R_ready);
@@ -3516,8 +3517,8 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 
     // B A S I C S
     {
-        Model m;
-	Clause c;
+        CNF::Model m;
+	CNF::Clause c;
         CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
 	CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
 	CNF::Var Here_now_R_accE    = var(v,    t,     R_Move::accE);
@@ -3703,8 +3704,8 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 
     // M O V E M E N T
     {
-        Model m;
-	Clause c;
+        CNF::Model m;
+	CNF::Clause c;
         CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
 	CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
 	CNF::Var Here_now_R_accE    = var(v,    t,     R_Move::accE);
@@ -6040,8 +6041,8 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 
     // L I F T I N G + D R O P P I N G
     { // Lifting process
-        Model m;
-	Clause c;
+        CNF::Model m;
+	CNF::Clause c;
         CNF::Var Here_now_empty            = var(v,       t,    On_Node::empty);
 	CNF::Var Here_now_C0               = var(v,       t,    On_Node::Car0);
 	CNF::Var Here_now_C1               = var(v,       t,    On_Node::Car1);
@@ -6108,7 +6109,7 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 
 	c = not(Here_now_R_lifting4) or Here_will_C0R_ready        or Here_now_C1         or Here_now_C2;
 	m.addClause(c);  // maybe make these lazy?!?  
-	c = not(Here_now_R_lifting4) or Here_now_C0                or OR Here_now_C1      or Here_will_C2R_ready;
+	c = not(Here_now_R_lifting4) or Here_now_C0                or Here_now_C1         or Here_will_C2R_ready;
 	m.addClause(c); //
 	c = not(Here_now_R_lifting4) or Here_will_C0R_ready        or Here_now_C1         or Here_will_C2R_ready;
 	m.addClause(c); //
@@ -6122,8 +6123,8 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 	m.addClause(c); //
     }
     { // Dropping process
-        Model m;
-	Clause c;
+        CNF::Model m;
+	CNF::Clause c;
         CNF::Var Here_now_C0R_ready        = var(v,       t,    NdStat::C0R_ready);
 	CNF::Var Here_now_C1R_ready        = var(v,       t,    NdStat::C1R_ready);
 	CNF::Var Here_now_C2R_ready        = var(v,       t,    NdStat::C2R_ready);
@@ -6173,8 +6174,8 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 	m.addClause(c); //
     }
     {// Lift/drop and  PARKED cars
-        Model m;
-	Clause c;
+        CNF::Model m;
+	CNF::Clause c;
         CNF::Var Here_now_R_lifting4  = var(v,       t,      R_Vertical::l4);
 	CNF::Var Here_now_R_drop      = var(v,       t,      R_Vertical::drop);
 	CNF::Var Here_now_empty       = var(v,       t,      On_Node::empty);
