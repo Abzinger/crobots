@@ -6142,11 +6142,11 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 
 	c = not(Here_now_R_drop)     or Here_will_R_ready;
 	m.addClause(c); //
-	c = not(Here_will_C0R_ready) or Here_will_C1R_ready       or Here_will_C2R_ready      or Here_will_empty                   or Here_will_R_drop;
+	c = not(Here_now_C0R_ready) or Here_now_C1R_ready       or Here_now_C2R_ready      or Here_will_empty                   or Here_will_R_drop;
 	m.addClause(c);
-	c = Here_will_C0R_ready      or not(Here_will_C1R_ready)  or Here_will_C2R_ready      or Here_will_empty                   or Here_will_R_drop;
+	c = Here_now_C0R_ready      or not(Here_now_C1R_ready)  or Here_now_C2R_ready      or Here_will_empty                   or Here_will_R_drop;
 	m.addClause(c);
-	c = Here_will_C0R_ready      or Here_will_C1R_ready       or not(Here_will_C2R_ready) or Here_will_empty                   or Here_will_R_drop;
+	c = Here_now_C0R_ready      or Here_now_C1R_ready       or not(Here_now_C2R_ready) or Here_will_empty                   or Here_will_R_drop;
 	m.addClause(c);
 	c = not(Here_will_C0R_ready) or not(Here_will_C1R_ready);
 	m.addClause(c);
