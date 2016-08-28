@@ -1,17 +1,17 @@
-// grid_gurobi.cc C++11
+// grid_sat.cc C++11
 // Part of the robots project
 // Author: Dirk Oliver Theis
-#include "grid_gurobi.hh"
-#include "gurobi_c++.h"
+#include "grid_sat.hh"
 #include <stdexcept>
 #include <cstdio>
 #include <cmath>
+#include "CNF.hh"
 
 // *****************************************************************************************************************************
-// *    Grid_Gurobi  member functions
+// *    Grid_Sat  member functions
 // *****************************************************************************************************************************
 
-GridSpace::Grid_Gurobi::Grid_Gurobi(const Grid & _G, const unsigned _t_max):
+GridSpace::Grid_Sat::Grid_Sat(const Grid & _G, const unsigned _t_max):
     G                          {_G},
     t_max                      {_t_max},
     p_model                    {new CNF::Model},
@@ -34,9 +34,9 @@ GridSpace::Grid_Gurobi::Grid_Gurobi(const Grid & _G, const unsigned _t_max):
         }
     }
     make_model();
-} // Grid_Gurobi---constructor
+} // Grid_Sat---constructor
 
-GridSpace::Grid_Gurobi::~Grid_Gurobi()
+GridSpace::Grid_Sat::~Grid_Sat()
 {
     // delete GRBVar arrays
     for (unsigned t=0; t<=t_max; ++t) {
@@ -49,12 +49,12 @@ GridSpace::Grid_Gurobi::~Grid_Gurobi()
     } // for t
     // delete model & env
     delete p_model;
-} //    ~Grid_Gurobi
+} //    ~Grid_Sat
 
 //********************************************************************************************************************************************************************************************************
-void GridSpace::Grid_Gurobi::set_initial_state(const Stat_Vector_t *p_stat0)
+void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
 {
-    if (p_initial_state) throw std::runtime_error("Grid_Gurobi::set_initial_state(): Attempt to set initial state a 2nd time.");
+    if (p_initial_state) throw std::runtime_error("Grid_Sat::set_initial_state(): Attempt to set initial state a 2nd time.");
     p_initial_state = p_stat0;
 
     for (short y=0; y<G.NS_sz(); ++y) {
@@ -70,7 +70,7 @@ void GridSpace::Grid_Gurobi::set_initial_state(const Stat_Vector_t *p_stat0)
                 // // punish not leaving the state through large cost
                 // for (unsigned t=1; t<t_max; ++t) {
                 //     GRBLinExpr _x = var(xy,t,s.on_node);
-                //     if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_initial_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
+                //     if (_x.size() != 1) throw std::runtime_error("Grid_Sat::set_initial_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
                 //     // GRBVar x = _x.getVar(0);
                 //     // x.set( GRB_DoubleAttr_Obj, x.get(GRB_DoubleAttr_Obj) + 100. );
                 // }
@@ -91,9 +91,9 @@ void GridSpace::Grid_Gurobi::set_initial_state(const Stat_Vector_t *p_stat0)
     } // for y
 } //^ set_initial_state()
 
-void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t * p_state)
+void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
 {
-    if (p_terminal_state) throw std::runtime_error("Grid_Gurobi::set_initial_state(): Attempt to set terminal state a 2nd time.");
+    if (p_terminal_state) throw std::runtime_error("Grid_Sat::set_initial_state(): Attempt to set terminal state a 2nd time.");
     p_terminal_state = p_state;
 
     for (short y=0; y<G.NS; ++y) {
@@ -104,60 +104,24 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t * p_state)
 
                 if ( s.on_node!=On_Node::empty && ( !my_opts.ignore_C0 || s.on_node!=On_Node::Car0 ) ) {
                     for (    On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
-                        if (my_opts.hardwire) {
-                            const double RHS = (s.on_node==i ? 1 : 0 );
-                            model.addConstr(     RHS == var(xy,t_max,i) );
-                        } else {
-                            for (unsigned t = 1 + (1-my_opts.punish_mismatch)*(t_max-1); t<=t_max; ++t) {
-                                GRBLinExpr _x = var(xy,t,i);
-                                if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
-                                GRBVar x = _x.getVar(0);
-                                x.set( GRB_DoubleAttr_Obj, (s.on_node==i ? 0 : (t==t_max ? mismatch_cost__t_max : mismatch_cost__t) ) );
-                            } //^ for t
-                        } //^ if/else
+                        const double RHS = (s.on_node==i ? 1 : 0 );
+                        model.addConstr(     RHS == var(xy,t_max,i) );
                     } //^ for stat
                 } //^ if whether to ignore C0
                 if (!my_opts.ignore_robots) {
                     for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
-                        if (my_opts.hardwire) {
-                            const double RHS = (s.ndstat==i ? 1 : 0 );
-                            model.addConstr( RHS == var(xy,t_max,i) );
-                        } else {
-                            for (unsigned t = 1 + (1-my_opts.punish_mismatch)*(t_max-1); t<=t_max; ++t) {
-                                GRBLinExpr _x = var(xy,t,i);
-                                if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this NdStat variable (GRBLinExpr has !=1 terms).");
-                                GRBVar x = _x.getVar(0);
-                                x.set( GRB_DoubleAttr_Obj, (s.ndstat==i ? 0 : (t==t_max ? mismatch_cost__t_max : mismatch_cost__t) ) );
-                            } //^ for
-                        }
+                        const double RHS = (s.ndstat==i ? 1 : 0 );
+                        model.addConstr( RHS == var(xy,t_max,i) );
                     }
                     for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
-                        if (my_opts.hardwire) {
-                            const double RHS = (s.r_vert==i ? 1 : 0 );
-                            model.addConstr( RHS == var(xy,t_max,i) );
-                        } else {
-                            for (unsigned t = 1 + (1-my_opts.punish_mismatch)*(t_max-1); t<=t_max; ++t) {
-                                GRBLinExpr _x = var(xy,t,i);
-                                if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this R_Vertical variable (GRBLinExpr has !=1 terms).");
-                                GRBVar x = _x.getVar(0);
-                                x.set( GRB_DoubleAttr_Obj, (s.r_vert==i ? 0 : (t==t_max ? mismatch_cost__t_max : mismatch_cost__t) ) );
-                            } //^ for
-                        }
+                        const double RHS = (s.r_vert==i ? 1 : 0 );
+                        model.addConstr( RHS == var(xy,t_max,i) );
                     }
                     for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
                         const Direction d = get_direction(i);
                         if ( G.move(xy,d)!=nowhere ) {
-                            if (my_opts.hardwire) {
-                                const double RHS = (s.r_mv==i ? 1 : 0 );
-                                model.addConstr( RHS == var(xy,t_max,i) );
-                            } else {
-                                for (unsigned t = 1 + (1-my_opts.punish_mismatch)*(t_max-1); t<=t_max; ++t) {
-                                    GRBLinExpr _x = var(xy,t,i);
-                                    if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
-                                    GRBVar x = _x.getVar(0);
-                                    x.set( GRB_DoubleAttr_Obj, (s.r_mv==i ? 0 : (t==t_max ? mismatch_cost__t_max : mismatch_cost__t) ) );
-                                } //^ for
-                            } //^ if/else
+                            const double RHS = (s.r_mv==i ? 1 : 0 );
+                            model.addConstr( RHS == var(xy,t_max,i) );
                         } //^ if dir exists
                     }
                 } // if (do robots)
@@ -168,93 +132,17 @@ void GridSpace::Grid_Gurobi::set_terminal_state(const Stat_Vector_t * p_state)
 
 //********************************************************************************************************************************************************************************************************
 
-void GridSpace::Grid_Gurobi::optimize()
+void GridSpace::Grid_Sat::optimize()
 {
-    Grid_Gurobi_Callback my_callback {*this};
-    model.setCallback(&my_callback);
-
-    model.getEnv().set(GRB_IntParam_Threads, 1);
-
-    model.optimize();
+    You - need - to - implement - this - function;
 } //^ optimize()
 
 //********************************************************************************************************************************************************************************************************
 
-std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Gurobi::get_solution()  const
+std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  const
 {
-    if (model.get(GRB_IntAttr_SolCount) > 0) {
-        std::vector< Stat_Vector_t > fullsol (t_max+1, G);
-        for (unsigned t=0; t<=t_max; ++t) {
-            XY v {0,0};
-            for (v.y=0; v.y<G.NS_sz(); ++v.y) {
-                for (v.x=0; v.x<G.EW_sz(); ++v.x) {
-                    if ( G.exists(v) ) {
-                        On_Node on_node = On_Node::SIZE;
-                        for (On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
-                            GRBLinExpr _x = var(v,t,i);
-                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::get_solution(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
-                            GRBVar x = _x.getVar(0);
-                            const double val = x.get(GRB_DoubleAttr_X);
-                            if (val>.1 && val<.9)    throw std::runtime_error("Grid_Gurobi::get_solution(): This On_Node variable doesn't appear to be integral.");
-                            if (val > .5) {
-                                if (on_node!=On_Node::SIZE) throw std::runtime_error("Grid_Gurobi::get_solution(): There seem to be >1 On_Node variables with value 1.");
-                                on_node=i;
-                            }
-                        } // for  On_Node
-
-                        NdStat ndstat = NdStat::SIZE;
-                        for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
-                            GRBLinExpr _x = var(v,t,i);
-                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::get_solution(): There's something wrong with this NdStat variable (GRBLinExpr has !=1 terms).");
-                            GRBVar x = _x.getVar(0);
-                            const double val = x.get(GRB_DoubleAttr_X);
-                            if (val>.1 && val<.9) throw std::runtime_error("Grid_Gurobi::get_solution(): This NdStat variable doesn't appear to be integral.");
-                            if (val > .5) {
-                                if (ndstat!=NdStat::SIZE) throw std::runtime_error("Grid_Gurobi::get_solution(): There seem to be >1 NdStat variables with value 1.");
-                                ndstat=i;
-                            }
-                        } // for  NdStat
-
-                        R_Vertical r_vert = R_Vertical::SIZE;
-                        for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
-                            GRBLinExpr _x = var(v,t,i);
-                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::get_solution(): There's something wrong with this R_Vertical variable (GRBLinExpr has !=1 terms).");
-                            GRBVar x = _x.getVar(0);
-                            const double val = x.get(GRB_DoubleAttr_X);
-                            if (val>.1 && val<.9) throw std::runtime_error("Grid_Gurobi::get_solution(): This R_Vertical variable doesn't appear to be integral.");
-                            if (val > .5) {
-                                if (r_vert!=R_Vertical::SIZE) throw std::runtime_error("Grid_Gurobi::get_solution(): There seem to be >1 R_Vertical variables with value 1.");
-                                r_vert=i;
-                            }
-                        } // for  R_Vertical
-
-                        R_Move r_mv = R_Move::SIZE;
-                        for (R_Move     i=begin_R_Move();     i!=end_R_Move();     ++i) {
-                            const Direction d = get_direction(i);
-                            double val = 0.;
-                            if ( G.move(v,d)!=nowhere ) {
-                                GRBLinExpr _x = var(v,t,i);
-                                if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::get_solution(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
-                                GRBVar x = _x.getVar(0);
-                                val = x.get(GRB_DoubleAttr_X);
-                            }
-                            if (val>.1 && val<.9) throw std::runtime_error("Grid_Gurobi::get_solution(): This R_Move variable doesn't appear to be integral.");
-                            if (val > .5) {
-                                if (r_mv!=R_Move::SIZE) throw std::runtime_error("Grid_Gurobi::get_solution(): There seem to be >1 R_Move variables with value 1.");
-                                r_mv=i;
-                            }
-                        } // for  R_Move
-
-                        fullsol[t][v] = Full_Stat{on_node,ndstat,r_vert,r_mv};
-                    } // if exists
-                } // for x
-            } // for y
-        } // for t
-
-        return fullsol;
-    } // if  there's a solution
-    else return std::vector< Stat_Vector_t >{};
-
+    You - need - to - implement - this - function.
+        // Look up in grid_gurobi.cc what it does there.
 } // get_solution()
 
 
@@ -264,57 +152,57 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Gurobi::get_solution()  
 
 
 inline
-CNF::Var GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const On_Node what) const
+CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const On_Node what) const
 {
-    if ((unsigned)what == (unsigned)On_Node::SIZE) throw std::range_error  ("Grid_Gurobi::var(On_Node): On_Node argument is out of range");
-    if ((unsigned)what >  (unsigned)On_Node::SIZE) throw std::runtime_error("Grid_Gurobi::var(On_Node): On_Node argument is broken (BAD BUG)");
+    if ((unsigned)what == (unsigned)On_Node::SIZE) throw std::range_error  ("Grid_Sat::var(On_Node): On_Node argument is out of range");
+    if ((unsigned)what >  (unsigned)On_Node::SIZE) throw std::runtime_error("Grid_Sat::var(On_Node): On_Node argument is broken (BAD BUG)");
 
     if (v==nowhere) {
         if (what==On_Node::empty) return 1;
         else                      return 0;
     } else {
-        if (! G.exists(v) ) throw std::range_error  ("Grid_Gurobi::var(On_Node): node does not exist.");
+        if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(On_Node): node does not exist.");
         return onnode_vars[v][t][(int)what];
     }
 } // var()
 
 inline
-CNF::Var GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const NdStat who) const
+CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const NdStat who) const
 {
-    if ((unsigned)who == (unsigned)NdStat::SIZE) throw std::range_error  ("Grid_Gurobi::var(NdStat): NdStat argument is out of range");
-    if ((unsigned)who >  (unsigned)NdStat::SIZE) throw std::runtime_error("Grid_Gurobi::var(NdStat): NdStat argument is broken (BAD BUG)");
+    if ((unsigned)who == (unsigned)NdStat::SIZE) throw std::range_error  ("Grid_Sat::var(NdStat): NdStat argument is out of range");
+    if ((unsigned)who >  (unsigned)NdStat::SIZE) throw std::runtime_error("Grid_Sat::var(NdStat): NdStat argument is broken (BAD BUG)");
 
     if (v==nowhere) {
         if (who==NdStat::nobodyhome) return 1;
         else                         return 0;
     } else {
-        if (! G.exists(v) ) throw std::range_error  ("Grid_Gurobi::var(NdStat): node does not exist.");
+        if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(NdStat): node does not exist.");
         return ndstat_vars[v][t][(int)who];
     }
 } // var()
 
 inline
-CNF::Var GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const R_Vertical vert) const
+CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const R_Vertical vert) const
 {
-    if ((unsigned)vert == (unsigned)R_Vertical::SIZE) throw std::range_error  ("Grid_Gurobi::var(R_Vertical): R_Vertical argument is out of range");
-    if ((unsigned)vert >  (unsigned)R_Vertical::SIZE) throw std::runtime_error("Grid_Gurobi::var(R_Vertical): R_Vertical argument is broken (BAD BUG)");
+    if ((unsigned)vert == (unsigned)R_Vertical::SIZE) throw std::range_error  ("Grid_Sat::var(R_Vertical): R_Vertical argument is out of range");
+    if ((unsigned)vert >  (unsigned)R_Vertical::SIZE) throw std::runtime_error("Grid_Sat::var(R_Vertical): R_Vertical argument is broken (BAD BUG)");
 
     if (v==nowhere) return 0;
     else {
-        if (! G.exists(v) ) throw std::range_error  ("Grid_Gurobi::var(R_Vertical): node does not exist.");
+        if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(R_Vertical): node does not exist.");
         return rvertical_vars[v][t][(int)vert];
     }
 } // var()
 
 inline
-CNF::Var GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const R_Move where) const
+CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const R_Move where) const
 {
-    if ((unsigned)where == (unsigned)R_Move::SIZE) throw std::range_error  ("Grid_Gurobi::var(R_Move): R_Move argument is out of range");
-    if ((unsigned)where >  (unsigned)R_Move::SIZE) throw std::runtime_error("Grid_Gurobi::var(R_Move): R_Move argument is broken (BAD BUG)");
+    if ((unsigned)where == (unsigned)R_Move::SIZE) throw std::range_error  ("Grid_Sat::var(R_Move): R_Move argument is out of range");
+    if ((unsigned)where >  (unsigned)R_Move::SIZE) throw std::runtime_error("Grid_Sat::var(R_Move): R_Move argument is broken (BAD BUG)");
 
     if (v==nowhere) return 0;
     else {
-        if (! G.exists(v) ) throw std::range_error  ("Grid_Gurobi::var(R_Move): node does not exist.");
+        if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(R_Move): node does not exist.");
         const Direction d = get_direction(where);
         return ( G.move(v,d)==nowhere ?    (GRBLinExpr)0.   :   (GRBLinExpr)rmv_vars[v][t][(int)where]  );
     }
@@ -324,19 +212,17 @@ CNF::Var GridSpace::Grid_Gurobi::var(const XY v, const unsigned t, const R_Move 
 //********************************************************************************************************************************************************************************************************
 //  C R E A T E   T H E   M O D E L
 //********************************************************************************************************************************************************************************************************
-void GridSpace::Grid_Gurobi::make_model()
+void GridSpace::Grid_Sat::make_model()
 {
     make_vars();
-    model.update();
     make_constraints();
-    model.update();
 } // make_model()
 
 
 //********************************************************************************************************************************************************************************************************
 //  V A R I A B L E S
 //********************************************************************************************************************************************************************************************************
-void GridSpace::Grid_Gurobi::make_vars()
+void GridSpace::Grid_Sat::make_vars()
 {
     for (short y=0; y<G.NS_sz(); ++y) {
         for (short x=0; x<G.EW_sz(); ++x) {
@@ -348,7 +234,7 @@ void GridSpace::Grid_Gurobi::make_vars()
     } // for y
 } // make_vars()
 
-void GridSpace::Grid_Gurobi::atom_vars(const XY v, const unsigned t)
+void GridSpace::Grid_Sat::atom_vars(const XY v, const unsigned t)
 {
     auto vartype = GRB_BINARY;
     // auto vartype = GRB_CONTINUOUS;
@@ -407,7 +293,7 @@ void GridSpace::Grid_Gurobi::atom_vars(const XY v, const unsigned t)
 //  C O N S T R A I N T S
 //********************************************************************************************************************************************************************************************************
 
-void GridSpace::Grid_Gurobi::make_constraints()
+void GridSpace::Grid_Sat::make_constraints()
 {
     for (short y=0; y<G.NS_sz(); ++y) {
         for (short x=0; x<G.EW_sz(); ++x) {
@@ -435,482 +321,3072 @@ void GridSpace::Grid_Gurobi::make_constraints()
 //********************************************************************************************************************************************************************************************************
 
 
-void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
+void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 {
-    // B A S I C
-    {
-        const GRBLinExpr Here_now_empty       = var(v,       t,    On_Node::empty);
-        const GRBLinExpr Here_now_car0        = var(v,       t,    On_Node::Car0);
-        const GRBLinExpr Here_now_car1        = var(v,       t,    On_Node::Car1);
-        const GRBLinExpr Here_now_car2        = var(v,       t,    On_Node::Car2);
-        model.addConstr(1 == Here_now_empty + Here_now_car0 + Here_now_car1  + Here_now_car2 );
+      // B A S I C
+      {
+	CNF::Model m;
+	CNF::Var Here_now_empty       = var(v,       t,    On_Node::empty);
+	CNF::Var Here_now_car0        = var(v,       t,    On_Node::Car0);
+	CNF::Var Here_now_car1        = var(v,       t,    On_Node::Car1);
+	CNF::Var Here_now_car2        = var(v,       t,    On_Node::Car2);
+	
+	CNF::Clause c;
+	c = Here_now_empty             or Here_now_car0              or Here_now_car1       or Here_now_car2;
+	m.addClause(c);
+	c = not(Here_now_empty)        or not(Here_now_car0);
+	m.addClause(c);
+	c = not(Here_now_empty)        or not(Here_now_car1);
+	m.addClause(c);
+	c = not(Here_now_empty)        or not(Here_now_car2);
+	m.addClause(c);
+	c = not(ere_now_car0)          or not(Here_now_car1);
+	m.addClause(c);
+	c = not(Here_now_car0)         or not(Here_now_car2);
+	m.addClause(c);
+	c = not(Here_now_car1)         or not(Here_now_car2);
+	m.addClause(c);
+	
+	CNF::Var Here_now_nobodyhome       = var(v,       t,    NdStat::nobodyhome  );
+	CNF::Var Here_now_R_ready          = var(v,       t,    NdStat::R_ready     );
+	CNF::Var Here_now_C0R_ready        = var(v,       t,    NdStat::C0R_ready   );
+	CNF::Var Here_now_C1R_ready        = var(v,       t,    NdStat::C1R_ready   );
+	CNF::Var Here_now_C2R_ready        = var(v,       t,    NdStat::C2R_ready   );
+	CNF::Var Here_now_R_moving         = var(v,       t,    NdStat::R_moving    );
+	CNF::Var Here_now_C0R_moving       = var(v,       t,    NdStat::C0R_moving  );
+	CNF::Var Here_now_C1R_moving       = var(v,       t,    NdStat::C1R_moving  );
+	CNF::Var Here_now_C2R_moving       = var(v,       t,    NdStat::C2R_moving  );
+	CNF::Var Here_now_R_vertical       = var(v,       t,    NdStat::R_vertical  );
+	
+	c = Here_now_nobodyhome                                                                                                    or Here_now_R_ready        or Here_now_C0R_ready         or Here_now_C1R_ready  or Here_now_C2R_ready                  or Here_now_R_moving       or Here_now_C0R_moving        or Here_now_C1R_moving or Here_now_C2R_moving                 or Here_now_R_vertical;
+	m.addClause(c);      
+	c = not(Here_now_nobodyhome) or not(Here_now_R_ready);
+	m.addClause(c);
+	c = not(Here_now_nobodyhome) or not(Here_now_C0R_ready);
+	m.addClause(c);
+	c = not(Here_now_nobodyhome) or not(Here_now_C1R_ready);
+	m.addClause(c);
+	c = not(Here_now_nobodyhome) or not(Here_now_C2R_ready);
+	m.addClause(c);
+	c = not(Here_now_nobodyhome) or not(Here_now_R_moving);
+	m.addClause(c);
+	c = not(Here_now_nobodyhome) or not(Here_now_C0R_moving);
+	m.addClause(c);
+	c = not(Here_now_nobodyhome) or not(Here_now_C1R_moving);
+	m.addClause(c);
+	c = not(Here_now_nobodyhome) or not(Here_now_C2R_moving);
+	m.addClause(c);
+	c = not(Here_now_nobodyhome) or not(Here_now_R_vertical);
+	m.addClause(c);
+	c = not(Here_now_R_ready)    or not(Here_now_C0R_ready);
+	m.addClause(c);
+	c = not(Here_now_R_ready)    or not(Here_now_C1R_ready);
+	m.addClause(c);
+	c = not(Here_now_R_ready)    or not(Here_now_C2R_ready);
+	m.addClause(c);
+	c = not(Here_now_R_ready)    or not(Here_now_R_moving);
+	m.addClause(c);
+	c = not(Here_now_R_ready)    or not(Here_now_C0R_moving);
+	m.addClause(c);
+	c = not(Here_now_R_ready)    or not(Here_now_C1R_moving);
+	m.addClause(c);
+	c = not(Here_now_R_ready)    or not(Here_now_C2R_moving);
+	m.addClause(c);
+	c = not(Here_now_R_ready)    or not(Here_now_R_vertical);
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)  or not(Here_now_C1R_ready);
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)  or not(Here_now_C2R_ready);
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)  or not(Here_now_R_moving);
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)  or not(Here_now_C0R_moving);
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)  or not(Here_now_C1R_moving);
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)  or not(Here_now_C2R_moving);
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)  or not(Here_now_R_vertical);
+	m.addClause(c);
+	c = not(Here_now_C1R_ready)  or not(Here_now_C2R_ready);
+	m.addClause(c);
+	c = not(Here_now_C1R_ready)  or not(Here_now_R_moving);
+	m.addClause(c);
+	c = not(Here_now_C1R_ready)  or not(Here_now_C0R_moving);
+	m.addClause(c);
+	c = not(Here_now_C1R_ready)  or not(Here_now_C1R_moving);
+	m.addClause(c);
+	c = not(Here_now_C1R_ready)  or not(Here_now_C2R_moving);
+	m.addClause(c);
+	c = not(Here_now_C1R_ready)  or not(Here_now_R_vertical);
+	m.addClause(c);
+	c = not(Here_now_C2R_ready)  or not(Here_now_R_moving);
+	m.addClause(c);
+	c = not(Here_now_C2R_ready)  or not(Here_now_C0R_moving);
+	m.addClause(c);
+	c = not(Here_now_C2R_ready)  or not(Here_now_C1R_moving);
+	m.addClause(c);
+	c = not(Here_now_C2R_ready)  or not(Here_now_C2R_moving);
+	m.addClause(c);
+	c = not(Here_now_C2R_ready)  or not(Here_now_R_vertical);
+	m.addClause(c);
+	c = not(Here_now_R_moving)   or not(Here_now_C0R_moving);
+	m.addClause(c);
+	c = not(Here_now_R_moving)   or not(Here_now_C1R_moving);
+	m.addClause(c);
+	c = not(Here_now_R_moving)   or not(Here_now_C2R_moving);
+	m.addClause(c);
+	c = not(Here_now_R_moving)   or not(Here_now_R_vertical);
+	m.addClause(c);
+	c = not(Here_now_C0R_moving) or not(Here_now_C1R_moving);
+	m.addClause(c);
+	c = not(Here_now_C0R_moving) or not(Here_now_C2R_moving);
+	m.addClause(c);
+	c = not(Here_now_C0R_moving) or not(Here_now_R_vertical);
+	m.addClause(c);
+	c = not(Here_now_C1R_moving) or not(Here_now_C2R_moving);
+	m.addClause(c);
+	c = not(Here_now_C1R_moving) or not(Here_now_R_vertical);
+	m.addClause(c);
+	c = not(Here_now_C2R_moving) or not(Here_now_R_vertical);
+	m.addClause(c);
 
-        const GRBLinExpr Here_now_nobodyhome       = var(v,       t,    NdStat::nobodyhome  );
-        const GRBLinExpr Here_now_R_ready          = var(v,       t,    NdStat::R_ready     );
-        const GRBLinExpr Here_now_C0R_ready        = var(v,       t,    NdStat::C0R_ready   );
-        const GRBLinExpr Here_now_C1R_ready        = var(v,       t,    NdStat::C1R_ready   );
-        const GRBLinExpr Here_now_C2R_ready        = var(v,       t,    NdStat::C2R_ready   );
-        const GRBLinExpr Here_now_R_moving         = var(v,       t,    NdStat::R_moving    );
-        const GRBLinExpr Here_now_C0R_moving       = var(v,       t,    NdStat::C0R_moving  );
-        const GRBLinExpr Here_now_C1R_moving       = var(v,       t,    NdStat::C1R_moving  );
-        const GRBLinExpr Here_now_C2R_moving       = var(v,       t,    NdStat::C2R_moving  );
-        const GRBLinExpr Here_now_R_vertical       = var(v,       t,    NdStat::R_vertical  );
-        model.addConstr(1 ==
-                        Here_now_nobodyhome
-                        + Here_now_R_ready  + Here_now_C0R_ready  + Here_now_C1R_ready  + Here_now_C2R_ready
-                        + Here_now_R_moving + Here_now_C0R_moving + Here_now_C1R_moving + Here_now_C2R_moving
-                        + Here_now_R_vertical );
+
+	// at most one of crobot or car:
+	
+	c = not(Here_now_C0R_ready)     or Here_now_C1R_ready       or Here_now_C2R_ready      or Here_now_C0R_moving              or Here_now_C1R_moving      or Here_now_C2R_moving      or Here_now_empty;
+	m.addClause(c);
+	c = Here_now_C0R_ready          or not(Here_now_C1R_ready)  or Here_now_C2R_ready      or Here_now_C0R_moving              or Here_now_C1R_moving      or Here_now_C2R_moving      or Here_now_empty;
+	m.addClause(c);
+	c = Here_now_C0R_ready          or Here_now_C1R_ready       or not(Here_now_C2R_ready) or Here_now_C0R_moving              or Here_now_C1R_moving      or Here_now_C2R_moving      or Here_now_empty;
+	m.addClause(c);
+	c = Here_now_C0R_ready          or Here_now_C1R_ready       or Here_now_C2R_ready      or not(Here_now_C0R_moving)         or Here_now_C1R_moving      or Here_now_C2R_moving      or Here_now_empty;
+	m.addClause(c);
+	c = Here_now_C0R_ready          or Here_now_C1R_ready       or Here_now_C2R_ready      or Here_now_C0R_moving              or not(Here_now_C1R_moving) or Here_now_C2R_moving      or Here_now_empty;
+	m.addClause(c);
+	c = Here_now_C0R_ready          or Here_now_C1R_ready       or Here_now_C2R_ready      or Here_now_C0R_moving              or Here_now_C1R_moving      or not(Here_now_C2R_moving) or Here_now_empty;
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)     or not(Here_now_C1R_ready);
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)     or not(Here_now_C2R_ready);
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)     or not(Here_now_C0R_moving);
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)     or not(Here_now_C1R_moving);
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)     or not(Here_now_C2R_moving);
+	m.addClause(c);
+	c = not(Here_now_C1R_ready)     or not(Here_now_C2R_ready);
+	m.addClause(c);
+	c = not(Here_now_C1R_ready)     or not(Here_now_C0R_moving);
+	m.addClause(c);
+	c = not(Here_now_C1R_ready)     or not(Here_now_C1R_moving);
+	m.addClause(c);
+	c = not(Here_now_C1R_ready)     or not(Here_now_C2R_moving);
+	m.addClause(c);
+	c = not(Here_now_C2R_ready)     or not(Here_now_C0R_moving);
+	m.addClause(c);
+	c = not(Here_now_C2R_ready)     or not(Here_now_C1R_moving);
+	m.addClause(c);
+	c = not(Here_now_C2R_ready)     or not(Here_now_C2R_moving);
+	m.addClause(c);
+	c = not(Here_now_C0R_moving)    or not(Here_now_C1R_moving);
+	m.addClause(c);
+	c = not(Here_now_C0R_moving)    or not(Here_now_C2R_moving);
+	m.addClause(c);
+	c = not(Here_now_C1R_moving)    or not(Here_now_C2R_moving);
+	m.addClause(c);
 
 
-        // at most one of crobot or car:
-        model.addConstr( Here_now_C0R_ready OR Here_now_C1R_ready OR Here_now_C2R_ready OR Here_now_C0R_moving OR Here_now_C1R_moving OR Here_now_C2R_moving     IMPLIES  Here_now_empty );
+	CNF::Var Here_now_R_lift           = var(v,       t,    R_Vertical::lift);
+	CNF::Var Here_now_R_lifting1       = var(v,       t,    R_Vertical::l1);
+	CNF::Var Here_now_R_lifting2       = var(v,       t,    R_Vertical::l2);
+	CNF::Var Here_now_R_lifting3       = var(v,       t,    R_Vertical::l3);
+	CNF::Var Here_now_R_lifting4       = var(v,       t,    R_Vertical::l4);
+	CNF::Var Here_now_R_drop           = var(v,       t,    R_Vertical::l4);
+	// neccessarly 
+	c = not(Here_now_R_vertical)    or Here_now_R_lift          or Here_now_R_lifting1     or Here_now_R_lifting2              or Here_now_R_lifting3      or Here_now_R_lifting4      or Here_now_R_drop;
+	m.addClause(c);
+	// sufficient 
+	// 6 choose 1
+	c = not(Here_now_R_lift)        or Here_now_R_lifting1      or Here_now_R_lifting2     or Here_now_R_lifting3              or Here_now_R_lifting4      or Here_now_R_drop          or Here_now_R_vertical;
+	m.addClause(c);
+	c = Here_now_R_lift             or not(Here_now_R_lifting1) or Here_now_R_lifting2     or Here_now_R_lifting3              or Here_now_R_lifting4      or Here_now_R_drop          or Here_now_R_vertical;
+	m.addClause(c);
+	c = Here_now_R_lift             or Here_now_R_lifting1      or not(Here_now_R_lifting2)or Here_now_R_lifting3              or Here_now_R_lifting4      or Here_now_R_drop          or Here_now_R_vertical;
+	m.addClause(c);
+	c = Here_now_R_lift             or Here_now_R_lifting1      or Here_now_R_lifting2     or not(Here_now_R_lifting3)         or Here_now_R_lifting4      or Here_now_R_drop          or Here_now_R_vertical;
+	m.addClause(c);
+	c = Here_now_R_lift             or Here_now_R_lifting1      or Here_now_R_lifting2     or Here_now_R_lifting3              or not(Here_now_R_lifting4) or Here_now_R_drop          or Here_now_R_vertical;
+	m.addClause(c);
+	c = Here_now_R_lift             or Here_now_R_lifting1      or Here_now_R_lifting2     or Here_now_R_lifting3              or Here_now_R_lifting4      or not(Here_now_R_drop)     or Here_now_R_vertical;
+	m.addClause(c);
+	// 6 choose 2
+	c = not(Here_now_R_lift)        or not(Here_now_R_lifting1);
+	m.addClause(c);
+	c = not(Here_now_R_lift)        or not(Here_now_R_lifting2);
+	m.addClause(c);
+	c = not(Here_now_R_lift)        or not(Here_now_R_lifting3);
+	m.addClause(c);
+	c = not(Here_now_R_lift)        or not(Here_now_R_lifting4);
+	m.addClause(c);
+	c = not(Here_now_R_lift)        or not(Here_now_R_drop);
+	m.addClause(c);
+	c = not(Here_now_R_lifting1)    or not(Here_now_R_lifting2);
+	m.addClause(c);
+	c = not(Here_now_R_lifting1)    or not(Here_now_R_lifting3);
+	m.addClause(c);
+	c = not(Here_now_R_lifting1)    or not(Here_now_R_lifting4);
+	m.addClause(c);
+	c = not(Here_now_R_lifting1)    or not(Here_now_R_drop);
+	m.addClause(c);
+	c = not(Here_now_R_lifting2)    or not(Here_now_R_lifting3);
+	m.addClause(c);
+	c = not(Here_now_R_lifting2)    or not(Here_now_R_lifting4);
+	m.addClause(c);
+	c = not(Here_now_R_lifting2)    or not(Here_now_R_drop);
+	m.addClause(c);
+	c = not(Here_now_R_lifting3)    or not(Here_now_R_lifting4);
+	m.addClause(c);
+	c = not(Here_now_R_lifting3)    or not(Here_now_R_drop);
+	m.addClause(c);
+	c = not(Here_now_R_lifting4)    or not(Here_now_R_drop);
 
 
-        const GRBLinExpr Here_now_R_lift           = var(v,       t,    R_Vertical::lift);
-        const GRBLinExpr Here_now_R_lifting1       = var(v,       t,    R_Vertical::l1);
-        const GRBLinExpr Here_now_R_lifting2       = var(v,       t,    R_Vertical::l2);
-        const GRBLinExpr Here_now_R_lifting3       = var(v,       t,    R_Vertical::l3);
-        const GRBLinExpr Here_now_R_lifting4       = var(v,       t,    R_Vertical::l4);
-        const GRBLinExpr Here_now_R_drop           = var(v,       t,    R_Vertical::drop);
-        model.addConstr( Here_now_R_vertical == Here_now_R_lift + Here_now_R_lifting1 + Here_now_R_lifting2 + Here_now_R_lifting3 + Here_now_R_lifting4 + Here_now_R_drop );
+	CNF::Var  Here_now_R_accE = var(v,    t,     R_Move::accE);
+	CNF::Var  Here_now_R_mvE0 = var(v,    t,     R_Move::mvE0);
+	CNF::Var  Here_now_R_accW = var(v,    t,     R_Move::accW);
+	CNF::Var  Here_now_R_mvW0 = var(v,    t,     R_Move::mvW0);
+	CNF::Var  Here_now_R_accN = var(v,    t,     R_Move::accN);
+	CNF::Var  Here_now_R_mvN1 = var(v,    t,     R_Move::mvN1);
+	CNF::Var  Here_now_R_mvN0 = var(v,    t,     R_Move::mvN0);
+	CNF::Var  Here_now_R_accS = var(v,    t,     R_Move::accS);
+	CNF::Var  Here_now_R_mvS1 = var(v,    t,     R_Move::mvS1);
+	CNF::Var  Here_now_R_mvS0 = var(v,    t,     R_Move::mvS0);
+	// necessarly
+	c = not(Here_now_R_moving)                                                                                                 or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
+	m.addClause(c);
+	// sufficient
+	// 10 choose 1
+	c = Here_now_R_moving                                                                                                      or not(Here_now_R_accE) or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
+	m.addClause(c);
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         not(Here_now_R_mvE0)                                                or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
+	m.addClause(c);
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or not(Here_now_R_accW) or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
+	m.addClause(c);
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         not(Here_now_R_mvW0)                                                or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
+	m.addClause(c);
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or not(Here_now_R_accN) or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
+	m.addClause(c);
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or not(Here_now_R_mvN1) or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
+	m.addClause(c);
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or not(Here_now_R_mvN0)                                                or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
+	m.addClause(c);
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or not(Here_now_R_accS) or Here_now_R_mvS1      or Here_now_R_mvS0;
+	m.addClause(c);
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or not(Here_now_R_mvS1) or Here_now_R_mvS0;
+	m.addClause(c);
+	c = Here_now_R_moving                                                                                                      or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or not(Here_now_R_mvS0);
+	m.addClause(c);
+	//10 choose 2
+	c = not(Here_now_R_accE)    or not(Here_now_R_mvE0);
+	m.addClause(c);
+	c = not(Here_now_R_accE)    or not(Here_now_R_accW);
+	m.addClause(c);
+	c = not(Here_now_R_accE)    or not(Here_now_R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_R_accE)    or not(Here_now_R_accN);
+	m.addClause(c);
+	c = not(Here_now_R_accE)    or not(Here_now_R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_R_accE)    or not(Here_now_R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_R_accE)    or not(Here_now_R_accS);
+	m.addClause(c);
+	c = not(Here_now_R_accE)    or not(Here_now_R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_R_accE)    or not(Here_now_R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_accW);
+	m.addClause(c);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_accN);
+	m.addClause(c);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_accS);
+	m.addClause(c);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_R_mvE0)    or not(Here_now_R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_R_accW)    or not(Here_now_R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_R_accW)    or not(Here_now_R_accN);
+	m.addClause(c);
+	c = not(Here_now_R_accW)    or not(Here_now_R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_R_accW)    or not(Here_now_R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_R_accW)    or not(Here_now_R_accS);
+	m.addClause(c);
+	c = not(Here_now_R_accW)    or not(Here_now_R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_R_accW)    or not(Here_now_R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_R_mvW0)    or not(Here_now_R_accN);
+	m.addClause(c);
+	c = not(Here_now_R_mvW0)    or not(Here_now_R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_R_mvW0)    or not(Here_now_R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_R_mvW0)    or not(Here_now_R_accS);
+	m.addClause(c);
+	c = not(Here_now_R_mvW0)    or not(Here_now_R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_R_mvW0)    or not(Here_now_R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_R_accN)    or not(Here_now_R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_R_accN)    or not(Here_now_R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_R_accN)    or not(Here_now_R_accS);
+	m.addClause(c);
+	c = not(Here_now_R_accN)    or not(Here_now_R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_R_accN)    or not(Here_now_R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_R_mvN1)    or not(Here_now_R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_R_mvN1)    or not(Here_now_R_accS);
+	m.addClause(c);
+	c = not(Here_now_R_mvN1)    or not(Here_now_R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_R_mvN1)    or not(Here_now_R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_R_mvN0)    or not(Here_now_R_accS);
+	m.addClause(c);
+	c = not(Here_now_R_mvN0)    or not(Here_now_R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_R_mvN0)    or not(Here_now_R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_R_accS)    or not(Here_now_R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_R_accS)    or not(Here_now_R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_R_mvS1)    or not(Here_now_R_mvS0);
+	m.addClause(c);
 
-        const GRBLinExpr Here_now_R_accE = var(v,    t,     R_Move::accE);
-        const GRBLinExpr Here_now_R_mvE0 = var(v,    t,     R_Move::mvE0);
-        const GRBLinExpr Here_now_R_accW = var(v,    t,     R_Move::accW);
-        const GRBLinExpr Here_now_R_mvW0 = var(v,    t,     R_Move::mvW0);
-        const GRBLinExpr Here_now_R_accN = var(v,    t,     R_Move::accN);
-        const GRBLinExpr Here_now_R_mvN1 = var(v,    t,     R_Move::mvN1);
-        const GRBLinExpr Here_now_R_mvN0 = var(v,    t,     R_Move::mvN0);
-        const GRBLinExpr Here_now_R_accS = var(v,    t,     R_Move::accS);
-        const GRBLinExpr Here_now_R_mvS1 = var(v,    t,     R_Move::mvS1);
-        const GRBLinExpr Here_now_R_mvS0 = var(v,    t,     R_Move::mvS0);
-        model.addConstr( Here_now_R_moving ==
-                         Here_now_R_accE +                   Here_now_R_mvE0 +
-                         Here_now_R_accW +                   Here_now_R_mvW0 +
-                         Here_now_R_accN + Here_now_R_mvN1 + Here_now_R_mvN0 +
-                         Here_now_R_accS + Here_now_R_mvS1 + Here_now_R_mvS0   );
+	// Car 0
+	
+	CNF::Var Here_now_C0R_accE = var(v,    t,     R_Move::w0_accE);
+	CNF::Var Here_now_C0R_mvE1 = var(v,    t,     R_Move::w0_mvE1);
+	CNF::Var Here_now_C0R_mvE0 = var(v,    t,     R_Move::w0_mvE0);
+	CNF::Var Here_now_C0R_accW = var(v,    t,     R_Move::w0_accW);
+	CNF::Var Here_now_C0R_mvW1 = var(v,    t,     R_Move::w0_mvW1);
+	CNF::Var Here_now_C0R_mvW0 = var(v,    t,     R_Move::w0_mvW0);
+	CNF::Var Here_now_C0R_accN = var(v,    t,     R_Move::w0_accN);
+	CNF::Var Here_now_C0R_mvN1 = var(v,    t,     R_Move::w0_mvN1);
+	CNF::Var Here_now_C0R_mvN2 = var(v,    t,     R_Move::w0_mvN2);
+	CNF::Var Here_now_C0R_mvN3 = var(v,    t,     R_Move::w0_mvN3);
+	CNF::Var Here_now_C0R_mvN0 = var(v,    t,     R_Move::w0_mvN0);
+	CNF::Var Here_now_C0R_accS = var(v,    t,     R_Move::w0_accS);
+	CNF::Var Here_now_C0R_mvS1 = var(v,    t,     R_Move::w0_mvS1);
+	CNF::Var Here_now_C0R_mvS2 = var(v,    t,     R_Move::w0_mvS2);
+	CNF::Var Here_now_C0R_mvS3 = var(v,    t,     R_Move::w0_mvS3);
+	CNF::Var Here_now_C0R_mvS0 = var(v,    t,     R_Move::w0_mvS0);
 
-        const GRBLinExpr Here_now_C0R_accE = var(v,    t,     R_Move::w0_accE);
-        const GRBLinExpr Here_now_C0R_mvE1 = var(v,    t,     R_Move::w0_mvE1);
-        const GRBLinExpr Here_now_C0R_mvE0 = var(v,    t,     R_Move::w0_mvE0);
-        const GRBLinExpr Here_now_C0R_accW = var(v,    t,     R_Move::w0_accW);
-        const GRBLinExpr Here_now_C0R_mvW1 = var(v,    t,     R_Move::w0_mvW1);
-        const GRBLinExpr Here_now_C0R_mvW0 = var(v,    t,     R_Move::w0_mvW0);
-        const GRBLinExpr Here_now_C0R_accN = var(v,    t,     R_Move::w0_accN);
-        const GRBLinExpr Here_now_C0R_mvN1 = var(v,    t,     R_Move::w0_mvN1);
-        const GRBLinExpr Here_now_C0R_mvN2 = var(v,    t,     R_Move::w0_mvN2);
-        const GRBLinExpr Here_now_C0R_mvN3 = var(v,    t,     R_Move::w0_mvN3);
-        const GRBLinExpr Here_now_C0R_mvN0 = var(v,    t,     R_Move::w0_mvN0);
-        const GRBLinExpr Here_now_C0R_accS = var(v,    t,     R_Move::w0_accS);
-        const GRBLinExpr Here_now_C0R_mvS1 = var(v,    t,     R_Move::w0_mvS1);
-        const GRBLinExpr Here_now_C0R_mvS2 = var(v,    t,     R_Move::w0_mvS2);
-        const GRBLinExpr Here_now_C0R_mvS3 = var(v,    t,     R_Move::w0_mvS3);
-        const GRBLinExpr Here_now_C0R_mvS0 = var(v,    t,     R_Move::w0_mvS0);
-        model.addConstr( Here_now_C0R_moving ==
-                         Here_now_C0R_accE + Here_now_C0R_mvE1 + Here_now_C0R_mvE0 +
-                         Here_now_C0R_accW + Here_now_C0R_mvW1 + Here_now_C0R_mvW0 +
-                         Here_now_C0R_accN + Here_now_C0R_mvN1 + Here_now_C0R_mvN2 + Here_now_C0R_mvN3 + Here_now_C0R_mvN0 +
-                         Here_now_C0R_accS + Here_now_C0R_mvS1 + Here_now_C0R_mvS2 + Here_now_C0R_mvS3 + Here_now_C0R_mvS0   );
+	//necceraly
+	c = not(Here_now_C0R_moving)               or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
+	// sufficient
+	// 16 choose 1
+	c = Here_now_C0R_moving                    or                                                                                           not(Here_now_C0R_accE)    or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or not(Here_now_C0R_mvE1) or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or not(Here_now_C0R_mvE0) or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       not(Here_now_C0R_accW)    or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or not(Here_now_C0R_mvW1) or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or not(Here_now_C0R_mvW0) or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       not(Here_now_C0R_accN)    or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or not(Here_now_C0R_mvN1) or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or not(Here_now_C0R_mvN2) or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
+	
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or not(Here_now_C0R_mvN3)                or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
 
-        const GRBLinExpr Here_now_C1R_accE = var(v,    t,     R_Move::w1_accE);
-        const GRBLinExpr Here_now_C1R_mvE1 = var(v,    t,     R_Move::w1_mvE1);
-        const GRBLinExpr Here_now_C1R_mvE0 = var(v,    t,     R_Move::w1_mvE0);
-        const GRBLinExpr Here_now_C1R_accW = var(v,    t,     R_Move::w1_accW);
-        const GRBLinExpr Here_now_C1R_mvW1 = var(v,    t,     R_Move::w1_mvW1);
-        const GRBLinExpr Here_now_C1R_mvW0 = var(v,    t,     R_Move::w1_mvW0);
-        const GRBLinExpr Here_now_C1R_accN = var(v,    t,     R_Move::w1_accN);
-        const GRBLinExpr Here_now_C1R_mvN1 = var(v,    t,     R_Move::w1_mvN1);
-        const GRBLinExpr Here_now_C1R_mvN2 = var(v,    t,     R_Move::w1_mvN2);
-        const GRBLinExpr Here_now_C1R_mvN3 = var(v,    t,     R_Move::w1_mvN3);
-        const GRBLinExpr Here_now_C1R_mvN0 = var(v,    t,     R_Move::w1_mvN0);
-        const GRBLinExpr Here_now_C1R_accS = var(v,    t,     R_Move::w1_accS);
-        const GRBLinExpr Here_now_C1R_mvS1 = var(v,    t,     R_Move::w1_mvS1);
-        const GRBLinExpr Here_now_C1R_mvS2 = var(v,    t,     R_Move::w1_mvS2);
-        const GRBLinExpr Here_now_C1R_mvS3 = var(v,    t,     R_Move::w1_mvS3);
-        const GRBLinExpr Here_now_C1R_mvS0 = var(v,    t,     R_Move::w1_mvS0);
-        model.addConstr( Here_now_C1R_moving ==
-                         Here_now_C1R_accE + Here_now_C1R_mvE1 + Here_now_C1R_mvE0 +
-                         Here_now_C1R_accW + Here_now_C1R_mvW1 + Here_now_C1R_mvW0 +
-                         Here_now_C1R_accN + Here_now_C1R_mvN1 + Here_now_C1R_mvN2 + Here_now_C1R_mvN3 + Here_now_C1R_mvN0 +
-                         Here_now_C1R_accS + Here_now_C1R_mvS1 + Here_now_C1R_mvS2 + Here_now_C1R_mvS3 + Here_now_C1R_mvS0   );
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or not(Here_now_C0R_mvN0) or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0     or                                        Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0     or                                        Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2     or Here_now_C0R_mvN3                      or Here_now_C0R_mvN0      or                                                                                           not(Here_now_C0R_accS)    or Here_now_C0R_mvS1      or Here_now_C0R_mvS2     or Here_now_C0R_mvS3                      or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0     or                                        Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0     or                                        Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2     or Here_now_C0R_mvN3                      or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or not(Here_now_C0R_mvS1) or Here_now_C0R_mvS2     or Here_now_C0R_mvS3                      or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or not(Here_now_C0R_mvS2) or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or not(Here_now_C0R_mvS3)                or Here_now_C0R_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_moving                    or                                                                                           or  Here_now_C0R_accE     or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	// 16 choose 2
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvE1);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvE0);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_accW);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_accN);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_accS);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvE0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_accW);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_accN);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_accS);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_accW);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_accN);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_accS);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_accN);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_accS);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_accN);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_accS);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_accN);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_accS);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_accS);
+	m.addClause(c);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_accN)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_accS);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_accS);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN2)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN3)                 or not(Here_now_C0R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN3)                 or not(Here_now_C0R_accS);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN3)                 or not(Here_now_C0R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN3)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN3)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN3)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN0)                 or not(Here_now_C0R_accS);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN0)                 or not(Here_now_C0R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN0)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN0)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN0)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_accS)                 or not(Here_now_C0R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_accS)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_accS)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_accS)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS1)                 or not(Here_now_C0R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS1)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS1)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS2)                 or not(Here_now_C0R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS2)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS3)                 or not(Here_now_C0R_mvS0);
+	m.addClause(c);
+	
+        // Car 1
 
-        const GRBLinExpr Here_now_C2R_accE = var(v,    t,     R_Move::w2_accE);
-        const GRBLinExpr Here_now_C2R_mvE1 = var(v,    t,     R_Move::w2_mvE1);
-        const GRBLinExpr Here_now_C2R_mvE0 = var(v,    t,     R_Move::w2_mvE0);
-        const GRBLinExpr Here_now_C2R_accW = var(v,    t,     R_Move::w2_accW);
-        const GRBLinExpr Here_now_C2R_mvW1 = var(v,    t,     R_Move::w2_mvW1);
-        const GRBLinExpr Here_now_C2R_mvW0 = var(v,    t,     R_Move::w2_mvW0);
-        const GRBLinExpr Here_now_C2R_accN = var(v,    t,     R_Move::w2_accN);
-        const GRBLinExpr Here_now_C2R_mvN1 = var(v,    t,     R_Move::w2_mvN1);
-        const GRBLinExpr Here_now_C2R_mvN2 = var(v,    t,     R_Move::w2_mvN2);
-        const GRBLinExpr Here_now_C2R_mvN3 = var(v,    t,     R_Move::w2_mvN3);
-        const GRBLinExpr Here_now_C2R_mvN0 = var(v,    t,     R_Move::w2_mvN0);
-        const GRBLinExpr Here_now_C2R_accS = var(v,    t,     R_Move::w2_accS);
-        const GRBLinExpr Here_now_C2R_mvS1 = var(v,    t,     R_Move::w2_mvS1);
-        const GRBLinExpr Here_now_C2R_mvS2 = var(v,    t,     R_Move::w2_mvS2);
-        const GRBLinExpr Here_now_C2R_mvS3 = var(v,    t,     R_Move::w2_mvS3);
-        const GRBLinExpr Here_now_C2R_mvS0 = var(v,    t,     R_Move::w2_mvS0);
-        model.addConstr( Here_now_C2R_moving ==
-                         Here_now_C2R_accE + Here_now_C2R_mvE1 + Here_now_C2R_mvE0 +
-                         Here_now_C2R_accW + Here_now_C2R_mvW1 + Here_now_C2R_mvW0 +
-                         Here_now_C2R_accN + Here_now_C2R_mvN1 + Here_now_C2R_mvN2 + Here_now_C2R_mvN3 + Here_now_C2R_mvN0 +
-                         Here_now_C2R_accS + Here_now_C2R_mvS1 + Here_now_C2R_mvS2 + Here_now_C2R_mvS3 + Here_now_C2R_mvS0   );
+	CNF::Var Here_now_C1R_accE = var(v,    t,     R_Move::w1_accE);
+	CNF::Var Here_now_C1R_mvE1 = var(v,    t,     R_Move::w1_mvE1);
+	CNF::Var Here_now_C1R_mvE0 = var(v,    t,     R_Move::w1_mvE0);
+	CNF::Var Here_now_C1R_accW = var(v,    t,     R_Move::w1_accW);
+	CNF::Var Here_now_C1R_mvW1 = var(v,    t,     R_Move::w1_mvW1);
+	CNF::Var Here_now_C1R_mvW0 = var(v,    t,     R_Move::w1_mvW0);
+	CNF::Var Here_now_C1R_accN = var(v,    t,     R_Move::w1_accN);
+	CNF::Var Here_now_C1R_mvN1 = var(v,    t,     R_Move::w1_mvN1);
+	CNF::Var Here_now_C1R_mvN2 = var(v,    t,     R_Move::w1_mvN2);
+	CNF::Var Here_now_C1R_mvN3 = var(v,    t,     R_Move::w1_mvN3);
+	CNF::Var Here_now_C1R_mvN0 = var(v,    t,     R_Move::w1_mvN0);
+	CNF::Var Here_now_C1R_accS = var(v,    t,     R_Move::w1_accS);
+	CNF::Var Here_now_C1R_mvS1 = var(v,    t,     R_Move::w1_mvS1);
+	CNF::Var Here_now_C1R_mvS2 = var(v,    t,     R_Move::w1_mvS2);
+	CNF::Var Here_now_C1R_mvS3 = var(v,    t,     R_Move::w1_mvS3);
+	CNF::Var Here_now_C1R_mvS0 = var(v,    t,     R_Move::w1_mvS0);
+
+	//necceraly
+	c = not(Here_now_C1R_moving)               or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	// sufficient
+	// 16 choose 1
+	c = Here_now_C1R_moving                    or                                                                                           not(Here_now_C1R_accE)    or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or not(Here_now_C1R_mvE1) or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or not(Here_now_C1R_mvE0)  or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      not(Here_now_C1R_accW)    or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or not(Here_now_C1R_mvW1) or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or not(Here_now_C1R_mvW0)  or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      not(Here_now_C1R_accN)    or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or not(Here_now_C1R_mvN1) or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or not(Here_now_C1R_mvN2)  or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or not(Here_now_C1R_mvN3)               or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or not(Here_now_C1R_mvN0) or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           not(Here_now_C1R_accS)    or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or not(Here_now_C1R_mvS1) or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or not(Here_now_C1R_mvS2)  or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or not(Here_now_C1R_mvS3)               or Here_now_C1R_mvS0;
+	m.addClause(c);
+	c = Here_now_C1R_moving                    or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	// 16 choose 2
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvE1);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvE0);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_accW);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_accN);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_accS);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c)
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvE0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_accW);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_accN);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_accS);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_accW);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_accN);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_accS);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c); 
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_accN);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_accS);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_accN);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_accS);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_accN);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_accS);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW0)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_accS);
+	m.addClause(c);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_accN)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_accS);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN1)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_accS);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN2)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN3)                 or not(Here_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN3)                 or not(Here_now_C1R_accS);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN3)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN3)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN3)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN3)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN0)                 or not(Here_now_C1R_accS);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN0)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN0)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN0)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN0)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_accS)                 or not(Here_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C1R_accS)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_accS)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_accS)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS1)                 or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS1)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS1)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS2)                 or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS2)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS3)                 or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+        // Car 2
+
+	CNF::Var Here_now_C2R_accE = var(v,    t,     R_Move::w2_accE);
+	CNF::Var Here_now_C2R_mvE1 = var(v,    t,     R_Move::w2_mvE1);
+	CNF::Var Here_now_C2R_mvE0 = var(v,    t,     R_Move::w2_mvE0);
+	CNF::Var Here_now_C2R_accW = var(v,    t,     R_Move::w2_accW);
+	CNF::Var Here_now_C2R_mvW1 = var(v,    t,     R_Move::w2_mvW1);
+	CNF::Var Here_now_C2R_mvW0 = var(v,    t,     R_Move::w2_mvW0);
+	CNF::Var Here_now_C2R_accN = var(v,    t,     R_Move::w2_accN);
+	CNF::Var Here_now_C2R_mvN1 = var(v,    t,     R_Move::w2_mvN1);
+	CNF::Var Here_now_C2R_mvN2 = var(v,    t,     R_Move::w2_mvN2);
+	CNF::Var Here_now_C2R_mvN3 = var(v,    t,     R_Move::w2_mvN3);
+	CNF::Var Here_now_C2R_mvN0 = var(v,    t,     R_Move::w2_mvN0);
+	CNF::Var Here_now_C2R_accS = var(v,    t,     R_Move::w2_accS);
+	CNF::Var Here_now_C2R_mvS1 = var(v,    t,     R_Move::w2_mvS1);
+	CNF::Var Here_now_C2R_mvS2 = var(v,    t,     R_Move::w2_mvS2);
+	CNF::Var Here_now_C2R_mvS3 = var(v,    t,     R_Move::w2_mvS3);
+	CNF::Var Here_now_C2R_mvS0 = var(v,    t,     R_Move::w2_mvS0);
+
+	//necceraly
+	c = not(Here_now_C2R_moving)               or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	// sufficient
+	// 16 choose 1
+	c = Here_now_C2R_moving                    or                                                                                           not(Here_now_C2R_accE)    or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or not(Here_now_C2R_mvE1) or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or not(Here_now_C2R_mvE0) or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       not(Here_now_C0R_accW)    or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or not(Here_now_C2R_mvW1) or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or not(Here_now_C2R_mvW0) or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       not(Here_now_C2R_accN)    or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or not(Here_now_C2R_mvN1) or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or not(Here_now_C2R_mvN2) or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or not(Here_now_C2R_mvN3)                or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or not(Here_now_C2R_mvN0) or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           not(Here_now_C2R_accS)    or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3 or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or not(Here_now_C2R_mvS1) or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or not(Here_now_C2R_mvS2) or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving or                                                                                                              Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or not(Here_now_C2R_mvS3)                or Here_now_C2R_mvS0;
+	m.addClause(c);
+	c = Here_now_C2R_moving                    or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	// 16 choose 2
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvE1);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvE0);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_accW);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_accN);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_accS);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvE0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_accW);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_accN);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C2R_accS);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_accW);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_accN);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_accS);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvE0)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_accN);
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_accS);
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_accN);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_accS);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW1)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_accN);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_accS);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvW0)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_accS);
+	m.addClause(c);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_accN)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_accS);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN1)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_accS);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN2)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN3)                 or not(Here_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN3)                 or not(Here_now_C2R_accS);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN3)                 or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN3)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN3)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN3)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN0)                 or not(Here_now_C2R_accS);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN0)                 or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN0)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN0)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN0)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_accS)                 or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C2R_accS)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_accS)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_accS)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvS1)                 or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvS1)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvS1)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvS2)                 or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvS2)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C2R_mvS3)                 or not(Here_now_C2R_mvS0);
+	m.addClause(c);
     } // endof B A S I C
 
     // M O V E M E N T
     {
-        const GRBLinExpr Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
-        const GRBLinExpr Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
-        const GRBLinExpr Here_now_R_accE    = var(v,    t,     R_Move::accE);
-        const GRBLinExpr Here_now_R_mvE0    = var(v,    t,     R_Move::mvE0);
-        const GRBLinExpr Here_now_R_accW    = var(v,    t,     R_Move::accW);
-        const GRBLinExpr Here_now_R_mvW0    = var(v,    t,     R_Move::mvW0);
-        const GRBLinExpr Here_now_R_accN    = var(v,    t,     R_Move::accN);
-        const GRBLinExpr Here_now_R_mvN1    = var(v,    t,     R_Move::mvN1);
-        const GRBLinExpr Here_now_R_mvN0    = var(v,    t,     R_Move::mvN0);
-        const GRBLinExpr Here_now_R_accS    = var(v,    t,     R_Move::accS);
-        const GRBLinExpr Here_now_R_mvS1    = var(v,    t,     R_Move::mvS1);
-        const GRBLinExpr Here_now_R_mvS0    = var(v,    t,     R_Move::mvS0);
-        const GRBLinExpr Here_now_R_lift    = var(v,    t,     R_Vertical::lift);
-        const GRBLinExpr Here_now_R_lifting1= var(v,    t,     R_Vertical::l1);
-        const GRBLinExpr Here_now_R_lifting2= var(v,    t,     R_Vertical::l2);
-        const GRBLinExpr Here_now_R_lifting3= var(v,    t,     R_Vertical::l3);
-        const GRBLinExpr Here_now_R_lifting4= var(v,    t,     R_Vertical::l4);
-        const GRBLinExpr Here_now_R_drop    = var(v,    t,     R_Vertical::drop);
-        const GRBLinExpr Here_now_C0R_ready = var(v,    t,     NdStat::C0R_ready);
-        const GRBLinExpr Here_now_C0R_accE  = var(v,    t,     R_Move::w0_accE);
-        const GRBLinExpr Here_now_C0R_mvE1  = var(v,    t,     R_Move::w0_mvE1);
-        const GRBLinExpr Here_now_C0R_mvE0  = var(v,    t,     R_Move::w0_mvE0);
-        const GRBLinExpr Here_now_C0R_accW  = var(v,    t,     R_Move::w0_accW);
-        const GRBLinExpr Here_now_C0R_mvW1  = var(v,    t,     R_Move::w0_mvW1);
-        const GRBLinExpr Here_now_C0R_mvW0  = var(v,    t,     R_Move::w0_mvW0);
-        const GRBLinExpr Here_now_C0R_accN  = var(v,    t,     R_Move::w0_accN);
-        const GRBLinExpr Here_now_C0R_mvN1  = var(v,    t,     R_Move::w0_mvN1);
-        const GRBLinExpr Here_now_C0R_mvN2  = var(v,    t,     R_Move::w0_mvN2);
-        const GRBLinExpr Here_now_C0R_mvN3  = var(v,    t,     R_Move::w0_mvN3);
-        const GRBLinExpr Here_now_C0R_mvN0  = var(v,    t,     R_Move::w0_mvN0);
-        const GRBLinExpr Here_now_C0R_accS  = var(v,    t,     R_Move::w0_accS);
-        const GRBLinExpr Here_now_C0R_mvS1  = var(v,    t,     R_Move::w0_mvS1);
-        const GRBLinExpr Here_now_C0R_mvS2  = var(v,    t,     R_Move::w0_mvS2);
-        const GRBLinExpr Here_now_C0R_mvS3  = var(v,    t,     R_Move::w0_mvS3);
-        const GRBLinExpr Here_now_C0R_mvS0  = var(v,    t,     R_Move::w0_mvS0);
-        const GRBLinExpr Here_now_C1R_ready = var(v,    t,     NdStat::C1R_ready);
-        const GRBLinExpr Here_now_C1R_accE  = var(v,    t,     R_Move::w1_accE);
-        const GRBLinExpr Here_now_C1R_mvE1  = var(v,    t,     R_Move::w1_mvE1);
-        const GRBLinExpr Here_now_C1R_mvE0  = var(v,    t,     R_Move::w1_mvE0);
-        const GRBLinExpr Here_now_C1R_accW  = var(v,    t,     R_Move::w1_accW);
-        const GRBLinExpr Here_now_C1R_mvW1  = var(v,    t,     R_Move::w1_mvW1);
-        const GRBLinExpr Here_now_C1R_mvW0  = var(v,    t,     R_Move::w1_mvW0);
-        const GRBLinExpr Here_now_C1R_accN  = var(v,    t,     R_Move::w1_accN);
-        const GRBLinExpr Here_now_C1R_mvN1  = var(v,    t,     R_Move::w1_mvN1);
-        const GRBLinExpr Here_now_C1R_mvN2  = var(v,    t,     R_Move::w1_mvN2);
-        const GRBLinExpr Here_now_C1R_mvN3  = var(v,    t,     R_Move::w1_mvN3);
-        const GRBLinExpr Here_now_C1R_mvN0  = var(v,    t,     R_Move::w1_mvN0);
-        const GRBLinExpr Here_now_C1R_accS  = var(v,    t,     R_Move::w1_accS);
-        const GRBLinExpr Here_now_C1R_mvS1  = var(v,    t,     R_Move::w1_mvS1);
-        const GRBLinExpr Here_now_C1R_mvS2  = var(v,    t,     R_Move::w1_mvS2);
-        const GRBLinExpr Here_now_C1R_mvS3  = var(v,    t,     R_Move::w1_mvS3);
-        const GRBLinExpr Here_now_C1R_mvS0  = var(v,    t,     R_Move::w1_mvS0);
-        const GRBLinExpr Here_now_C2R_ready = var(v,    t,     NdStat::C2R_ready);
-        const GRBLinExpr Here_now_C2R_accE  = var(v,    t,     R_Move::w2_accE);
-        const GRBLinExpr Here_now_C2R_mvE1  = var(v,    t,     R_Move::w2_mvE1);
-        const GRBLinExpr Here_now_C2R_mvE0  = var(v,    t,     R_Move::w2_mvE0);
-        const GRBLinExpr Here_now_C2R_accW  = var(v,    t,     R_Move::w2_accW);
-        const GRBLinExpr Here_now_C2R_mvW1  = var(v,    t,     R_Move::w2_mvW1);
-        const GRBLinExpr Here_now_C2R_mvW0  = var(v,    t,     R_Move::w2_mvW0);
-        const GRBLinExpr Here_now_C2R_accN  = var(v,    t,     R_Move::w2_accN);
-        const GRBLinExpr Here_now_C2R_mvN1  = var(v,    t,     R_Move::w2_mvN1);
-        const GRBLinExpr Here_now_C2R_mvN2  = var(v,    t,     R_Move::w2_mvN2);
-        const GRBLinExpr Here_now_C2R_mvN3  = var(v,    t,     R_Move::w2_mvN3);
-        const GRBLinExpr Here_now_C2R_mvN0  = var(v,    t,     R_Move::w2_mvN0);
-        const GRBLinExpr Here_now_C2R_accS  = var(v,    t,     R_Move::w2_accS);
-        const GRBLinExpr Here_now_C2R_mvS1  = var(v,    t,     R_Move::w2_mvS1);
-        const GRBLinExpr Here_now_C2R_mvS2  = var(v,    t,     R_Move::w2_mvS2);
-        const GRBLinExpr Here_now_C2R_mvS3  = var(v,    t,     R_Move::w2_mvS3);
-        const GRBLinExpr Here_now_C2R_mvS0  = var(v,    t,     R_Move::w2_mvS0);
+        CNF::Model m;
+	CNF::Clause c;
+        CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
+	CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
+	CNF::Var Here_now_R_accE    = var(v,    t,     R_Move::accE);
+	CNF::Var Here_now_R_mvE0    = var(v,    t,     R_Move::mvE0);
+	CNF::Var Here_now_R_accW    = var(v,    t,     R_Move::accW);
+	CNF::Var Here_now_R_mvW0    = var(v,    t,     R_Move::mvW0);
+	CNF::Var Here_now_R_accN    = var(v,    t,     R_Move::accN);
+	CNF::Var Here_now_R_mvN1    = var(v,    t,     R_Move::mvN1);
+	CNF::Var Here_now_R_mvN0    = var(v,    t,     R_Move::mvN0);
+	CNF::Var Here_now_R_accS    = var(v,    t,     R_Move::accS);
+	CNF::Var Here_now_R_mvS1    = var(v,    t,     R_Move::mvS1);
+	CNF::Var Here_now_R_mvS0    = var(v,    t,     R_Move::mvS0);
+	CNF::Var Here_now_R_lift    = var(v,    t,     R_Vertical::lift);
+	CNF::Var Here_now_R_lifting1= var(v,    t,     R_Vertical::l1);
+	CNF::Var Here_now_R_lifting2= var(v,    t,     R_Vertical::l2);
+	CNF::Var Here_now_R_lifting3= var(v,    t,     R_Vertical::l3);
+	CNF::Var Here_now_R_lifting4= var(v,    t,     R_Vertical::l4);
+	CNF::Var Here_now_R_drop    = var(v,    t,     R_Vertical::drop);
+	CNF::Var Here_now_C0R_ready = var(v,    t,     NdStat::C0R_ready);
+	CNF::Var Here_now_C0R_accE  = var(v,    t,     R_Move::w0_accE);
+	CNF::Var Here_now_C0R_mvE1  = var(v,    t,     R_Move::w0_mvE1);
+	CNF::Var Here_now_C0R_mvE0  = var(v,    t,     R_Move::w0_mvE0);
+	CNF::Var Here_now_C0R_accW  = var(v,    t,     R_Move::w0_accW);
+	CNF::Var Here_now_C0R_mvW1  = var(v,    t,     R_Move::w0_mvW1);
+	CNF::Var Here_now_C0R_mvW0  = var(v,    t,     R_Move::w0_mvW0);
+	CNF::Var Here_now_C0R_accN  = var(v,    t,     R_Move::w0_accN);
+	CNF::Var Here_now_C0R_mvN1  = var(v,    t,     R_Move::w0_mvN1);
+	CNF::Var Here_now_C0R_mvN2  = var(v,    t,     R_Move::w0_mvN2);
+	CNF::Var Here_now_C0R_mvN3  = var(v,    t,     R_Move::w0_mvN3);
+	CNF::Var Here_now_C0R_mvN0  = var(v,    t,     R_Move::w0_mvN0);
+	CNF::Var Here_now_C0R_accS  = var(v,    t,     R_Move::w0_accS);
+	CNF::Var Here_now_C0R_mvS1  = var(v,    t,     R_Move::w0_mvS1);
+	CNF::Var Here_now_C0R_mvS2  = var(v,    t,     R_Move::w0_mvS2);
+	CNF::Var Here_now_C0R_mvS3  = var(v,    t,     R_Move::w0_mvS3);
+	CNF::Var Here_now_C0R_mvS0  = var(v,    t,     R_Move::w0_mvS0);
+	CNF::Var Here_now_C1R_ready = var(v,    t,     NdStat::C1R_ready);
+	CNF::Var Here_now_C1R_accE  = var(v,    t,     R_Move::w1_accE);
+	CNF::Var Here_now_C1R_mvE1  = var(v,    t,     R_Move::w1_mvE1);
+	CNF::Var Here_now_C1R_mvE0  = var(v,    t,     R_Move::w1_mvE0);
+	CNF::Var Here_now_C1R_accW  = var(v,    t,     R_Move::w1_accW);
+	CNF::Var Here_now_C1R_mvW1  = var(v,    t,     R_Move::w1_mvW1);
+	CNF::Var Here_now_C1R_mvW0  = var(v,    t,     R_Move::w1_mvW0);
+	CNF::Var Here_now_C1R_accN  = var(v,    t,     R_Move::w1_accN);
+	CNF::Var Here_now_C1R_mvN1  = var(v,    t,     R_Move::w1_mvN1);
+	CNF::Var Here_now_C1R_mvN2  = var(v,    t,     R_Move::w1_mvN2);
+	CNF::Var Here_now_C1R_mvN3  = var(v,    t,     R_Move::w1_mvN3);
+	CNF::Var Here_now_C1R_mvN0  = var(v,    t,     R_Move::w1_mvN0);
+	CNF::Var Here_now_C1R_accS  = var(v,    t,     R_Move::w1_accS);
+	CNF::Var Here_now_C1R_mvS1  = var(v,    t,     R_Move::w1_mvS1);
+	CNF::Var Here_now_C1R_mvS2  = var(v,    t,     R_Move::w1_mvS2);
+	CNF::Var Here_now_C1R_mvS3  = var(v,    t,     R_Move::w1_mvS3);
+	CNF::Var Here_now_C1R_mvS0  = var(v,    t,     R_Move::w1_mvS0);
+	CNF::Var Here_now_C2R_ready = var(v,    t,     NdStat::C2R_ready);
+	CNF::Var Here_now_C2R_accE  = var(v,    t,     R_Move::w2_accE);
+	CNF::Var Here_now_C2R_mvE1  = var(v,    t,     R_Move::w2_mvE1);
+	CNF::Var Here_now_C2R_mvE0  = var(v,    t,     R_Move::w2_mvE0);
+	CNF::Var Here_now_C2R_accW  = var(v,    t,     R_Move::w2_accW);
+	CNF::Var Here_now_C2R_mvW1  = var(v,    t,     R_Move::w2_mvW1);
+	CNF::Var Here_now_C2R_mvW0  = var(v,    t,     R_Move::w2_mvW0);
+	CNF::Var Here_now_C2R_accN  = var(v,    t,     R_Move::w2_accN);
+	CNF::Var Here_now_C2R_mvN1  = var(v,    t,     R_Move::w2_mvN1);
+	CNF::Var Here_now_C2R_mvN2  = var(v,    t,     R_Move::w2_mvN2);
+	CNF::Var Here_now_C2R_mvN3  = var(v,    t,     R_Move::w2_mvN3);
+	CNF::Var Here_now_C2R_mvN0  = var(v,    t,     R_Move::w2_mvN0);
+	CNF::Var Here_now_C2R_accS  = var(v,    t,     R_Move::w2_accS);
+	CNF::Var Here_now_C2R_mvS1  = var(v,    t,     R_Move::w2_mvS1);
+	CNF::Var Here_now_C2R_mvS2  = var(v,    t,     R_Move::w2_mvS2);
+	CNF::Var Here_now_C2R_mvS3  = var(v,    t,     R_Move::w2_mvS3);
+	CNF::Var Here_now_C2R_mvS0  = var(v,    t,     R_Move::w2_mvS0);
 
         // Abbreviations
-        const GRBLinExpr Here_now_CR_accE = ( Here_now_C0R_accE + Here_now_C1R_accE + Here_now_C2R_accE );
-        const GRBLinExpr Here_now_CR_mvE1 = ( Here_now_C0R_mvE1 + Here_now_C1R_mvE1 + Here_now_C2R_mvE1 );
-        const GRBLinExpr Here_now_CR_mvE0 = ( Here_now_C0R_mvE0 + Here_now_C1R_mvE0 + Here_now_C2R_mvE0 );
+	CNF::Var Here_now_Cr_accE ;
+	// neccessarly
+	c = not(Here_now_CR_accE)  or Here_now_C0R_accE      or Here_now_C1R_accE      or Here_now_C2R_accE;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_accE) or Here_now_C1R_accE      or Here_now_C2R_accE      or Here_now_CR_accE;
+	m.addClause(c);
+	c = Here_now_C0R_accE      or not(Here_now_C1R_accE) or Here_now_C2R_accE      or Here_now_CR_accE;
+	m.addClause(c);
+	c = Here_now_C0R_accE      or Here_now_C1R_accE      or not(Here_now_C2R_accE) or Here_now_CR_accE;
+	m.addClause(c);
+	c = not(Here_now_C0R_accE) or not(Here_now_C1R_accE);
+	m.addClause(c);
+	c = not(Here_now_C0R_accE) or not(Here_now_C2R_accE);
+	m.addClause(c);
+	c = not(Here_now_C1R_accE) or not(Here_now_C2R_accE);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvE1;
+	// necessarly
+	c = not(Here_now_CR_mvE1)  or Here_now_C0R_mvE1      or Here_now_C1R_mvE1      or Here_now_C2R_mvE1;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvE1) or Here_now_C1R_mvE1      or Here_now_C2R_mvE1      or Here_now_CR_mvE1;
+	m.addClause(c);
+	c = Here_now_C0R_mvE1      or not(Here_now_C1R_mvE1) or Here_now_C2R_mvE1      or Here_now_CR_mvE1;
+	m.addClause(c);
+	c = Here_now_C0R_mvE1      or Here_now_C1R_mvE1      or not(Here_now_C2R_mvE1) or Here_now_CR_mvE1;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1) or not(Here_now_C1R_mvE1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1) or not(Here_now_C2R_mvE1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1) or not(Here_now_C2R_mvE1);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvE0;
+	// necessalry
+	c = not(Here_now_CR_mvE0)  or Here_now_C0R_mvE0      or Here_now_C1R_mvE0      or Here_now_C2R_mvE0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvE0) or Here_now_C1R_mvE0      or Here_now_C2R_mvE0      or Here_now_CR_mvE0;
+	m.addClause(c);
+	c = Here_now_C0R_mvE0      or not(Here_now_C1R_mvE0) or Here_now_C2R_mvE0      or Here_now_CR_mvE0;
+	m.addClause(c);
+	c = Here_now_C0R_mvE0      or Here_now_C1R_mvE0      or not(Here_now_C2R_mvE0) or Here_now_CR_mvE0;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0) or not(Here_now_C1R_mvE0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0) or not(Here_now_C2R_mvE0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0) or not(Here_now_C2R_mvE0);
+	m.addClause(c);
 
-        const GRBLinExpr Here_now_CR_accW = ( Here_now_C0R_accW + Here_now_C1R_accW + Here_now_C2R_accW );
-        const GRBLinExpr Here_now_CR_mvW1 = ( Here_now_C0R_mvW1 + Here_now_C1R_mvW1 + Here_now_C2R_mvW1 );
-        const GRBLinExpr Here_now_CR_mvW0 = ( Here_now_C0R_mvW0 + Here_now_C1R_mvW0 + Here_now_C2R_mvW0 );
+	CNF::Var Here_now_CR_accW;
+	// necessarly
+	c = not(Here_now_CR_accW)  or Here_now_C0R_accW      or Here_now_C1R_accW      or Here_now_C2R_accW;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_accW) or Here_now_C1R_accW      or Here_now_C2R_accW      or Here_now_CR_accW;
+	m.addClause(c);
+	c = Here_now_C0R_accW      or not(Here_now_C1R_accW) or Here_now_C2R_accW      or Here_now_CR_accW;
+	m.addClause(c);
+	c = Here_now_C0R_accW      or Here_now_C1R_accW      or not(Here_now_C2R_accW) or Here_now_CR_accW;
+	m.addClause(c);
+	c = not(Here_now_C0R_accW) or not(Here_now_C1R_accW);
+	m.addClause(c);
+	c = not(Here_now_C0R_accW) or not(Here_now_C2R_accW);
+	m.addClause(c);
+	c = not(Here_now_C1R_accW) or not(Here_now_C2R_accW);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvW1;
+	// necessarly
+	c = not(Here_now_CR_mvW1)  or Here_now_C0R_mvW1      or Here_now_C1R_mvW1      or Here_now_C2R_mvW1;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvW1) or Here_now_C1R_mvW1      or Here_now_C2R_mvW1      or Here_now_CR_mvW1;
+	m.addClause(c);
+	c = Here_now_C0R_mvW1      or not(Here_now_C1R_mvW1) or Here_now_C2R_mvW1      or Here_now_CR_mvW1;
+	m.addClause(c);
+	c = Here_now_C0R_mvW1      or Here_now_C1R_mvW1      or not(Here_now_C2R_mvW1) or Here_now_CR_mvW1;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1) or not(Here_now_C1R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1) or not(Here_now_C2R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1) or not(Here_now_C2R_mvW1);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvW0;
+	// necessarly
+	c = not(Here_now_CR_mvW0)  or Here_now_C0R_mvW0      or Here_now_C1R_mvW0      or Here_now_C2R_mvW0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvW0) or Here_now_C1R_mvW0      or Here_now_C2R_mvW0      or Here_now_CR_mvW0;
+	m.addClause(c);
+	c = Here_now_C0R_mvW0      or not(Here_now_C1R_mvW0) or Here_now_C2R_mvW0      or Here_now_CR_mvW0;
+	m.addClause(c);
+	c = Here_now_C0R_mvW0      or Here_now_C1R_mvW0      or not(Here_now_C2R_mvW0) or Here_now_CR_mvW0;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0) or not(Here_now_C1R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0) or not(Here_now_C2R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW0) or not(Here_now_C2R_mvW0);
+	m.addClause(c);
 
-        const GRBLinExpr Here_now_CR_accN = ( Here_now_C0R_accN + Here_now_C1R_accN + Here_now_C2R_accN );
-        const GRBLinExpr Here_now_CR_mvN1 = ( Here_now_C0R_mvN1 + Here_now_C1R_mvN1 + Here_now_C2R_mvN1 );
-        const GRBLinExpr Here_now_CR_mvN2 = ( Here_now_C0R_mvN2 + Here_now_C1R_mvN2 + Here_now_C2R_mvN2 );
-        const GRBLinExpr Here_now_CR_mvN3 = ( Here_now_C0R_mvN3 + Here_now_C1R_mvN3 + Here_now_C2R_mvN3 );
-        const GRBLinExpr Here_now_CR_mvN0 = ( Here_now_C0R_mvN0 + Here_now_C1R_mvN0 + Here_now_C2R_mvN0 );
+	CNF::Var Here_now_CR_accN;
+	// neccessarly
+	c = not(Here_now_CR_accN)  or Here_now_C0R_accN      or Here_now_C1R_accN      or Here_now_C2R_accN;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_accN) or Here_now_C1R_accN      or Here_now_C2R_accN      or Here_now_CR_accN;
+	m.addClause(c);
+	c = Here_now_C0R_accN      or not(Here_now_C1R_accN) or Here_now_C2R_accN      or Here_now_CR_accN;
+	m.addClause(c);
+	c = Here_now_C0R_accN      or Here_now_C1R_accN      or not(Here_now_C2R_accN) or Here_now_CR_accN;
+	m.addClause(c);
+	c = not(Here_now_C0R_accN) or not(Here_now_C1R_accN);
+	m.addClause(c);
+	c = not(Here_now_C0R_accN) or not(Here_now_C2R_accN);
+	m.addClause(c);
+	c = not(Here_now_C1R_accN) or not(Here_now_C2R_accN);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvN1;
+	// neccessarly
+	c = not(Here_now_CR_mvN1)  or Here_now_C0R_mvN1      or Here_now_C1R_mvN1      or Here_now_C2R_mvN1;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvN1) or Here_now_C1R_mvN1      or Here_now_C2R_mvN1      or Here_now_CR_mvN1;
+	m.addClause(c);
+	c = Here_now_C0R_mvN1      or not(Here_now_C1R_mvN1) or Here_now_C2R_mvN1      or Here_now_CR_mvN1;
+	m.addClause(c);
+	c = Here_now_C0R_mvN1      or Here_now_C1R_mvN1      or not(Here_now_C2R_mvN1) or Here_now_CR_mvN1;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1) or not(Here_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1) or not(Here_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN1) or not(Here_now_C2R_mvN1);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvN2;
+	// neccessarly
+	c = not(Here_now_CR_mvN2)  or Here_now_C0R_mvN2      or Here_now_C1R_mvN2       or Here_now_C2R_mvN2;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvN2) or Here_now_C1R_mvN2      or Here_now_C2R_mvN2       or Here_now_CR_mvN2;
+	m.addClause(c);
+	c = Here_now_C0R_mvN2      or not(Here_now_C1R_mvN2) or Here_now_C2R_mvN2       or Here_now_CR_mvN2;
+	m.addClause(c);
+	c = Here_now_C0R_mvN2      or Here_now_C1R_mvN2      or not(Here_now_C2R_mvN2)  or Here_now_CR_mvN2;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN2) or not(Here_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN2) or not(Here_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN2) or not(Here_now_C2R_mvN2);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvN3;
+	// neccessarly
+	c = not(Here_now_CR_mvN3)  or Here_now_C0R_mvN3      or Here_now_C1R_mvN3      or Here_now_C2R_mvN3;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvN3) or Here_now_C1R_mvN3      or Here_now_C2R_mvN3      or Here_now_CR_mvN3;
+	m.addClause(c);
+	c = Here_now_C0R_mvN3      or not(Here_now_C1R_mvN3) or Here_now_C2R_mvN3      or Here_now_CR_mvN3;
+	m.addClause(c);
+	c = Here_now_C0R_mvN3      or Here_now_C1R_mvN3      or not(Here_now_C2R_mvN3) or Here_now_CR_mvN3;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN3) or not(Here_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN3) or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN3) or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvN0;
+	// neccessarly
+	c = not(Here_now_CR_mvN0)  or Here_now_C0R_mvN0      or Here_now_C1R_mvN0      or Here_now_C2R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvN0) or Here_now_C1R_mvN0      or Here_now_C2R_mvN0      or Here_now_CR_mvN0;
+	m.addClause(c);
+	c = Here_now_C0R_mvN0      or not(Here_now_C1R_mvN0) or Here_now_C2R_mvN0      or Here_now_CR_mvN0;
+	m.addClause(c);
+	c = Here_now_C0R_mvN0      or Here_now_C1R_mvN0      or not(Here_now_C2R_mvN0) or Here_now_CR_mvN0;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN0) or not(Here_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN0) or not(Here_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN0) or not(Here_now_C2R_mvN0);
+	m.addClause(c);
 
-        const GRBLinExpr Here_now_CR_accS = ( Here_now_C0R_accS + Here_now_C1R_accS + Here_now_C2R_accS );
-        const GRBLinExpr Here_now_CR_mvS1 = ( Here_now_C0R_mvS1 + Here_now_C1R_mvS1 + Here_now_C2R_mvS1 );
-        const GRBLinExpr Here_now_CR_mvS2 = ( Here_now_C0R_mvS2 + Here_now_C1R_mvS2 + Here_now_C2R_mvS2 );
-        const GRBLinExpr Here_now_CR_mvS3 = ( Here_now_C0R_mvS3 + Here_now_C1R_mvS3 + Here_now_C2R_mvS3 );
-        const GRBLinExpr Here_now_CR_mvS0 = ( Here_now_C0R_mvS0 + Here_now_C1R_mvS0 + Here_now_C2R_mvS0 );
 
-        const GRBLinExpr E_now_nobodyhome= var( G.east(v),    t,    NdStat::nobodyhome);
-        const GRBLinExpr E_now_R_ready   = var( G.east(v),    t,    NdStat::R_ready);
-        const GRBLinExpr E_now_R_accE    = var( G.east(v),    t,    R_Move::accE);
-        const GRBLinExpr E_now_R_mvE0    = var( G.east(v),    t,    R_Move::mvE0);
-        const GRBLinExpr E_now_R_accW    = var( G.east(v),    t,    R_Move::accW);
-        const GRBLinExpr E_now_R_mvW0    = var( G.east(v),    t,    R_Move::mvW0);
-        const GRBLinExpr E_now_C0R_ready = var( G.east(v),    t,    NdStat::C0R_ready);
-        const GRBLinExpr E_now_C0R_accE  = var( G.east(v),    t,    R_Move::w0_accE);
-        const GRBLinExpr E_now_C0R_mvE1  = var( G.east(v),    t,    R_Move::w0_mvE1);
-        const GRBLinExpr E_now_C0R_mvE0  = var( G.east(v),    t,    R_Move::w0_mvE0);
-        const GRBLinExpr E_now_C0R_accW  = var( G.east(v),    t,    R_Move::w0_accW);
-        const GRBLinExpr E_now_C0R_mvW1  = var( G.east(v),    t,    R_Move::w0_mvW1);
-        const GRBLinExpr E_now_C0R_mvW0  = var( G.east(v),    t,    R_Move::w0_mvW0);
-        const GRBLinExpr E_now_C1R_ready = var( G.east(v),    t,    NdStat::C1R_ready);
-        const GRBLinExpr E_now_C1R_accE  = var( G.east(v),    t,    R_Move::w1_accE);
-        const GRBLinExpr E_now_C1R_mvE1  = var( G.east(v),    t,    R_Move::w1_mvE1);
-        const GRBLinExpr E_now_C1R_mvE0  = var( G.east(v),    t,    R_Move::w1_mvE0);
-        const GRBLinExpr E_now_C1R_accW  = var( G.east(v),    t,    R_Move::w1_accW);
-        const GRBLinExpr E_now_C1R_mvW1  = var( G.east(v),    t,    R_Move::w1_mvW1);
-        const GRBLinExpr E_now_C1R_mvW0  = var( G.east(v),    t,    R_Move::w1_mvW0);
-        const GRBLinExpr E_now_C2R_ready = var( G.east(v),    t,    NdStat::C2R_ready);
-        const GRBLinExpr E_now_C2R_accE  = var( G.east(v),    t,    R_Move::w2_accE);
-        const GRBLinExpr E_now_C2R_mvE1  = var( G.east(v),    t,    R_Move::w2_mvE1);
-        const GRBLinExpr E_now_C2R_mvE0  = var( G.east(v),    t,    R_Move::w2_mvE0);
-        const GRBLinExpr E_now_C2R_accW  = var( G.east(v),    t,    R_Move::w2_accW);
-        const GRBLinExpr E_now_C2R_mvW1  = var( G.east(v),    t,    R_Move::w2_mvW1);
-        const GRBLinExpr E_now_C2R_mvW0  = var( G.east(v),    t,    R_Move::w2_mvW0);
+	CNF::Var Here_now_CR_accS;
+	// neccessarly
+	c = not(Here_now_CR_accS)  or Here_now_C0R_accS      or Here_now_C1R_accS      or Here_now_C2R_accS;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_accS) or Here_now_C1R_accS      or Here_now_C2R_accS      or Here_now_CR_accS;
+	m.addClause(c);
+	c = Here_now_C0R_accS      or not(Here_now_C1R_accS) or Here_now_C2R_accS      or Here_now_CR_accS;
+	m.addClause(c);
+	c = Here_now_C0R_accS      or Here_now_C1R_accS      or not(Here_now_C2R_accS) or Here_now_CR_accS;
+	m.addClause(c);
+	c = not(Here_now_C0R_accS) or not(Here_now_C1R_accS);
+	m.addClause(c);
+	c = not(Here_now_C0R_accS) or not(Here_now_C2R_accS);
+	m.addClause(c);
+	c = not(Here_now_C1R_accS) or not(Here_now_C2R_accS);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvS1;
+	// neccessarly
+	c = not(Here_now_CR_mvS1)  or Here_now_C0R_mvS1      or Here_now_C1R_mvS1      or Here_now_C2R_mvS1;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvS1) or Here_now_C1R_mvS1      or Here_now_C2R_mvS1      or Here_now_CR_mvS1;
+	m.addClause(c);
+	c = Here_now_C0R_mvS1      or not(Here_now_C1R_mvS1) or Here_now_C2R_mvS1      or Here_now_CR_mvS1;
+	m.addClause(c);
+	c = Here_now_C0R_mvS1      or Here_now_C1R_mvS1      or not(Here_now_C2R_mvS1) or Here_now_CR_mvS1;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS1) or not(Here_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS1) or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS1) or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvS2;
+	// neccessarly
+	c = not(Here_now_CR_mvS2)  or Here_now_C0R_mvS2      or Here_now_C1R_mvS2      or Here_now_C2R_mvS2;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvS2) or Here_now_C1R_mvS2      or Here_now_C2R_mvS2      or Here_now_CR_mvS2;
+	m.addClause(c);
+	c = Here_now_C0R_mvS2      or not(Here_now_C1R_mvS2) or Here_now_C2R_mvS2      or Here_now_CR_mvS2;
+	m.addClause(c);
+	c = Here_now_C0R_mvS2      or Here_now_C1R_mvS2      or not(Here_now_C2R_mvS2) or Here_now_CR_mvS2;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS2) or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS2) or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS2) or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvS3;
+	// neccessarly
+	c = not(Here_now_CR_mvS3)  or Here_now_C0R_mvS3      or Here_now_C1R_mvS3      or Here_now_C2R_mvS3;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvS3) or Here_now_C1R_mvS3      or Here_now_C2R_mvS3      or Here_now_CR_mvS3;
+	m.addClause(c);
+	c = Here_now_C0R_mvS3      or not(Here_now_C1R_mvS3) or Here_now_C2R_mvS3      or Here_now_CR_mvS3;
+	m.addClause(c);
+	c = Here_now_C0R_mvS3      or Here_now_C1R_mvS3      or not(Here_now_C2R_mvS3) or Here_now_CR_mvS3;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS3) or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS3) or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS3) or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvS0;
+	// neccessarly
+	c = not(Here_now_CR_mvS0)  or Here_now_C0R_mvS0      or Here_now_C1R_mvS0      or Here_now_C2R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvS0) or Here_now_C1R_mvS0      or Here_now_C2R_mvS0      or Here_now_CR_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_mvS0      or not(Here_now_C1R_mvS0) or Here_now_C2R_mvS0      or Here_now_CR_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_mvS0      or Here_now_C1R_mvS0      or not(Here_now_C2R_mvS0) or Here_now_CR_mvS0;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS0) or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS0) or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS0) or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+
+
+	CNF::Var E_now_nobodyhome= var( G.east(v),    t,    NdStat::nobodyhome);
+	CNF::Var E_now_R_ready   = var( G.east(v),    t,    NdStat::R_ready);
+	CNF::Var E_now_R_accE    = var( G.east(v),    t,    R_Move::accE);
+	CNF::Var E_now_R_mvE0    = var( G.east(v),    t,    R_Move::mvE0);
+	CNF::Var E_now_R_accW    = var( G.east(v),    t,    R_Move::accW);
+	CNF::Var E_now_R_mvW0    = var( G.east(v),    t,    R_Move::mvW0);
+	CNF::Var E_now_C0R_ready = var( G.east(v),    t,    NdStat::C0R_ready);
+	CNF::Var E_now_C0R_accE  = var( G.east(v),    t,    R_Move::w0_accE);
+	CNF::Var E_now_C0R_mvE1  = var( G.east(v),    t,    R_Move::w0_mvE1);
+	CNF::Var E_now_C0R_mvE0  = var( G.east(v),    t,    R_Move::w0_mvE0);
+	CNF::Var E_now_C0R_accW  = var( G.east(v),    t,    R_Move::w0_accW);
+	CNF::Var E_now_C0R_mvW1  = var( G.east(v),    t,    R_Move::w0_mvW1);
+	CNF::Var E_now_C0R_mvW0  = var( G.east(v),    t,    R_Move::w0_mvW0);
+	CNF::Var E_now_C1R_ready = var( G.east(v),    t,    NdStat::C1R_ready);
+	CNF::Var E_now_C1R_accE  = var( G.east(v),    t,    R_Move::w1_accE);
+	CNF::Var E_now_C1R_mvE1  = var( G.east(v),    t,    R_Move::w1_mvE1);
+	CNF::Var E_now_C1R_mvE0  = var( G.east(v),    t,    R_Move::w1_mvE0);
+	CNF::Var E_now_C1R_accW  = var( G.east(v),    t,    R_Move::w1_accW);
+	CNF::Var E_now_C1R_mvW1  = var( G.east(v),    t,    R_Move::w1_mvW1);
+	CNF::Var E_now_C1R_mvW0  = var( G.east(v),    t,    R_Move::w1_mvW0);
+	CNF::Var E_now_C2R_ready = var( G.east(v),    t,    NdStat::C2R_ready);
+	CNF::Var E_now_C2R_accE  = var( G.east(v),    t,    R_Move::w2_accE);
+	CNF::Var E_now_C2R_mvE1  = var( G.east(v),    t,    R_Move::w2_mvE1);
+	CNF::Var E_now_C2R_mvE0  = var( G.east(v),    t,    R_Move::w2_mvE0);
+	CNF::Var E_now_C2R_accW  = var( G.east(v),    t,    R_Move::w2_accW);
+	CNF::Var E_now_C2R_mvW1  = var( G.east(v),    t,    R_Move::w2_mvW1);
+	CNF::Var E_now_C2R_mvW0  = var( G.east(v),    t,    R_Move::w2_mvW0);
 
         // Abbreviations
-        const GRBLinExpr E_now_CR_accE = ( E_now_C0R_accE + E_now_C1R_accE + E_now_C2R_accE );
-        const GRBLinExpr E_now_CR_mvE1 = ( E_now_C0R_mvE1 + E_now_C1R_mvE1 + E_now_C2R_mvE1 );
-        const GRBLinExpr E_now_CR_mvE0 = ( E_now_C0R_mvE0 + E_now_C1R_mvE0 + E_now_C2R_mvE0 );
+	CNF::Var E_now_CR_accE;
+	// neccessarly
+	c = not(E_now_CR_accE)  or E_now_C0R_accE      or E_now_C1R_accE      or E_now_C2R_accE;
+	m.addClause(c);
+	// sufficient
+	c = not(E_now_C0R_accE) or E_now_C1R_accE      or E_now_C2R_accE      or E_now_CR_accE;
+	m.addClause(c);
+	c = E_now_C0R_accE      or not(E_now_C1R_accE) or E_now_C2R_accE      or E_now_CR_accE;
+	m.addClause(c);
+	c = E_now_C0R_accE      or E_now_C1R_accE      or not(E_now_C2R_accE) or E_now_CR_accE;
+	m.addClause(c);
+	c = not(E_now_C0R_accE) or not(E_now_C1R_accE);
+	m.addClause(c);
+	c = not(E_now_C0R_accE) or not(E_now_C2R_accE);
+	m.addClause(c);
+	c = not(E_now_C1R_accE) or not(E_now_C2R_accE);
+	m.addClause(c);
+	CNF::Var E_now_CR_mvE1;
+	// neccessarly
+	c = not(E_now_CR_mvE1)  or E_now_C0R_mvE1      or E_now_C1R_mvE1      or E_now_C2R_mvE1;
+	m.addClause(c);
+	// sufficient
+	c = not(E_now_C0R_mvE1) or E_now_C1R_mvE1      or E_now_C2R_mvE1      or E_now_CR_mvE1;
+	m.addClause(c);
+	c = E_now_C0R_mvE1      or not(E_now_C1R_mvE1) or E_now_C2R_mvE1      or E_now_CR_mvE1;
+	m.addClause(c);
+	c = E_now_C0R_mvE1      or E_now_C1R_mvE1      or not(E_now_C2R_mvE1) or E_now_CR_mvE1;
+	m.addClause(c);
+	c = not(E_now_C0R_mvE1) or not(E_now_C1R_mvE1);
+	m.addClause(c);
+	c = not(E_now_C0R_mvE1) or not(E_now_C2R_mvE1);
+	m.addClause(c);
+	c = not(E_now_C1R_mvE1) or not(E_now_C2R_mvE1);
+	m.addClause(c);
+	CNF::Var E_now_CR_mvE0;
+	// neccessarly
+	c = not(E_now_CR_mvE0)  or E_now_C0R_mvE0      or E_now_C1R_mvE0      or E_now_C2R_mvE0;
+	m.addClause(c);
+	// sufficient
+	c = not(E_now_C0R_mvE0) or E_now_C1R_mvE0      or E_now_C2R_mvE0      or E_now_CR_mvE0;
+	m.addClause(c);
+	c = E_now_C0R_mvE0      or not(E_now_C1R_mvE0) or E_now_C2R_mvE0      or E_now_CR_mvE0;
+	m.addClause(c);
+	c = E_now_C0R_mvE0      or E_now_C1R_mvE0      or not(E_now_C2R_mvE0) or E_now_CR_mvE0;
+	m.addClause(c);
+	c = not(E_now_C0R_mvE0) or not(E_now_C1R_mvE0);
+	m.addClause(c);
+	c = not(E_now_C0R_mvE0) or not(E_now_C2R_mvE0);
+	m.addClause(c);
+	c = not(E_now_C1R_mvE0) or not(E_now_C2R_mvE0);
+	m.addClause(c);
 
-        const GRBLinExpr E_now_CR_accW = ( E_now_C0R_accW + E_now_C1R_accW + E_now_C2R_accW );
-        const GRBLinExpr E_now_CR_mvW1 = ( E_now_C0R_mvW1 + E_now_C1R_mvW1 + E_now_C2R_mvW1 );
-        const GRBLinExpr E_now_CR_mvW0 = ( E_now_C0R_mvW0 + E_now_C1R_mvW0 + E_now_C2R_mvW0 );
+	CNF::Var E_now_CR_accW;
+	// neccessarly
+	c = not(E_now_CR_accW)  or E_now_C0R_accW      or E_now_C1R_accW      or E_now_C2R_accW;
+	m.addClause(c);
+	// sufficient
+	c = not(E_now_C0R_accW) or E_now_C1R_accW      or E_now_C2R_accW      or E_now_CR_accW;
+	m.addClause(c);
+	c = E_now_C0R_accW      or not(E_now_C1R_accW) or E_now_C2R_accW      or E_now_CR_accW;
+	m.addClause(c);
+	c = E_now_C0R_accW      or E_now_C1R_accW      or not(E_now_C2R_accW) or E_now_CR_accW;
+	m.addClause(c);
+	c = not(E_now_C0R_accW) or not(E_now_C1R_accW);
+	m.addClause(c);
+	c = not(E_now_C0R_accW) or not(E_now_C2R_accW);
+	m.addClause(c);
+	c = not(E_now_C1R_accW) or not(E_now_C2R_accW);
+	m.addClause(c);
+	CNF::Var E_now_CR_mvW1;
+	// neccessarly
+	c = not(E_now_CR_mvW1)  or E_now_C0R_mvW1      or E_now_C1R_mvW1      or E_now_C2R_mvW1;
+	m.addClause(c);
+	// sufficient
+	c = not(E_now_C0R_mvW1) or E_now_C1R_mvW1      or E_now_C2R_mvW1      or E_now_CR_mvW1;
+	m.addClause(c);
+	c = E_now_C0R_mvW1      or not(E_now_C1R_mvW1) or E_now_C2R_mvW1      or E_now_CR_mvW1;
+	m.addClause(c);
+	c = E_now_C0R_mvW1      or E_now_C1R_mvW1      or not(E_now_C2R_mvW1) or E_now_CR_mvW1;
+	m.addClause(c);
+	c = not(E_now_C0R_mvW1) or not(E_now_C1R_mvW1);
+	m.addClause(c);
+	c = not(E_now_C0R_mvW1) or not(E_now_C2R_mvW1);
+	m.addClause(c);
+	c = not(E_now_C1R_mvW1) or not(E_now_C2R_mvW1);
+	m.addClause(c);
+	CNF::Var E_now_CR_mvW0;
+	// neccessarly
+	c = not(E_now_CR_mvW0)  or E_now_C0R_mvW0      or E_now_C1R_mvW0      or E_now_C2R_mvW0;
+	m.addClause(c);
+	// sufficient
+	c = not(E_now_C0R_mvW0) or E_now_C1R_mvW0      or E_now_C2R_mvW0      or E_now_CR_mvW0;
+	m.addClause(c);
+	c = E_now_C0R_mvW0      or not(E_now_C1R_mvW0) or E_now_C2R_mvW0      or E_now_CR_mvW0;
+	m.addClause(c);
+	c = E_now_C0R_mvW0      or E_now_C1R_mvW0      or not(E_now_C2R_mvW0) or E_now_CR_mvW0;
+	m.addClause(c);
+	c = not(E_now_C0R_mvW0) or not(E_now_C1R_mvW0);
+	m.addClause(c);
+	c = not(E_now_C0R_mvW0) or not(E_now_C2R_mvW0);
+	m.addClause(c);
+	c = not(E_now_C1R_mvW0) or not(E_now_C2R_mvW0);
+	m.addClause(c);
 
-        const GRBLinExpr N_now_nobodyhome= var( G.north(v),    t,    NdStat::nobodyhome);
-        const GRBLinExpr N_now_R_ready   = var( G.north(v),    t,    NdStat::R_ready);
-        const GRBLinExpr N_now_R_accN    = var( G.north(v),    t,    R_Move::accN);
-        const GRBLinExpr N_now_R_mvN1    = var( G.north(v),    t,    R_Move::mvN1);
-        const GRBLinExpr N_now_R_mvN0    = var( G.north(v),    t,    R_Move::mvN0);
-        const GRBLinExpr N_now_R_accS    = var( G.north(v),    t,    R_Move::accS);
-        const GRBLinExpr N_now_R_mvS1    = var( G.north(v),    t,    R_Move::mvS1);
-        const GRBLinExpr N_now_R_mvS0    = var( G.north(v),    t,    R_Move::mvS0);
-        const GRBLinExpr N_now_C0R_ready = var( G.north(v),    t,    NdStat::C0R_ready);
-        const GRBLinExpr N_now_C0R_accN  = var( G.north(v),    t,    R_Move::w0_accN);
-        const GRBLinExpr N_now_C0R_mvN1  = var( G.north(v),    t,    R_Move::w0_mvN1);
-        const GRBLinExpr N_now_C0R_mvN2  = var( G.north(v),    t,    R_Move::w0_mvN2);
-        const GRBLinExpr N_now_C0R_mvN3  = var( G.north(v),    t,    R_Move::w0_mvN3);
-        const GRBLinExpr N_now_C0R_mvN0  = var( G.north(v),    t,    R_Move::w0_mvN0);
-        const GRBLinExpr N_now_C0R_accS  = var( G.north(v),    t,    R_Move::w0_accS);
-        const GRBLinExpr N_now_C0R_mvS1  = var( G.north(v),    t,    R_Move::w0_mvS1);
-        const GRBLinExpr N_now_C0R_mvS2  = var( G.north(v),    t,    R_Move::w0_mvS2);
-        const GRBLinExpr N_now_C0R_mvS3  = var( G.north(v),    t,    R_Move::w0_mvS3);
-        const GRBLinExpr N_now_C0R_mvS0  = var( G.north(v),    t,    R_Move::w0_mvS0);
-        const GRBLinExpr N_now_C1R_ready = var( G.north(v),    t,    NdStat::C1R_ready);
-        const GRBLinExpr N_now_C1R_accN  = var( G.north(v),    t,    R_Move::w1_accN);
-        const GRBLinExpr N_now_C1R_mvN1  = var( G.north(v),    t,    R_Move::w1_mvN1);
-        const GRBLinExpr N_now_C1R_mvN2  = var( G.north(v),    t,    R_Move::w1_mvN2);
-        const GRBLinExpr N_now_C1R_mvN3  = var( G.north(v),    t,    R_Move::w1_mvN3);
-        const GRBLinExpr N_now_C1R_mvN0  = var( G.north(v),    t,    R_Move::w1_mvN0);
-        const GRBLinExpr N_now_C1R_accS  = var( G.north(v),    t,    R_Move::w1_accS);
-        const GRBLinExpr N_now_C1R_mvS1  = var( G.north(v),    t,    R_Move::w1_mvS1);
-        const GRBLinExpr N_now_C1R_mvS2  = var( G.north(v),    t,    R_Move::w1_mvS2);
-        const GRBLinExpr N_now_C1R_mvS3  = var( G.north(v),    t,    R_Move::w1_mvS3);
-        const GRBLinExpr N_now_C1R_mvS0  = var( G.north(v),    t,    R_Move::w1_mvS0);
-        const GRBLinExpr N_now_C2R_ready = var( G.north(v),    t,    NdStat::C2R_ready);
-        const GRBLinExpr N_now_C2R_accN  = var( G.north(v),    t,    R_Move::w2_accN);
-        const GRBLinExpr N_now_C2R_mvN1  = var( G.north(v),    t,    R_Move::w2_mvN1);
-        const GRBLinExpr N_now_C2R_mvN2  = var( G.north(v),    t,    R_Move::w2_mvN2);
-        const GRBLinExpr N_now_C2R_mvN3  = var( G.north(v),    t,    R_Move::w2_mvN3);
-        const GRBLinExpr N_now_C2R_mvN0  = var( G.north(v),    t,    R_Move::w2_mvN0);
-        const GRBLinExpr N_now_C2R_accS  = var( G.north(v),    t,    R_Move::w2_accS);
-        const GRBLinExpr N_now_C2R_mvS1  = var( G.north(v),    t,    R_Move::w2_mvS1);
-        const GRBLinExpr N_now_C2R_mvS2  = var( G.north(v),    t,    R_Move::w2_mvS2);
-        const GRBLinExpr N_now_C2R_mvS3  = var( G.north(v),    t,    R_Move::w2_mvS3);
-        const GRBLinExpr N_now_C2R_mvS0  = var( G.north(v),    t,    R_Move::w2_mvS0);
+
+	CNF::Var N_now_nobodyhome= var( G.north(v),    t,    NdStat::nobodyhome);
+	CNF::Var N_now_R_ready   = var( G.north(v),    t,    NdStat::R_ready);
+	CNF::Var N_now_R_accN    = var( G.north(v),    t,    R_Move::accN);
+	CNF::Var N_now_R_mvN1    = var( G.north(v),    t,    R_Move::mvN1);
+	CNF::Var N_now_R_mvN0    = var( G.north(v),    t,    R_Move::mvN0);
+	CNF::Var N_now_R_accS    = var( G.north(v),    t,    R_Move::accS);
+	CNF::Var N_now_R_mvS1    = var( G.north(v),    t,    R_Move::mvS1);
+	CNF::Var N_now_R_mvS0    = var( G.north(v),    t,    R_Move::mvS0);
+	CNF::Var N_now_C0R_ready = var( G.north(v),    t,    NdStat::C0R_ready);
+	CNF::Var N_now_C0R_accN  = var( G.north(v),    t,    R_Move::w0_accN);
+	CNF::Var N_now_C0R_mvN1  = var( G.north(v),    t,    R_Move::w0_mvN1);
+	CNF::Var N_now_C0R_mvN2  = var( G.north(v),    t,    R_Move::w0_mvN2);
+	CNF::Var N_now_C0R_mvN3  = var( G.north(v),    t,    R_Move::w0_mvN3);
+	CNF::Var N_now_C0R_mvN0  = var( G.north(v),    t,    R_Move::w0_mvN0);
+	CNF::Var N_now_C0R_accS  = var( G.north(v),    t,    R_Move::w0_accS);
+	CNF::Var N_now_C0R_mvS1  = var( G.north(v),    t,    R_Move::w0_mvS1);
+	CNF::Var N_now_C0R_mvS2  = var( G.north(v),    t,    R_Move::w0_mvS2);
+	CNF::Var N_now_C0R_mvS3  = var( G.north(v),    t,    R_Move::w0_mvS3);
+	CNF::Var N_now_C0R_mvS0  = var( G.north(v),    t,    R_Move::w0_mvS0);
+	CNF::Var N_now_C1R_ready = var( G.north(v),    t,    NdStat::C1R_ready);
+	CNF::Var N_now_C1R_accN  = var( G.north(v),    t,    R_Move::w1_accN);
+	CNF::Var N_now_C1R_mvN1  = var( G.north(v),    t,    R_Move::w1_mvN1);
+	CNF::Var N_now_C1R_mvN2  = var( G.north(v),    t,    R_Move::w1_mvN2);
+	CNF::Var N_now_C1R_mvN3  = var( G.north(v),    t,    R_Move::w1_mvN3);
+	CNF::Var N_now_C1R_mvN0  = var( G.north(v),    t,    R_Move::w1_mvN0);
+	CNF::Var N_now_C1R_accS  = var( G.north(v),    t,    R_Move::w1_accS);
+	CNF::Var N_now_C1R_mvS1  = var( G.north(v),    t,    R_Move::w1_mvS1);
+	CNF::Var N_now_C1R_mvS2  = var( G.north(v),    t,    R_Move::w1_mvS2);
+	CNF::Var N_now_C1R_mvS3  = var( G.north(v),    t,    R_Move::w1_mvS3);
+	CNF::Var N_now_C1R_mvS0  = var( G.north(v),    t,    R_Move::w1_mvS0);
+	CNF::Var N_now_C2R_ready = var( G.north(v),    t,    NdStat::C2R_ready);
+	CNF::Var N_now_C2R_accN  = var( G.north(v),    t,    R_Move::w2_accN);
+	CNF::Var N_now_C2R_mvN1  = var( G.north(v),    t,    R_Move::w2_mvN1);
+	CNF::Var N_now_C2R_mvN2  = var( G.north(v),    t,    R_Move::w2_mvN2);
+	CNF::Var N_now_C2R_mvN3  = var( G.north(v),    t,    R_Move::w2_mvN3);
+	CNF::Var N_now_C2R_mvN0  = var( G.north(v),    t,    R_Move::w2_mvN0);
+	CNF::Var N_now_C2R_accS  = var( G.north(v),    t,    R_Move::w2_accS);
+	CNF::Var N_now_C2R_mvS1  = var( G.north(v),    t,    R_Move::w2_mvS1);
+	CNF::Var N_now_C2R_mvS2  = var( G.north(v),    t,    R_Move::w2_mvS2);
+	CNF::Var N_now_C2R_mvS3  = var( G.north(v),    t,    R_Move::w2_mvS3);
+	CNF::Var N_now_C2R_mvS0  = var( G.north(v),    t,    R_Move::w2_mvS0);
 
         // Abbreviations
-        const GRBLinExpr N_now_CR_accN = ( N_now_C0R_accN + N_now_C1R_accN + N_now_C2R_accN );
-        const GRBLinExpr N_now_CR_mvN1 = ( N_now_C0R_mvN1 + N_now_C1R_mvN1 + N_now_C2R_mvN1 );
-        const GRBLinExpr N_now_CR_mvN2 = ( N_now_C0R_mvN2 + N_now_C1R_mvN2 + N_now_C2R_mvN2 );
-        const GRBLinExpr N_now_CR_mvN3 = ( N_now_C0R_mvN3 + N_now_C1R_mvN3 + N_now_C2R_mvN3 );
-        const GRBLinExpr N_now_CR_mvN0 = ( N_now_C0R_mvN0 + N_now_C1R_mvN0 + N_now_C2R_mvN0 );
+	CNF::Var N_now_CR_accN;
+	// neccessarly
+	c = not(N_now_CR_accN)  or N_now_C0R_accN      or N_now_C1R_accN      or N_now_C2R_accN;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_accN) or N_now_C1R_accN      or N_now_C2R_accN      or N_now_CR_accN;
+	m.addClause(c);
+	c = N_now_C0R_accN      or not(N_now_C1R_accN) or N_now_C2R_accN      or N_now_CR_accN;
+	m.addClause(c);
+	c = N_now_C0R_accN      or N_now_C1R_accN      or not(N_now_C2R_accN) or N_now_CR_accN;
+	m.addClause(c);
+	c = not(N_now_C0R_accN) or not(N_now_C1R_accN);
+	m.addClause(c);
+	c = not(N_now_C0R_accN) or not(N_now_C2R_accN);
+	m.addClause(c);
+	c = not(N_now_C1R_accN) or not(N_now_C2R_accN);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvN1;
+	// neccessarly
+	c = not(N_now_CR_mvN1)  or N_now_C0R_mvN1      or N_now_C1R_mvN1      or N_now_C2R_mvN1;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvN1) or N_now_C1R_mvN1      or N_now_C2R_mvN1      or N_now_CR_mvN1;
+	m.addClause(c);
+	c = N_now_C0R_mvN1      or not(N_now_C1R_mvN1) or N_now_C2R_mvN1      or N_now_CR_mvN1;
+	m.addClause(c);
+	c = N_now_C0R_mvN1      or N_now_C1R_mvN1      or not(N_now_C2R_mvN1) or N_now_CR_mvN1;
+	m.addClause(c);
+	c = not(N_now_C0R_mvN1) or not(N_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(N_now_C0R_mvN1) or not(N_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(N_now_C1R_mvN1) or not(N_now_C2R_mvN1);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvN2;
+	// neccessarly
+	c = not(N_now_CR_mvN2)  or N_now_C0R_mvN2      or N_now_C1R_mvN2      or N_now_C2R_mvN2;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvN2) or N_now_C1R_mvN2      or N_now_C2R_mvN2      or N_now_CR_mvN2;
+	m.addClause(c);
+	c = N_now_C0R_mvN2      or not(N_now_C1R_mvN2) or N_now_C2R_mvN2      or N_now_CR_mvN2;
+	m.addClause(c);
+	c = N_now_C0R_mvN2      or N_now_C1R_mvN2      or not(N_now_C2R_mvN2) or N_now_CR_mvN2;
+	m.addClause(c);
+	c = not(N_now_C0R_mvN2) or not(N_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(N_now_C0R_mvN2) or not(N_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(N_now_C1R_mvN2) or not(N_now_C2R_mvN2);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvN3;
+	// neccessarly
+	c = not(N_now_CR_mvN3)  or N_now_C0R_mvN3      or N_now_C1R_mvN3      or N_now_C2R_mvN3;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvN3) or N_now_C1R_mvN3      or N_now_C2R_mvN3      or N_now_CR_mvN3;
+	m.addClause(c);
+	c = N_now_C0R_mvN3      or not(N_now_C1R_mvN3) or N_now_C2R_mvN3      or N_now_CR_mvN3;
+	m.addClause(c);
+	c = N_now_C0R_mvN3      or N_now_C1R_mvN3      or not(N_now_C2R_mvN3) or N_now_CR_mvN3;
+	m.addClause(c);
+	c = not(N_now_C0R_mvN3) or not(N_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(N_now_C0R_mvN3) or not(N_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(N_now_C1R_mvN3) or not(N_now_C2R_mvN3);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvN0;
+	// neccessarly
+	c = not(N_now_CR_mvN0)  or N_now_C0R_mvN0      or N_now_C1R_mvN0      or N_now_C2R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvN0) or N_now_C1R_mvN0      or N_now_C2R_mvN0      or N_now_CR_mvN0;
+	m.addClause(c);
+	c = N_now_C0R_mvN0      or not(N_now_C1R_mvN0) or N_now_C2R_mvN0      or N_now_CR_mvN0;
+	m.addClause(c);
+	c = N_now_C0R_mvN0      or N_now_C1R_mvN0      or not(N_now_C2R_mvN0) or N_now_CR_mvN0;
+	m.addClause(c);
+	c = not(N_now_C0R_mvN0) or not(N_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(N_now_C0R_mvN0) or not(N_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(N_now_C1R_mvN0) or not(N_now_C2R_mvN0);
+	m.addClause(c);
 
-        const GRBLinExpr N_now_CR_accS = ( N_now_C0R_accS + N_now_C1R_accS + N_now_C2R_accS );
-        const GRBLinExpr N_now_CR_mvS1 = ( N_now_C0R_mvS1 + N_now_C1R_mvS1 + N_now_C2R_mvS1 );
-        const GRBLinExpr N_now_CR_mvS2 = ( N_now_C0R_mvS2 + N_now_C1R_mvS2 + N_now_C2R_mvS2 );
-        const GRBLinExpr N_now_CR_mvS3 = ( N_now_C0R_mvS3 + N_now_C1R_mvS3 + N_now_C2R_mvS3 );
-        const GRBLinExpr N_now_CR_mvS0 = ( N_now_C0R_mvS0 + N_now_C1R_mvS0 + N_now_C2R_mvS0 );
+	CNF::Var N_now_CR_accS;
+	// neccessarly
+	c = not(N_now_CR_accS)  or N_now_C0R_accS      or N_now_C1R_accS      or N_now_C2R_accS;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_accS) or N_now_C1R_accS      or N_now_C2R_accS      or N_now_CR_accS;
+	m.addClause(c);
+	c = N_now_C0R_accS      or not(N_now_C1R_accS) or N_now_C2R_accS      or N_now_CR_accS;
+	m.addClause(c);
+	c = N_now_C0R_accS      or N_now_C1R_accS      or not(N_now_C2R_accS) or N_now_CR_accS;
+	m.addClause(c);
+	c = not(N_now_C0R_accS) or not(N_now_C1R_accS);
+	m.addClause(c);
+	c = not(N_now_C0R_accS) or not(N_now_C2R_accS);
+	m.addClause(c);
+	c = not(N_now_C1R_accS) or not(N_now_C2R_accS);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvS1;
+	// neccessarly
+	c = not(N_now_CR_mvS1)  or N_now_C0R_mvS1      or N_now_C1R_mvS1      or N_now_C2R_mvS1;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvS1) or N_now_C1R_mvS1      or N_now_C2R_mvS1      or N_now_CR_mvS1;
+	m.addClause(c);
+	c = N_now_C0R_mvS1      or not(N_now_C1R_mvS1) or N_now_C2R_mvS1      or N_now_CR_mvS1;
+	m.addClause(c);
+	c = N_now_C0R_mvS1      or N_now_C1R_mvS1      or not(N_now_C2R_mvS1) or N_now_CR_mvS1;
+	m.addClause(c);
+	c = not(N_now_C0R_mvS1) or not(N_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(N_now_C0R_mvS1) or not(N_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(N_now_C1R_mvS1) or not(N_now_C2R_mvS1);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvS2;
+	// neccessarly
+	c = not(N_now_CR_mvS2)  or N_now_C0R_mvS2      or N_now_C1R_mvS2      or N_now_C2R_mvS2;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvS2) or N_now_C1R_mvS2      or N_now_C2R_mvS2      or N_now_CR_mvS2;
+	m.addClause(c);
+	c = N_now_C0R_mvS2      or not(N_now_C1R_mvS2) or N_now_C2R_mvS2      or N_now_CR_mvS2;
+	m.addClause(c);
+	c = N_now_C0R_mvS2      or N_now_C1R_mvS2      or not(N_now_C2R_mvS2) or N_now_CR_mvS2;
+	m.addClause(c);
+	c = not(N_now_C0R_mvS2) or not(N_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(N_now_C0R_mvS2) or not(N_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(N_now_C1R_mvS2) or not(N_now_C2R_mvS2);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvS3;
+	// neccessarly
+	c = not(N_now_CR_mvS3)  or N_now_C0R_mvS3      or N_now_C1R_mvS3      or N_now_C2R_mvS3;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvS3) or N_now_C1R_mvS3      or N_now_C2R_mvS3      or N_now_CR_mvS3;
+	m.addClause(c);
+	c = N_now_C0R_mvS3      or not(N_now_C1R_mvS3) or N_now_C2R_mvS3      or N_now_CR_mvS3;
+	m.addClause(c);
+	c = N_now_C0R_mvS3      or N_now_C1R_mvS3      or not(N_now_C2R_mvS3) or N_now_CR_mvS3;
+	m.addClause(c);
+	c = not(N_now_C0R_mvS3) or not(N_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(N_now_C0R_mvS3) or not(N_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(N_now_C1R_mvS3) or not(N_now_C2R_mvS3);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvS0;
+	// neccessarly
+	c = not(N_now_CR_mvS0)  or N_now_C0R_mvS0      or N_now_C1R_mvS0      or N_now_C2R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvS0) or N_now_C1R_mvS0      or N_now_C2R_mvS0      or N_now_CR_mvS0;
+	m.addClause(c);
+	c = N_now_C0R_mvS0      or not(N_now_C1R_mvS0) or N_now_C2R_mvS0      or N_now_CR_mvS0;
+	m.addClause(c);
+	c = N_now_C0R_mvS0      or N_now_C1R_mvS0      or not(N_now_C2R_mvS0) or N_now_CR_mvS0;
+	m.addClause(c);
+	c = not(N_now_C0R_mvS0) or not(N_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(N_now_C0R_mvS0) or not(N_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(N_now_C1R_mvS0) or not(N_now_C2R_mvS0);
+	m.addClause(c);
 
-        const GRBLinExpr W_now_nobodyhome= var( G.west(v),    t,    NdStat::nobodyhome);
-        const GRBLinExpr W_now_R_ready   = var( G.west(v),    t,    NdStat::R_ready);
-        const GRBLinExpr W_now_R_accE    = var( G.west(v),    t,    R_Move::accE);
-        const GRBLinExpr W_now_R_mvE0    = var( G.west(v),    t,    R_Move::mvE0);
-        const GRBLinExpr W_now_R_accW    = var( G.west(v),    t,    R_Move::accW);
-        const GRBLinExpr W_now_R_mvW0    = var( G.west(v),    t,    R_Move::mvW0);
-        const GRBLinExpr W_now_C0R_ready = var( G.west(v),    t,    NdStat::C0R_ready);
-        const GRBLinExpr W_now_C0R_accE  = var( G.west(v),    t,    R_Move::w0_accE);
-        const GRBLinExpr W_now_C0R_mvE1  = var( G.west(v),    t,    R_Move::w0_mvE1);
-        const GRBLinExpr W_now_C0R_mvE0  = var( G.west(v),    t,    R_Move::w0_mvE0);
-        const GRBLinExpr W_now_C0R_accW  = var( G.west(v),    t,    R_Move::w0_accW);
-        const GRBLinExpr W_now_C0R_mvW1  = var( G.west(v),    t,    R_Move::w0_mvW1);
-        const GRBLinExpr W_now_C0R_mvW0  = var( G.west(v),    t,    R_Move::w0_mvW0);
-        const GRBLinExpr W_now_C1R_ready = var( G.west(v),    t,    NdStat::C1R_ready);
-        const GRBLinExpr W_now_C1R_accE  = var( G.west(v),    t,    R_Move::w1_accE);
-        const GRBLinExpr W_now_C1R_mvE1  = var( G.west(v),    t,    R_Move::w1_mvE1);
-        const GRBLinExpr W_now_C1R_mvE0  = var( G.west(v),    t,    R_Move::w1_mvE0);
-        const GRBLinExpr W_now_C1R_accW  = var( G.west(v),    t,    R_Move::w1_accW);
-        const GRBLinExpr W_now_C1R_mvW1  = var( G.west(v),    t,    R_Move::w1_mvW1);
-        const GRBLinExpr W_now_C1R_mvW0  = var( G.west(v),    t,    R_Move::w1_mvW0);
-        const GRBLinExpr W_now_C2R_ready = var( G.west(v),    t,    NdStat::C2R_ready);
-        const GRBLinExpr W_now_C2R_accE  = var( G.west(v),    t,    R_Move::w2_accE);
-        const GRBLinExpr W_now_C2R_mvE1  = var( G.west(v),    t,    R_Move::w2_mvE1);
-        const GRBLinExpr W_now_C2R_mvE0  = var( G.west(v),    t,    R_Move::w2_mvE0);
-        const GRBLinExpr W_now_C2R_accW  = var( G.west(v),    t,    R_Move::w2_accW);
-        const GRBLinExpr W_now_C2R_mvW1  = var( G.west(v),    t,    R_Move::w2_mvW1);
-        const GRBLinExpr W_now_C2R_mvW0  = var( G.west(v),    t,    R_Move::w2_mvW0);
+
+	CNF::Var W_now_nobodyhome= var( G.west(v),    t,    NdStat::nobodyhome);
+	CNF::Var W_now_R_ready   = var( G.west(v),    t,    NdStat::R_ready);
+	CNF::Var W_now_R_accE    = var( G.west(v),    t,    R_Move::accE);
+	CNF::Var W_now_R_mvE0    = var( G.west(v),    t,    R_Move::mvE0);
+	CNF::Var W_now_R_accW    = var( G.west(v),    t,    R_Move::accW);
+	CNF::Var W_now_R_mvW0    = var( G.west(v),    t,    R_Move::mvW0);
+	CNF::Var W_now_C0R_ready = var( G.west(v),    t,    NdStat::C0R_ready);
+	CNF::Var W_now_C0R_accE  = var( G.west(v),    t,    R_Move::w0_accE);
+	CNF::Var W_now_C0R_mvE1  = var( G.west(v),    t,    R_Move::w0_mvE1);
+	CNF::Var W_now_C0R_mvE0  = var( G.west(v),    t,    R_Move::w0_mvE0);
+	CNF::Var W_now_C0R_accW  = var( G.west(v),    t,    R_Move::w0_accW);
+	CNF::Var W_now_C0R_mvW1  = var( G.west(v),    t,    R_Move::w0_mvW1);
+	CNF::Var W_now_C0R_mvW0  = var( G.west(v),    t,    R_Move::w0_mvW0);
+	CNF::Var W_now_C1R_ready = var( G.west(v),    t,    NdStat::C1R_ready);
+	CNF::Var W_now_C1R_accE  = var( G.west(v),    t,    R_Move::w1_accE);
+	CNF::Var W_now_C1R_mvE1  = var( G.west(v),    t,    R_Move::w1_mvE1);
+	CNF::Var W_now_C1R_mvE0  = var( G.west(v),    t,    R_Move::w1_mvE0);
+	CNF::Var W_now_C1R_accW  = var( G.west(v),    t,    R_Move::w1_accW);
+	CNF::Var W_now_C1R_mvW1  = var( G.west(v),    t,    R_Move::w1_mvW1);
+	CNF::Var W_now_C1R_mvW0  = var( G.west(v),    t,    R_Move::w1_mvW0);
+	CNF::Var W_now_C2R_ready = var( G.west(v),    t,    NdStat::C2R_ready);
+	CNF::Var W_now_C2R_accE  = var( G.west(v),    t,    R_Move::w2_accE);
+	CNF::Var W_now_C2R_mvE1  = var( G.west(v),    t,    R_Move::w2_mvE1);
+	CNF::Var W_now_C2R_mvE0  = var( G.west(v),    t,    R_Move::w2_mvE0);
+	CNF::Var W_now_C2R_accW  = var( G.west(v),    t,    R_Move::w2_accW);
+	CNF::Var W_now_C2R_mvW1  = var( G.west(v),    t,    R_Move::w2_mvW1);
+	CNF::Var W_now_C2R_mvW0  = var( G.west(v),    t,    R_Move::w2_mvW0);
 
         // Abbreviations
-        const GRBLinExpr W_now_CR_accE = ( W_now_C0R_accE + W_now_C1R_accE + W_now_C2R_accE );
-        const GRBLinExpr W_now_CR_mvE1 = ( W_now_C0R_mvE1 + W_now_C1R_mvE1 + W_now_C2R_mvE1 );
-        const GRBLinExpr W_now_CR_mvE0 = ( W_now_C0R_mvE0 + W_now_C1R_mvE0 + W_now_C2R_mvE0 );
+	CNF::Var W_now_CR_accE;
+	// neccessarly
+	c = not(W_now_CR_accE)  or W_now_C0R_accE      or W_now_C1R_accE      or W_now_C2R_accE;
+	m.addClause(c);
+	// sufficient
+	c = not(W_now_C0R_accE) or W_now_C1R_accE      or W_now_C2R_accE      or W_now_CR_accE;
+	m.addClause(c);
+	c = W_now_C0R_accE      or not(W_now_C1R_accE) or W_now_C2R_accE      or W_now_CR_accE;
+	m.addClause(c);
+	c = W_now_C0R_accE      or W_now_C1R_accE      or not(W_now_C2R_accE) or W_now_CR_accE;
+	m.addClause(c);
+	c = not(W_now_C0R_accE) or not(W_now_C1R_accE);
+	m.addClause(c);
+	c = not(W_now_C0R_accE) or not(W_now_C2R_accE);
+	m.addClause(c);
+	c = not(W_now_C1R_accE) or not(W_now_C2R_accE);
+	m.addClause(c);
+	CNF::Var W_now_CR_mvE1;
+	// neccessarly
+	c = not(W_now_CR_mvE1)  or W_now_C0R_mvE1      or W_now_C1R_mvE1      or W_now_C2R_mvE1;
+	m.addClause(c);
+	// sufficient
+	c = not(W_now_C0R_mvE1) or W_now_C1R_mvE1      or W_now_C2R_mvE1      or W_now_CR_mvE1;
+	m.addClause(c);
+	c = W_now_C0R_mvE1      or not(W_now_C1R_mvE1) or W_now_C2R_mvE1      or W_now_CR_mvE1;
+	m.addClause(c);
+	c = W_now_C0R_mvE1      or W_now_C1R_mvE1      or not(W_now_C2R_mvE1) or W_now_CR_mvE1;
+	m.addClause(c);
+	c = not(W_now_C0R_mvE1) or not(W_now_C1R_mvE1);
+	m.addClause(c);
+	c = not(W_now_C0R_mvE1) or not(W_now_C2R_mvE1);
+	m.addClause(c);
+	c = not(W_now_C1R_mvE1) or not(W_now_C2R_mvE1);
+	m.addClause(c);
+	CNF::Var W_now_CR_mvE0;
+	// neccessarly
+	c = not(W_now_CR_mvE0)  or W_now_C0R_mvE0      or W_now_C1R_mvE0      or W_now_C2R_mvE0;
+	m.addClause(c);
+	// sufficient
+	c = not(W_now_C0R_mvE0) or W_now_C1R_mvE0      or W_now_C2R_mvE0      or W_now_CR_mvE0;
+	m.addClause(c);
+	c = W_now_C0R_mvE0      or not(W_now_C1R_mvE0) or W_now_C2R_mvE0      or W_now_CR_mvE0;
+	m.addClause(c);
+	c = W_now_C0R_mvE0      or W_now_C1R_mvE0      or not(W_now_C2R_mvE0) or W_now_CR_mvE0;
+	m.addClause(c);
+	c = not(W_now_C0R_mvE0) or not(W_now_C1R_mvE0);
+	m.addClause(c);
+	c = not(W_now_C0R_mvE0) or not(W_now_C2R_mvE0);
+	m.addClause(c);
+	c = not(W_now_C1R_mvE0) or not(W_now_C2R_mvE0);
+	m.addClause(c);
 
-        const GRBLinExpr W_now_CR_accW = ( W_now_C0R_accW + W_now_C1R_accW + W_now_C2R_accW );
-        const GRBLinExpr W_now_CR_mvW1 = ( W_now_C0R_mvW1 + W_now_C1R_mvW1 + W_now_C2R_mvW1 );
-        const GRBLinExpr W_now_CR_mvW0 = ( W_now_C0R_mvW0 + W_now_C1R_mvW0 + W_now_C2R_mvW0 );
+	CNF::Var W_now_CR_accW;
+	// neccessarly
+	c = not(W_now_CR_accW)  or W_now_C0R_accW      or W_now_C1R_accW      or W_now_C2R_accW;
+	m.addClause(c);
+	// sufficient
+	c = not(W_now_C0R_accW) or W_now_C1R_accW      or W_now_C2R_accW      or W_now_CR_accW;
+	m.addClause(c);
+	c = W_now_C0R_accW      or not(W_now_C1R_accW) or W_now_C2R_accW      or W_now_CR_accW;
+	m.addClause(c);
+	c = W_now_C0R_accW      or W_now_C1R_accW      or not(W_now_C2R_accW) or W_now_CR_accW;
+	m.addClause(c);
+	c = not(W_now_C0R_accW) or not(W_now_C1R_accW);
+	m.addClause(c);
+	c = not(W_now_C0R_accW) or not(W_now_C2R_accW);
+	m.addClause(c);
+	c = not(W_now_C1R_accW) or not(W_now_C2R_accW);
+	m.addClause(c);
+	CNF::Var W_now_CR_mvW1;
+	// neccessarly
+	c = not(W_now_CR_mvW1)  or W_now_C0R_mvW1      or W_now_C1R_mvW1      or W_now_C2R_mvW1;
+	m.addClause(c);
+	// sufficient
+	c = not(W_now_C0R_mvW1) or W_now_C1R_mvW1      or W_now_C2R_mvW1      or W_now_CR_mvW1;
+	m.addClause(c);
+	c = W_now_C0R_mvW1      or not(W_now_C1R_mvW1) or W_now_C2R_mvW1      or W_now_CR_mvW1;
+	m.addClause(c);
+	c = W_now_C0R_mvW1      or W_now_C1R_mvW1      or not(W_now_C2R_mvW1) or W_now_CR_mvW1;
+	m.addClause(c);
+	c = not(W_now_C0R_mvW1) or not(W_now_C1R_mvW1);
+	m.addClause(c);
+	c = not(W_now_C0R_mvW1) or not(W_now_C2R_mvW1);
+	m.addClause(c);
+	c = not(W_now_C1R_mvW1) or not(W_now_C2R_mvW1);
+	m.addClause(c);
+	CNF::Var W_now_CR_mvW0;
+	// neccessarly
+	c = not(W_now_CR_mvW0)  or W_now_C0R_mvW0      or W_now_C1R_mvW0      or W_now_C2R_mvW0;
+	m.addClause(c);
+	// sufficient
+	c = not(W_now_C0R_mvW0) or W_now_C1R_mvW0      or W_now_C2R_mvW0      or W_now_CR_mvW0;
+	m.addClause(c);
+	c = W_now_C0R_mvW0      or not(W_now_C1R_mvW0) or W_now_C2R_mvW0      or W_now_CR_mvW0;
+	m.addClause(c);
+	c = W_now_C0R_mvW0      or W_now_C1R_mvW0      or not(W_now_C2R_mvW0) or W_now_CR_mvW0;
+	m.addClause(c);
+	c = not(W_now_C0R_mvW0) or not(W_now_C1R_mvW0);
+	m.addClause(c);
+	c = not(W_now_C0R_mvW0) or not(W_now_C2R_mvW0);
+	m.addClause(c);
+	c = not(W_now_C1R_mvW0) or not(W_now_C2R_mvW0);
+	m.addClause(c);
 
-        const GRBLinExpr S_now_nobodyhome= var( G.south(v),    t,    NdStat::nobodyhome);
-        const GRBLinExpr S_now_R_ready   = var( G.south(v),    t,    NdStat::R_ready);
-        const GRBLinExpr S_now_R_accN    = var( G.south(v),    t,    R_Move::accN);
-        const GRBLinExpr S_now_R_mvN1    = var( G.south(v),    t,    R_Move::mvN1);
-        const GRBLinExpr S_now_R_mvN0    = var( G.south(v),    t,    R_Move::mvN0);
-        const GRBLinExpr S_now_R_accS    = var( G.south(v),    t,    R_Move::accS);
-        const GRBLinExpr S_now_R_mvS1    = var( G.south(v),    t,    R_Move::mvS1);
-        const GRBLinExpr S_now_R_mvS0    = var( G.south(v),    t,    R_Move::mvS0);
-        const GRBLinExpr S_now_C0R_ready = var( G.south(v),    t,    NdStat::C0R_ready);
-        const GRBLinExpr S_now_C0R_accN  = var( G.south(v),    t,    R_Move::w0_accN);
-        const GRBLinExpr S_now_C0R_mvN1  = var( G.south(v),    t,    R_Move::w0_mvN1);
-        const GRBLinExpr S_now_C0R_mvN2  = var( G.south(v),    t,    R_Move::w0_mvN2);
-        const GRBLinExpr S_now_C0R_mvN3  = var( G.south(v),    t,    R_Move::w0_mvN3);
-        const GRBLinExpr S_now_C0R_mvN0  = var( G.south(v),    t,    R_Move::w0_mvN0);
-        const GRBLinExpr S_now_C0R_accS  = var( G.south(v),    t,    R_Move::w0_accS);
-        const GRBLinExpr S_now_C0R_mvS1  = var( G.south(v),    t,    R_Move::w0_mvS1);
-        const GRBLinExpr S_now_C0R_mvS2  = var( G.south(v),    t,    R_Move::w0_mvS2);
-        const GRBLinExpr S_now_C0R_mvS3  = var( G.south(v),    t,    R_Move::w0_mvS3);
-        const GRBLinExpr S_now_C0R_mvS0  = var( G.south(v),    t,    R_Move::w0_mvS0);
-        const GRBLinExpr S_now_C1R_ready = var( G.south(v),    t,    NdStat::C1R_ready);
-        const GRBLinExpr S_now_C1R_accN  = var( G.south(v),    t,    R_Move::w1_accN);
-        const GRBLinExpr S_now_C1R_mvN1  = var( G.south(v),    t,    R_Move::w1_mvN1);
-        const GRBLinExpr S_now_C1R_mvN2  = var( G.south(v),    t,    R_Move::w1_mvN2);
-        const GRBLinExpr S_now_C1R_mvN3  = var( G.south(v),    t,    R_Move::w1_mvN3);
-        const GRBLinExpr S_now_C1R_mvN0  = var( G.south(v),    t,    R_Move::w1_mvN0);
-        const GRBLinExpr S_now_C1R_accS  = var( G.south(v),    t,    R_Move::w1_accS);
-        const GRBLinExpr S_now_C1R_mvS1  = var( G.south(v),    t,    R_Move::w1_mvS1);
-        const GRBLinExpr S_now_C1R_mvS2  = var( G.south(v),    t,    R_Move::w1_mvS2);
-        const GRBLinExpr S_now_C1R_mvS3  = var( G.south(v),    t,    R_Move::w1_mvS3);
-        const GRBLinExpr S_now_C1R_mvS0  = var( G.south(v),    t,    R_Move::w1_mvS0);
-        const GRBLinExpr S_now_C2R_ready = var( G.south(v),    t,    NdStat::C2R_ready);
-        const GRBLinExpr S_now_C2R_accN  = var( G.south(v),    t,    R_Move::w2_accN);
-        const GRBLinExpr S_now_C2R_mvN1  = var( G.south(v),    t,    R_Move::w2_mvN1);
-        const GRBLinExpr S_now_C2R_mvN2  = var( G.south(v),    t,    R_Move::w2_mvN2);
-        const GRBLinExpr S_now_C2R_mvN3  = var( G.south(v),    t,    R_Move::w2_mvN3);
-        const GRBLinExpr S_now_C2R_mvN0  = var( G.south(v),    t,    R_Move::w2_mvN0);
-        const GRBLinExpr S_now_C2R_accS  = var( G.south(v),    t,    R_Move::w2_accS);
-        const GRBLinExpr S_now_C2R_mvS1  = var( G.south(v),    t,    R_Move::w2_mvS1);
-        const GRBLinExpr S_now_C2R_mvS2  = var( G.south(v),    t,    R_Move::w2_mvS2);
-        const GRBLinExpr S_now_C2R_mvS3  = var( G.south(v),    t,    R_Move::w2_mvS3);
-        const GRBLinExpr S_now_C2R_mvS0  = var( G.south(v),    t,    R_Move::w2_mvS0);
+
+	CNF::Var S_now_nobodyhome= var( G.south(v),    t,    NdStat::nobodyhome);
+	CNF::Var S_now_R_ready   = var( G.south(v),    t,    NdStat::R_ready);
+	CNF::Var S_now_R_accN    = var( G.south(v),    t,    R_Move::accN);
+	CNF::Var S_now_R_mvN1    = var( G.south(v),    t,    R_Move::mvN1);
+	CNF::Var S_now_R_mvN0    = var( G.south(v),    t,    R_Move::mvN0);
+	CNF::Var S_now_R_accS    = var( G.south(v),    t,    R_Move::accS);
+	CNF::Var S_now_R_mvS1    = var( G.south(v),    t,    R_Move::mvS1);
+	CNF::Var S_now_R_mvS0    = var( G.south(v),    t,    R_Move::mvS0);
+	CNF::Var S_now_C0R_ready = var( G.south(v),    t,    NdStat::C0R_ready);
+	CNF::Var S_now_C0R_accN  = var( G.south(v),    t,    R_Move::w0_accN);
+	CNF::Var S_now_C0R_mvN1  = var( G.south(v),    t,    R_Move::w0_mvN1);
+	CNF::Var S_now_C0R_mvN2  = var( G.south(v),    t,    R_Move::w0_mvN2);
+	CNF::Var S_now_C0R_mvN3  = var( G.south(v),    t,    R_Move::w0_mvN3);
+	CNF::Var S_now_C0R_mvN0  = var( G.south(v),    t,    R_Move::w0_mvN0);
+	CNF::Var S_now_C0R_accS  = var( G.south(v),    t,    R_Move::w0_accS);
+	CNF::Var S_now_C0R_mvS1  = var( G.south(v),    t,    R_Move::w0_mvS1);
+	CNF::Var S_now_C0R_mvS2  = var( G.south(v),    t,    R_Move::w0_mvS2);
+	CNF::Var S_now_C0R_mvS3  = var( G.south(v),    t,    R_Move::w0_mvS3);
+	CNF::Var S_now_C0R_mvS0  = var( G.south(v),    t,    R_Move::w0_mvS0);
+	CNF::Var S_now_C1R_ready = var( G.south(v),    t,    NdStat::C1R_ready);
+	CNF::Var S_now_C1R_accN  = var( G.south(v),    t,    R_Move::w1_accN);
+	CNF::Var S_now_C1R_mvN1  = var( G.south(v),    t,    R_Move::w1_mvN1);
+	CNF::Var S_now_C1R_mvN2  = var( G.south(v),    t,    R_Move::w1_mvN2);
+	CNF::Var S_now_C1R_mvN3  = var( G.south(v),    t,    R_Move::w1_mvN3);
+	CNF::Var S_now_C1R_mvN0  = var( G.south(v),    t,    R_Move::w1_mvN0);
+	CNF::Var S_now_C1R_accS  = var( G.south(v),    t,    R_Move::w1_accS);
+	CNF::Var S_now_C1R_mvS1  = var( G.south(v),    t,    R_Move::w1_mvS1);
+	CNF::Var S_now_C1R_mvS2  = var( G.south(v),    t,    R_Move::w1_mvS2);
+	CNF::Var S_now_C1R_mvS3  = var( G.south(v),    t,    R_Move::w1_mvS3);
+	CNF::Var S_now_C1R_mvS0  = var( G.south(v),    t,    R_Move::w1_mvS0);
+	CNF::Var S_now_C2R_ready = var( G.south(v),    t,    NdStat::C2R_ready);
+	CNF::Var S_now_C2R_accN  = var( G.south(v),    t,    R_Move::w2_accN);
+	CNF::Var S_now_C2R_mvN1  = var( G.south(v),    t,    R_Move::w2_mvN1);
+	CNF::Var S_now_C2R_mvN2  = var( G.south(v),    t,    R_Move::w2_mvN2);
+	CNF::Var S_now_C2R_mvN3  = var( G.south(v),    t,    R_Move::w2_mvN3);
+	CNF::Var S_now_C2R_mvN0  = var( G.south(v),    t,    R_Move::w2_mvN0);
+	CNF::Var S_now_C2R_accS  = var( G.south(v),    t,    R_Move::w2_accS);
+	CNF::Var S_now_C2R_mvS1  = var( G.south(v),    t,    R_Move::w2_mvS1);
+	CNF::Var S_now_C2R_mvS2  = var( G.south(v),    t,    R_Move::w2_mvS2);
+	CNF::Var S_now_C2R_mvS3  = var( G.south(v),    t,    R_Move::w2_mvS3);
+	CNF::Var S_now_C2R_mvS0  = var( G.south(v),    t,    R_Move::w2_mvS0);
 
         // Abbreviations
-        const GRBLinExpr S_now_CR_accN = ( S_now_C0R_accN + S_now_C1R_accN + S_now_C2R_accN );
-        const GRBLinExpr S_now_CR_mvN1 = ( S_now_C0R_mvN1 + S_now_C1R_mvN1 + S_now_C2R_mvN1 );
-        const GRBLinExpr S_now_CR_mvN2 = ( S_now_C0R_mvN2 + S_now_C1R_mvN2 + S_now_C2R_mvN2 );
-        const GRBLinExpr S_now_CR_mvN3 = ( S_now_C0R_mvN3 + S_now_C1R_mvN3 + S_now_C2R_mvN3 );
-        const GRBLinExpr S_now_CR_mvN0 = ( S_now_C0R_mvN0 + S_now_C1R_mvN0 + S_now_C2R_mvN0 );
+	CNF::Var S_now_CR_accN;
+	// neccessarly
+	c = not(S_now_CR_accN)  or S_now_C0R_accN      or S_now_C1R_accN      or S_now_C2R_accN;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_accN) or S_now_C1R_accN      or S_now_C2R_accN      or S_now_CR_accN;
+	m.addClause(c);
+	c = S_now_C0R_accN      or not(S_now_C1R_accN) or S_now_C2R_accN      or S_now_CR_accN;
+	m.addClause(c);
+	c = S_now_C0R_accN      or S_now_C1R_accN      or not(S_now_C2R_accN) or S_now_CR_accN;
+	m.addClause(c);
+	c = not(S_now_C0R_accN) or not(S_now_C1R_accN);
+	m.addClause(c);
+	c = not(S_now_C0R_accN) or not(S_now_C2R_accN);
+	m.addClause(c);
+	c = not(S_now_C1R_accN) or not(S_now_C2R_accN);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvN1;
+	// neccessarly
+	c = not(S_now_CR_mvN1)  or S_now_C0R_mvN1      or S_now_C1R_mvN1      or S_now_C2R_mvN1;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvN1) or S_now_C1R_mvN1      or S_now_C2R_mvN1      or S_now_CR_mvN1;
+	m.addClause(c);
+	c = S_now_C0R_mvN1      or not(S_now_C1R_mvN1) or S_now_C2R_mvN1      or S_now_CR_mvN1;
+	m.addClause(c);
+	c = S_now_C0R_mvN1      or S_now_C1R_mvN1      or not(S_now_C2R_mvN1) or S_now_CR_mvN1;
+	m.addClause(c);
+	c = not(S_now_C0R_mvN1) or not(S_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(S_now_C0R_mvN1) or not(S_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(S_now_C1R_mvN1) or not(S_now_C2R_mvN1);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvN2;
+	// neccessarly
+	c = not(S_now_CR_mvN2)  or S_now_C0R_mvN2      or S_now_C1R_mvN2      or S_now_C2R_mvN2;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvN2) or S_now_C1R_mvN2      or S_now_C2R_mvN2      or S_now_CR_mvN2;
+	m.addClause(c);
+	c = S_now_C0R_mvN2      or not(S_now_C1R_mvN2) or S_now_C2R_mvN2      or S_now_CR_mvN2;
+	m.addClause(c);
+	c = S_now_C0R_mvN2      or S_now_C1R_mvN2      or not(S_now_C2R_mvN2) or S_now_CR_mvN2;
+	m.addClause(c);
+	c = not(S_now_C0R_mvN2) or not(S_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(S_now_C0R_mvN2) or not(S_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(S_now_C1R_mvN2) or not(S_now_C2R_mvN2);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvN3;
+	// neccessarly
+	c = not(S_now_CR_mvN3)  or S_now_C0R_mvN3      or S_now_C1R_mvN3      or S_now_C2R_mvN3;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvN3) or S_now_C1R_mvN3      or S_now_C2R_mvN3      or S_now_CR_mvN3;
+	m.addClause(c);
+	c = S_now_C0R_mvN3      or not(S_now_C1R_mvN3) or S_now_C2R_mvN3      or S_now_CR_mvN3;
+	m.addClause(c);
+	c = S_now_C0R_mvN3      or S_now_C1R_mvN3      or not(S_now_C2R_mvN3) or S_now_CR_mvN3;
+	m.addClause(c);
+	c = not(S_now_C0R_mvN3) or not(S_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(S_now_C0R_mvN3) or not(S_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(S_now_C1R_mvN3) or not(S_now_C2R_mvN3);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvN0;
+	// neccessarly
+	c = not(S_now_CR_mvN0)  or S_now_C0R_mvN0      or S_now_C1R_mvN0      or S_now_C2R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvN0) or S_now_C1R_mvN0      or S_now_C2R_mvN0      or S_now_CR_mvN0;
+	m.addClause(c);
+	c = S_now_C0R_mvN0      or not(S_now_C1R_mvN0) or S_now_C2R_mvN0      or S_now_CR_mvN0;
+	m.addClause(c);
+	c = S_now_C0R_mvN0      or S_now_C1R_mvN0      or not(S_now_C2R_mvN0) or S_now_CR_mvN0;
+	m.addClause(c);
+	c = not(S_now_C0R_mvN0) or not(S_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(S_now_C0R_mvN0) or not(S_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(S_now_C1R_mvN0) or not(S_now_C2R_mvN0);
+	m.addClause(c);
 
-        const GRBLinExpr S_now_CR_accS = ( S_now_C0R_accS + S_now_C1R_accS + S_now_C2R_accS );
-        const GRBLinExpr S_now_CR_mvS1 = ( S_now_C0R_mvS1 + S_now_C1R_mvS1 + S_now_C2R_mvS1 );
-        const GRBLinExpr S_now_CR_mvS2 = ( S_now_C0R_mvS2 + S_now_C1R_mvS2 + S_now_C2R_mvS2 );
-        const GRBLinExpr S_now_CR_mvS3 = ( S_now_C0R_mvS3 + S_now_C1R_mvS3 + S_now_C2R_mvS3 );
-        const GRBLinExpr S_now_CR_mvS0 = ( S_now_C0R_mvS0 + S_now_C1R_mvS0 + S_now_C2R_mvS0 );
+	CNF::Var S_now_CR_accS;
+	// neccessarly
+	c = not(S_now_CR_accS)  or S_now_C0R_accS      or S_now_C1R_accS      or S_now_C2R_accS;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_accS) or S_now_C1R_accS      or S_now_C2R_accS      or S_now_CR_accS;
+	m.addClause(c);
+	c = S_now_C0R_accS      or not(S_now_C1R_accS) or S_now_C2R_accS      or S_now_CR_accS;
+	m.addClause(c);
+	c = S_now_C0R_accS      or S_now_C1R_accS      or not(S_now_C2R_accS) or S_now_CR_accS;
+	m.addClause(c);
+	c = not(S_now_C0R_accS) or not(S_now_C1R_accS);
+	m.addClause(c);
+	c = not(S_now_C0R_accS) or not(S_now_C2R_accS);
+	m.addClause(c);
+	c = not(S_now_C1R_accS) or not(S_now_C2R_accS);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvS1;
+	// neccessarly
+	c = not(S_now_CR_mvS1)  or S_now_C0R_mvS1      or S_now_C1R_mvS1      or S_now_C2R_mvS1;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvS1) or S_now_C1R_mvS1      or S_now_C2R_mvS1      or S_now_CR_mvS1;
+	m.addClause(c);
+	c = S_now_C0R_mvS1      or not(S_now_C1R_mvS1) or S_now_C2R_mvS1      or S_now_CR_mvS1;
+	m.addClause(c);
+	c = S_now_C0R_mvS1      or S_now_C1R_mvS1      or not(S_now_C2R_mvS1) or S_now_CR_mvS1;
+	m.addClause(c);
+	c = not(S_now_C0R_mvS1) or not(S_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(S_now_C0R_mvS1) or not(S_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(S_now_C1R_mvS1) or not(S_now_C2R_mvS1);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvS2;
+	// neccessarly
+	c = not(S_now_CR_mvS2)  or S_now_C0R_mvS2      or S_now_C1R_mvS2      or S_now_C2R_mvS2;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvS2) or S_now_C1R_mvS2      or S_now_C2R_mvS2      or S_now_CR_mvS2;
+	m.addClause(c);
+	c = S_now_C0R_mvS2      or not(S_now_C1R_mvS2) or S_now_C2R_mvS2      or S_now_CR_mvS2;
+	m.addClause(c);
+	c = S_now_C0R_mvS2      or S_now_C1R_mvS2      or not(S_now_C2R_mvS2) or S_now_CR_mvS2;
+	m.addClause(c);
+	c = not(S_now_C0R_mvS2) or not(S_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(S_now_C0R_mvS2) or not(S_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(S_now_C1R_mvS2) or not(S_now_C2R_mvS2);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvS3;
+	// neccessarly
+	c = not(S_now_CR_mvS3)  or S_now_C0R_mvS3      or S_now_C1R_mvS3      or S_now_C2R_mvS3;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvS3) or S_now_C1R_mvS3      or S_now_C2R_mvS3      or S_now_CR_mvS3;
+	m.addClause(c);
+	c = S_now_C0R_mvS3      or not(S_now_C1R_mvS3) or S_now_C2R_mvS3      or S_now_CR_mvS3;
+	m.addClause(c);
+	c = S_now_C0R_mvS3      or S_now_C1R_mvS3      or not(S_now_C2R_mvS3) or S_now_CR_mvS3;
+	m.addClause(c);
+	c = not(S_now_C0R_mvS3) or not(S_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(S_now_C0R_mvS3) or not(S_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(S_now_C1R_mvS3) or not(S_now_C2R_mvS3);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvS0;
+	// neccessarly
+	c = not(S_now_CR_mvS0)  or S_now_C0R_mvS0      or S_now_C1R_mvS0      or S_now_C2R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvS0) or S_now_C1R_mvS0      or S_now_C2R_mvS0      or S_now_CR_mvS0;
+	m.addClause(c);
+	c = S_now_C0R_mvS0      or not(S_now_C1R_mvS0) or S_now_C2R_mvS0      or S_now_CR_mvS0;
+	m.addClause(c);
+	c = S_now_C0R_mvS0      or S_now_C1R_mvS0      or not(S_now_C2R_mvS0) or S_now_CR_mvS0;
+	m.addClause(c);
+	c = not(S_now_C0R_mvS0) or not(S_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(S_now_C0R_mvS0) or not(S_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(S_now_C1R_mvS0) or not(S_now_C2R_mvS0);
+	m.addClause(c);
 
 
 
         // At most one robot moving towards this node:
-        model.addConstr(  1 >= E_now_R_accW  + E_now_R_mvW0
-                          +    W_now_R_accE  + W_now_R_mvE0
-                          +    N_now_R_accS  + N_now_R_mvS0 + N_now_R_mvS1
-                          +    S_now_R_accN  + S_now_R_mvN0 + S_now_R_mvN1
-                          +    E_now_CR_accW + E_now_CR_mvW0 + E_now_CR_mvW1
-                          +    W_now_CR_accE + W_now_CR_mvE0 + W_now_CR_mvE1
-                          +    N_now_CR_accS + N_now_CR_mvS0 + N_now_CR_mvS1 + N_now_CR_mvS2 + N_now_CR_mvS3
-                          +    S_now_CR_accN + S_now_CR_mvN0 + S_now_CR_mvN1 + S_now_CR_mvN2 + S_now_CR_mvN3    );
+	c = E_now_R_accW  or E_now_R_mvW0                                                                                      or  W_now_R_accE  or W_now_R_mvE0                                                                                      or  N_now_R_accS  or N_now_R_mvS0  or N_now_R_mvS1                                                                     or  S_now_R_accN  or S_now_R_mvN0  or S_now_R_mvN1                                                                     or  E_now_CR_accW or E_now_CR_mvW0 or E_now_CR_mvW1                                                                    or  W_now_CR_accE or W_now_CR_mvE0 or W_now_CR_mvE1                                                                    or  N_now_CR_accS or N_now_CR_mvS0 or N_now_CR_mvS1 or N_now_CR_mvS2 or N_now_CR_mvS3                                  or  S_now_CR_accN or S_now_CR_mvN0 or S_now_CR_mvN1 or S_now_CR_mvN2 or S_now_CR_mvN3;
+	m.addClause(c);
+	// 26 choose 2
+	c = not(E_now_R_accW) or not(E_now_R_mvW0);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(W_now_R_accE);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(W_now_R_mvE0);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(N_now_R_accS);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(N_now_R_mvS0);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(N_now_R_mvS1);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(S_now_R_accN);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(S_now_R_mvN0);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(S_now_R_mvN1);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(E_now_CR_accW);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(E_now_CR_mvW0);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(E_now_CR_mvW1);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(E_now_R_accW) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(W_now_R_accE);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(W_now_R_mvE0);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(N_now_R_accS);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(N_now_R_mvS0);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(N_now_R_mvS1);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(S_now_R_accN);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(S_now_R_mvN0);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(S_now_R_mvN1);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(E_now_CR_accW);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(E_now_CR_mvW0);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(E_now_CR_mvW1);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(E_now_R_mvW0) or not(S_now_CR_mvN3);
+	m.addClause(c);
 
-        model.addConstr(    ( Here_now_R_mvN0         ) REQUIRES ( N_now_nobodyhome     OR  N_now_R_mvN0  OR  N_now_R_accN  OR  N_now_R_mvN1                                                  OR  N_now_CR_mvN2  OR  N_now_CR_mvN3 )       );
-        model.addConstr(    ( Here_now_R_accN         ) REQUIRES ( N_now_nobodyhome                       OR  N_now_R_accN  OR  N_now_R_mvN1                                                  OR  N_now_CR_mvN2  OR  N_now_CR_mvN3 )       );
-        model.addConstr(    ( Here_now_R_mvN1         ) REQUIRES ( N_now_nobodyhome                                         OR  N_now_R_mvN1                                                                     OR  N_now_CR_mvN3 )       );
-        model.addConstr(    ( Here_now_R_mvN0         ) REQUIRES ( S_now_nobodyhome     OR  S_now_R_mvN0 )                                                                                                                                 );
+	c = not(W_now_R_accE) or not(W_now_R_mvE0);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(N_now_R_accS);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(N_now_R_mvS0);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(N_now_R_mvS1);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(S_now_R_accN);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(S_now_R_mvN0);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(S_now_R_mvN1);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(E_now_CR_accW);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(E_now_CR_mvW0);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(E_now_CR_mvW1);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(W_now_R_accE) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(N_now_R_accS);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(N_now_R_mvS0);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(N_now_R_mvS1);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(S_now_R_accN);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(S_now_R_mvN0);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(S_now_R_mvN1);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(E_now_CR_accW);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(E_now_CR_mvW0);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(E_now_CR_mvW1);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(W_now_R_mvE0) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(N_now_R_mvS0);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(N_now_R_mvS1);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(S_now_R_accN);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(S_now_R_mvN0);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(S_now_R_mvN1);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(E_now_CR_accW);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(E_now_CR_mvW0);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(E_now_CR_mvW1);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(N_now_R_accS) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(N_now_R_mvS1);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(S_now_R_accN);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(S_now_R_mvN0);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(S_now_R_mvN1);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(E_now_CR_accW);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(E_now_CR_mvW0);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(E_now_CR_mvW1);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(N_now_R_mvS0) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(S_now_R_accN);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(S_now_R_mvN0);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(S_now_R_mvN1);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(E_now_CR_accW);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(E_now_CR_mvW0);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(E_now_CR_mvW1);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(N_now_R_mvS1) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(S_now_R_mvN0);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(S_now_R_mvN1);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(E_now_CR_accW);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(E_now_CR_mvW0);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(E_now_CR_mvW1);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(S_now_R_accN) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(S_now_R_mvN1);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(E_now_CR_accW);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(E_now_CR_mvW0);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(E_now_CR_mvW1);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(S_now_R_mvN0) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(E_now_CR_accW);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(E_now_CR_mvW0);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(E_now_CR_mvW1);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(S_now_R_mvN1) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(E_now_CR_mvW0);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(E_now_CR_mvW1);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(E_now_CR_accW) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(E_now_CR_mvW1);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(E_now_CR_mvW0) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(W_now_CR_accE);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(E_now_CR_mvW1) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(W_now_CR_accE) or not(W_now_CR_mvE0);
+	m.addClause(c);
+	c = not(W_now_CR_accE) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(W_now_CR_accE) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(W_now_CR_accE) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(W_now_CR_accE) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(W_now_CR_accE) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(W_now_CR_accE) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(W_now_CR_accE) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(W_now_CR_accE) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(W_now_CR_accE) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(W_now_CR_accE) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(W_now_CR_accE) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(W_now_CR_mvE0) or not(W_now_CR_mvE1);
+	m.addClause(c);
+	c = not(W_now_CR_mvE0) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(W_now_CR_mvE0) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(W_now_CR_mvE0) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(W_now_CR_mvE0) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(W_now_CR_mvE0) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(W_now_CR_mvE0) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(W_now_CR_mvE0) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(W_now_CR_mvE0) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(W_now_CR_mvE0) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(W_now_CR_mvE0) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(W_now_CR_mvE1) or not(N_now_CR_accS);
+	m.addClause(c);
+	c = not(W_now_CR_mvE1) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(W_now_CR_mvE1) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(W_now_CR_mvE1) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(W_now_CR_mvE1) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(W_now_CR_mvE1) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(W_now_CR_mvE1) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(W_now_CR_mvE1) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(W_now_CR_mvE1) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(W_now_CR_mvE1) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(N_now_CR_accS) or not(N_now_CR_mvS0);
+	m.addClause(c);
+	c = not(N_now_CR_accS) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(N_now_CR_accS) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(N_now_CR_accS) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(N_now_CR_accS) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(N_now_CR_accS) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(N_now_CR_accS) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(N_now_CR_accS) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(N_now_CR_accS) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(N_now_CR_mvS0) or not(N_now_CR_mvS1);
+	m.addClause(c);
+	c = not(N_now_CR_mvS0) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(N_now_CR_mvS0) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(N_now_CR_mvS0) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(N_now_CR_mvS0) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(N_now_CR_mvS0) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(N_now_CR_mvS0) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(N_now_CR_mvS0) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(N_now_CR_mvS1) or not(N_now_CR_mvS2);
+	m.addClause(c);
+	c = not(N_now_CR_mvS1) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(N_now_CR_mvS1) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(N_now_CR_mvS1) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(N_now_CR_mvS1) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(N_now_CR_mvS1) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(N_now_CR_mvS1) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(N_now_CR_mvS2) or not(N_now_CR_mvS3);
+	m.addClause(c);
+	c = not(N_now_CR_mvS2) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(N_now_CR_mvS2) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(N_now_CR_mvS2) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(N_now_CR_mvS2) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(N_now_CR_mvS2) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(N_now_CR_mvS3) or not(S_now_CR_accN);
+	m.addClause(c);
+	c = not(N_now_CR_mvS3) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(N_now_CR_mvS3) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(N_now_CR_mvS3) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(N_now_CR_mvS3) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(S_now_CR_accN) or not(S_now_CR_mvN0);
+	m.addClause(c);
+	c = not(S_now_CR_accN) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(S_now_CR_accN) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(S_now_CR_accN) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(S_now_CR_mvN0) or not(S_now_CR_mvN1);
+	m.addClause(c);
+	c = not(S_now_CR_mvN0) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(S_now_CR_mvN0) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(S_now_CR_mvN1) or not(S_now_CR_mvN2);
+	m.addClause(c);
+	c = not(S_now_CR_mvN1) or not(S_now_CR_mvN3);
+	m.addClause(c);
+	c = not(S_now_CR_mvN2) or not(S_now_CR_mvN3);
+	m.addClause(c);
 
-        model.addConstr(    ( Here_now_R_mvS0         ) REQUIRES ( S_now_nobodyhome     OR  S_now_R_mvS0  OR  S_now_R_accS  OR  S_now_R_mvS1                                                  OR  S_now_CR_mvS2  OR  S_now_CR_mvS3 )       );
-        model.addConstr(    ( Here_now_R_accS         ) REQUIRES ( S_now_nobodyhome                       OR  S_now_R_accS  OR  S_now_R_mvS1                                                  OR  S_now_CR_mvS2  OR  S_now_CR_mvS3 )       );
-        model.addConstr(    ( Here_now_R_mvS1         ) REQUIRES ( S_now_nobodyhome                                         OR  S_now_R_mvS1                                                                     OR  S_now_CR_mvS3 )       );
-        model.addConstr(    ( Here_now_R_mvS0         ) REQUIRES ( S_now_nobodyhome     OR  N_now_R_mvS0 )                                                                                                                                 );
+	c = not(Here_now_R_mvN0)  or N_now_nobodyhome or N_now_R_mvN0  or N_now_R_accN  or N_now_R_mvN1                 	                                                              or N_now_CR_mvN2 or N_now_CR_mvN3;
+	m.addClause(c);
+	c = not(N_now_R_accN)     or N_now_nobodyhome                  or N_now_R_accN  or N_now_R_mvN1                  	                                                              or N_now_CR_mvN2 or N_now_CR_mvN3;
+	m.addClause(c);
+	c = not(Here_now_R_mvN1)  or N_now_nobodyhome                                   or N_now_R_mvN1                 	                                                                               or N_now_CR_mvN3;
+	m.addClause(c);
+	c = not(Here_now_R_mvN0)  or S_now_nobodyhome or S_now_R_mvN0                                   ;
+	m.addClause(c);
+	c = not(Here_now_R_mvS0)  or S_now_nobodyhome or S_now_R_mvS0  or S_now_R_accS  or S_now_R_mvS1                 	                                                              or S_now_CR_mvS2 or S_now_CR_mvS3;
+	m.addClause(c);
+	c = not(Here_now_R_accS)  or S_now_nobodyhome                  or S_now_R_accS  or S_now_R_mvS1                 	                                                              or S_now_CR_mvS2 or S_now_CR_mvS3;
+	m.addClause(c);
+	c = not(Here_now_R_mvS1)  or S_now_nobodyhome                                   or S_now_R_mvS1                 	                                                                               or S_now_CR_mvS3;
+	m.addClause(c);
+	c = not(Here_now_R_mvS0)  or S_now_nobodyhome or N_now_R_mvS0                                   ;
+	m.addClause(c);
+	c = not(Here_now_R_mvE0)  or E_now_nobodyhome or E_now_R_mvE0  or E_now_R_accE                                  	                                                                               or E_now_CR_mvE1;
+	m.addClause(c);
+	c = not(Here_now_R_accE)  or E_now_nobodyhome                  or E_now_R_accE                                    	                                                                               or E_now_CR_mvE1;
+	m.addClause(C);
+	c = not(Here_now_R_mvE0)  or W_now_nobodyhome or W_now_R_mvE0                                   ;
+	m.addClause(c); 
+	c = not(Here_now_R_mvW0)  or W_now_nobodyhome or W_now_R_mvW0  or W_now_R_accW                                  	                                                                               or W_now_CR_mvW1;
+	m.addClause(c);
+        c = not(Here_now_R_accW)  or W_now_nobodyhome                  or W_now_R_accW                                  	                                                                               or W_now_CR_mvW1;
+	m.addClause(c);
+	c = not(Here_now_R_mvW0)  or W_now_nobodyhome or E_now_R_mvW0                                   ; 
+	m.addClause(c);
 
-        model.addConstr(    ( Here_now_R_mvE0         ) REQUIRES ( E_now_nobodyhome     OR  E_now_R_mvE0  OR  E_now_R_accE                                                                                         OR  E_now_CR_mvE1 )       );
-        model.addConstr(    ( Here_now_R_accE         ) REQUIRES ( E_now_nobodyhome                       OR  E_now_R_accE                                                                                         OR  E_now_CR_mvE1 )       );
-        model.addConstr(    ( Here_now_R_mvE0         ) REQUIRES ( W_now_nobodyhome     OR  W_now_R_mvE0 )                                                                                                                                   );
 
-        model.addConstr(    ( Here_now_R_mvW0         ) REQUIRES ( W_now_nobodyhome     OR  W_now_R_mvW0  OR  W_now_R_accW                                                                                         OR  W_now_CR_mvW1 )       );
-        model.addConstr(    ( Here_now_R_accW         ) REQUIRES ( W_now_nobodyhome                       OR  W_now_R_accW                                                                                         OR  W_now_CR_mvW1 )       );
-        model.addConstr(    ( Here_now_R_mvW0         ) REQUIRES ( W_now_nobodyhome     OR  E_now_R_mvW0 )                                                                                                                                   );
+	c = not(Here_now_CR_mvN0) or N_now_nobodyhome or N_now_CR_mvN0 or N_now_CR_accN or N_now_CR_mvN1                           or N_now_CR_mvN2      or N_now_CR_mvN3                     or N_now_R_accN  or N_now_R_mvN1 ;
+	m.addClause(c);
+	c = not(Here_now_CR_accN) or N_now_nobodyhome                  or N_now_CR_accN or N_now_CR_mvN1                           or N_now_CR_mvN2      or N_now_CR_mvN3                     or N_now_R_accN  or N_now_R_mvN1 ;
+	m.addClause(c);
+	c = not(Here_now_CR_mvN1) or N_now_nobodyhome                                   or N_now_CR_mvN1                           or N_now_CR_mvN2      or N_now_CR_mvN3                                      or N_now_R_mvN1 ;
+	m.addClause(c);
+	c = not(Here_now_CR_mvN2) or N_now_nobodyhome                                                                              or N_now_CR_mvN2      or N_now_CR_mvN3                                                      ;
+	m.addClause(c);
+	c = not(Here_now_CR_mvN3) or N_now_nobodyhome                                                                                                    or N_now_CR_mvN3                                                      ;
+	m.addClause(c);
+	c = not(Here_now_CR_mvN0) or S_now_nobodyhome or S_now_CR_mvN0                                  ;
+	m.addClause(c);
 
+	c = not(Here_now_CR_mvS0) or S_now_nobodyhome or S_now_CR_mvS0 or S_now_CR_accS or S_now_CR_mvS1                           or S_now_CR_mvS2      or S_now_CR_mvS3                     or S_now_R_accS  or S_now_R_mvS1 ;
+	m.addClause(c);
+	c = not(Here_now_CR_accS) or S_now_nobodyhome                  or S_now_CR_accS or S_now_CR_mvS1                           or S_now_CR_mvS2      or S_now_CR_mvS3                     or S_now_R_accS  or S_now_R_mvS1 ;
+	m.addClause(c);
+	c = not(Here_now_CR_mvS1) or S_now_nobodyhome                  or S_now_CR_mvS1                                            or S_now_CR_mvS2      or S_now_CR_mvS3                                      or S_now_R_mvS1 ;
+	m.addClause(c);
+	c = not(Here_now_CR_mvS2) or S_now_nobodyhome                                                                              or S_now_CR_mvS2      or S_now_CR_mvS3                                                      ;
+	m.addClause(c);
+	c = not(Here_now_CR_mvS3) or S_now_nobodyhome                                                                                                    or S_now_CR_mvS3                                                      ;
+	m.addClause(c);
+	c = not(Here_now_CR_mvS0) or S_now_nobodyhome or N_now_CR_mvS0                                  ;
+	m.addClause(c);    
 
-        model.addConstr(    ( Here_now_CR_mvN0       ) REQUIRES ( N_now_nobodyhome     OR  N_now_CR_mvN0  OR  N_now_CR_accN  OR  N_now_CR_mvN1  OR  N_now_CR_mvN2  OR  N_now_CR_mvN3          OR  N_now_R_accN  OR  N_now_R_mvN1 )       );
-        model.addConstr(    ( Here_now_CR_accN       ) REQUIRES ( N_now_nobodyhome                        OR  N_now_CR_accN  OR  N_now_CR_mvN1  OR  N_now_CR_mvN2  OR  N_now_CR_mvN3          OR  N_now_R_accN  OR  N_now_R_mvN1 )       );
-        model.addConstr(    ( Here_now_CR_mvN1       ) REQUIRES ( N_now_nobodyhome                                           OR  N_now_CR_mvN1  OR  N_now_CR_mvN2  OR  N_now_CR_mvN3                            OR  N_now_R_mvN1 )       );
-        model.addConstr(    ( Here_now_CR_mvN2       ) REQUIRES ( N_now_nobodyhome                                                              OR  N_now_CR_mvN2  OR  N_now_CR_mvN3                                             )       );
-        model.addConstr(    ( Here_now_CR_mvN3       ) REQUIRES ( N_now_nobodyhome                                                                                 OR  N_now_CR_mvN3                                             )       );
-        model.addConstr(    ( Here_now_CR_mvN0       ) REQUIRES ( S_now_nobodyhome     OR  S_now_CR_mvN0 )       );
-
-        model.addConstr(    ( Here_now_CR_mvS0       ) REQUIRES ( S_now_nobodyhome     OR  S_now_CR_mvS0  OR  S_now_CR_accS  OR  S_now_CR_mvS1  OR  S_now_CR_mvS2  OR  S_now_CR_mvS3          OR  S_now_R_accS  OR  S_now_R_mvS1 )       );
-        model.addConstr(    ( Here_now_CR_accS       ) REQUIRES ( S_now_nobodyhome                        OR  S_now_CR_accS  OR  S_now_CR_mvS1  OR  S_now_CR_mvS2  OR  S_now_CR_mvS3          OR  S_now_R_accS  OR  S_now_R_mvS1 )       );
-        model.addConstr(    ( Here_now_CR_mvS1       ) REQUIRES ( S_now_nobodyhome                                           OR  S_now_CR_mvS1  OR  S_now_CR_mvS2  OR  S_now_CR_mvS3                            OR  S_now_R_mvS1 )       );
-        model.addConstr(    ( Here_now_CR_mvS2       ) REQUIRES ( S_now_nobodyhome                                                              OR  S_now_CR_mvS2  OR  S_now_CR_mvS3                                             )       );
-        model.addConstr(    ( Here_now_CR_mvS3       ) REQUIRES ( S_now_nobodyhome                                                                                 OR  S_now_CR_mvS3                                             )       );
-        model.addConstr(    ( Here_now_CR_mvS0       ) REQUIRES ( S_now_nobodyhome     OR  N_now_CR_mvS0 )       );
-
-        model.addConstr(    ( Here_now_CR_mvE0       ) REQUIRES ( E_now_nobodyhome     OR  E_now_CR_mvE0  OR  E_now_CR_accE  OR  E_now_CR_mvE1                                                OR  E_now_R_accE  )       );
-        model.addConstr(    ( Here_now_CR_accE       ) REQUIRES ( E_now_nobodyhome                        OR  E_now_CR_accE  OR  E_now_CR_mvE1                                                OR  E_now_R_accE  )       );
-        model.addConstr(    ( Here_now_CR_mvE1       ) REQUIRES ( E_now_nobodyhome                                           OR  E_now_CR_mvE1                                                                  )       );
-        model.addConstr(    ( Here_now_CR_mvE0       ) REQUIRES ( W_now_nobodyhome     OR  W_now_CR_mvE0 )       );
-
-        model.addConstr(    ( Here_now_CR_mvW0       ) REQUIRES ( W_now_nobodyhome     OR  W_now_CR_mvW0  OR  W_now_CR_accW  OR  W_now_CR_mvW1                                                OR  W_now_R_accW  )       );
-        model.addConstr(    ( Here_now_CR_accW       ) REQUIRES ( W_now_nobodyhome                        OR  W_now_CR_accW  OR  W_now_CR_mvW1                                                OR  W_now_R_accW  )       );
-        model.addConstr(    ( Here_now_CR_mvW1       ) REQUIRES ( W_now_nobodyhome                                           OR  W_now_CR_mvW1                                                                  )       );
-        model.addConstr(    ( Here_now_CR_mvW0       ) REQUIRES ( E_now_nobodyhome     OR  E_now_CR_mvW0 )       );
+	c = not(Here_now_CR_mvE0) or E_now_nobodyhome or E_now_CR_mvE0 or E_now_CR_accE or E_now_CR_mvE1                           or E_now_R_accE                                                                             ;
+	m.addClause(c);
+	c = not(Here_now_CR_accE) or E_now_nobodyhome                  or E_now_CR_accE or E_now_CR_mvE1                           or E_now_R_accE                                                                             ;
+	m.addClause(c);
+	c = not(Here_now_CR_mvE1) or E_now_nobodyhome                                   or E_now_CR_mvE1;
+	m.addClause(c);
+	c = not(Here_now_CR_mvE0) or W_now_nobodyhome or W_now_CR_mvE0                                  ;
+	m.addClause(c);
+	c = not(Here_now_CR_mvW0) or W_now_nobodyhome or W_now_CR_mvW0 or W_now_CR_accW or W_now_CR_mvW1                           or W_now_R_accW                                                                             ;
+	m.addClause(c);
+	c = not(Here_now_CR_accW) or W_now_nobodyhome                  or W_now_CR_accW or W_now_CR_mvW1                           or W_now_R_accW                                                                             ;
+	m.addClause(c);
+	c = not(Here_now_CR_mvW1) or W_now_nobodyhome                                   or W_now_CR_mvW1;
+	m.addClause(c);
+	c = not(Here_now_CR_mvW0) or E_now_nobodyhome or E_now_CR_mvW0                                  ;
 
     }
 
 
     // L I F T I N G + D R O P P I N G
     {
-        const GRBLinExpr Here_now_empty       = var(v,       t,    On_Node::empty);
+        CNF::Model m;
+	CNF::Clause c;
+        CNF::Var Here_now_empty       = var(v,       t,    On_Node::empty);
 
-        const GRBLinExpr Here_now_R_ready     = var(v,       t,    NdStat::R_ready);
-        const GRBLinExpr Here_now_R_lift      = var(v,       t,    R_Vertical::lift);
-        const GRBLinExpr Here_now_R_lifting1  = var(v,       t,    R_Vertical::l1);
-        const GRBLinExpr Here_now_R_lifting2  = var(v,       t,    R_Vertical::l2);
-        const GRBLinExpr Here_now_R_lifting3  = var(v,       t,    R_Vertical::l3);
-        const GRBLinExpr Here_now_R_lifting4  = var(v,       t,    R_Vertical::l4);
-        const GRBLinExpr Here_now_R_drop      = var(v,       t,    R_Vertical::drop);
+	CNF::Var Here_now_R_ready     = var(v,       t,    NdStat::R_ready);
+	CNF::Var Here_now_R_lift      = var(v,       t,    R_Vertical::lift);
+	CNF::Var Here_now_R_lifting1  = var(v,       t,    R_Vertical::l1);
+	CNF::Var Here_now_R_lifting2  = var(v,       t,    R_Vertical::l2);
+	CNF::Var Here_now_R_lifting3  = var(v,       t,    R_Vertical::l3);
+	CNF::Var Here_now_R_lifting4  = var(v,       t,    R_Vertical::l4);
+	CNF::Var Here_now_R_drop      = var(v,       t,    R_Vertical::drop);
 
-        model.addConstr( Here_now_R_lift       IMPLIES        NOT Here_now_empty );
-        model.addConstr( Here_now_R_lifting1   IMPLIES        NOT Here_now_empty );
-        model.addConstr( Here_now_R_lifting2   IMPLIES        NOT Here_now_empty );
-        model.addConstr( Here_now_R_lifting3   IMPLIES        NOT Here_now_empty );
-        model.addConstr( Here_now_R_lifting4   IMPLIES        NOT Here_now_empty );
-
-        model.addConstr( Here_now_R_drop       IMPLIES        NOT Here_now_empty );
+	c = not(Here_now_R_lift)     or  not(Here_now_empty);
+	m.addClause(c);
+	c = not(Here_now_R_lifting1) or  not(Here_now_empty);
+	m.addClause(c);
+	c = not(Here_now_R_lifting2) or  not(Here_now_empty);
+	m.addClause(c);
+	c = not(Here_now_R_lifting3) or  not(Here_now_empty);
+	m.addClause(c);
+	c = not(Here_now_R_lifting4) or  not(Here_now_empty);
+	m.addClause(c);
+	c = not(Here_now_R_drop)     or  not(Here_now_empty);
+	m.addClause(c);
     }
 
 } // atom_constraints()
@@ -920,1004 +3396,2769 @@ void GridSpace::Grid_Gurobi::atom_constraints(const XY v, const unsigned t)
 //       T I M E  L I N K     C O N S T R A I N T S
 //********************************************************************************************************************************************************************************************************
 
-void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
+void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 {
-    if (t>=t_max) throw std::range_error("Grid_Gurobi::time_link_constraints(): It's too late!");
+    if (t>=t_max) throw std::range_error("Grid_Sat::time_link_constraints(): It's too late!");
 
     // B A S I C S
     {
-        const GRBLinExpr Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
-        const GRBLinExpr Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
-        const GRBLinExpr Here_now_R_accE    = var(v,    t,     R_Move::accE);
-        const GRBLinExpr Here_now_R_mvE0    = var(v,    t,     R_Move::mvE0);
-        const GRBLinExpr Here_now_R_accW    = var(v,    t,     R_Move::accW);
-        const GRBLinExpr Here_now_R_mvW0    = var(v,    t,     R_Move::mvW0);
-        const GRBLinExpr Here_now_R_accN    = var(v,    t,     R_Move::accN);
-        const GRBLinExpr Here_now_R_mvN1    = var(v,    t,     R_Move::mvN1);
-        const GRBLinExpr Here_now_R_mvN0    = var(v,    t,     R_Move::mvN0);
-        const GRBLinExpr Here_now_R_accS    = var(v,    t,     R_Move::accS);
-        const GRBLinExpr Here_now_R_mvS1    = var(v,    t,     R_Move::mvS1);
-        const GRBLinExpr Here_now_R_mvS0    = var(v,    t,     R_Move::mvS0);
-        const GRBLinExpr Here_now_R_lift    = var(v,    t,     R_Vertical::lift);
-        const GRBLinExpr Here_now_R_lifting1= var(v,    t,     R_Vertical::l1);
-        const GRBLinExpr Here_now_R_lifting2= var(v,    t,     R_Vertical::l2);
-        const GRBLinExpr Here_now_R_lifting3= var(v,    t,     R_Vertical::l3);
-        const GRBLinExpr Here_now_R_lifting4= var(v,    t,     R_Vertical::l4);
-        const GRBLinExpr Here_now_R_drop    = var(v,    t,     R_Vertical::drop);
-        const GRBLinExpr Here_now_C0R_ready = var(v,    t,     NdStat::C0R_ready);
-        const GRBLinExpr Here_now_C0R_accE  = var(v,    t,     R_Move::w0_accE);
-        const GRBLinExpr Here_now_C0R_mvE1  = var(v,    t,     R_Move::w0_mvE1);
-        const GRBLinExpr Here_now_C0R_mvE0  = var(v,    t,     R_Move::w0_mvE0);
-        const GRBLinExpr Here_now_C0R_accW  = var(v,    t,     R_Move::w0_accW);
-        const GRBLinExpr Here_now_C0R_mvW1  = var(v,    t,     R_Move::w0_mvW1);
-        const GRBLinExpr Here_now_C0R_mvW0  = var(v,    t,     R_Move::w0_mvW0);
-        const GRBLinExpr Here_now_C0R_accN  = var(v,    t,     R_Move::w0_accN);
-        const GRBLinExpr Here_now_C0R_mvN1  = var(v,    t,     R_Move::w0_mvN1);
-        const GRBLinExpr Here_now_C0R_mvN2  = var(v,    t,     R_Move::w0_mvN2);
-        const GRBLinExpr Here_now_C0R_mvN3  = var(v,    t,     R_Move::w0_mvN3);
-        const GRBLinExpr Here_now_C0R_mvN0  = var(v,    t,     R_Move::w0_mvN0);
-        const GRBLinExpr Here_now_C0R_accS  = var(v,    t,     R_Move::w0_accS);
-        const GRBLinExpr Here_now_C0R_mvS1  = var(v,    t,     R_Move::w0_mvS1);
-        const GRBLinExpr Here_now_C0R_mvS2  = var(v,    t,     R_Move::w0_mvS2);
-        const GRBLinExpr Here_now_C0R_mvS3  = var(v,    t,     R_Move::w0_mvS3);
-        const GRBLinExpr Here_now_C0R_mvS0  = var(v,    t,     R_Move::w0_mvS0);
-        const GRBLinExpr Here_now_C1R_ready = var(v,    t,     NdStat::C1R_ready);
-        const GRBLinExpr Here_now_C1R_accE  = var(v,    t,     R_Move::w1_accE);
-        const GRBLinExpr Here_now_C1R_mvE1  = var(v,    t,     R_Move::w1_mvE1);
-        const GRBLinExpr Here_now_C1R_mvE0  = var(v,    t,     R_Move::w1_mvE0);
-        const GRBLinExpr Here_now_C1R_accW  = var(v,    t,     R_Move::w1_accW);
-        const GRBLinExpr Here_now_C1R_mvW1  = var(v,    t,     R_Move::w1_mvW1);
-        const GRBLinExpr Here_now_C1R_mvW0  = var(v,    t,     R_Move::w1_mvW0);
-        const GRBLinExpr Here_now_C1R_accN  = var(v,    t,     R_Move::w1_accN);
-        const GRBLinExpr Here_now_C1R_mvN1  = var(v,    t,     R_Move::w1_mvN1);
-        const GRBLinExpr Here_now_C1R_mvN2  = var(v,    t,     R_Move::w1_mvN2);
-        const GRBLinExpr Here_now_C1R_mvN3  = var(v,    t,     R_Move::w1_mvN3);
-        const GRBLinExpr Here_now_C1R_mvN0  = var(v,    t,     R_Move::w1_mvN0);
-        const GRBLinExpr Here_now_C1R_accS  = var(v,    t,     R_Move::w1_accS);
-        const GRBLinExpr Here_now_C1R_mvS1  = var(v,    t,     R_Move::w1_mvS1);
-        const GRBLinExpr Here_now_C1R_mvS2  = var(v,    t,     R_Move::w1_mvS2);
-        const GRBLinExpr Here_now_C1R_mvS3  = var(v,    t,     R_Move::w1_mvS3);
-        const GRBLinExpr Here_now_C1R_mvS0  = var(v,    t,     R_Move::w1_mvS0);
-        const GRBLinExpr Here_now_C2R_ready = var(v,    t,     NdStat::C2R_ready);
-        const GRBLinExpr Here_now_C2R_accE  = var(v,    t,     R_Move::w2_accE);
-        const GRBLinExpr Here_now_C2R_mvE1  = var(v,    t,     R_Move::w2_mvE1);
-        const GRBLinExpr Here_now_C2R_mvE0  = var(v,    t,     R_Move::w2_mvE0);
-        const GRBLinExpr Here_now_C2R_accW  = var(v,    t,     R_Move::w2_accW);
-        const GRBLinExpr Here_now_C2R_mvW1  = var(v,    t,     R_Move::w2_mvW1);
-        const GRBLinExpr Here_now_C2R_mvW0  = var(v,    t,     R_Move::w2_mvW0);
-        const GRBLinExpr Here_now_C2R_accN  = var(v,    t,     R_Move::w2_accN);
-        const GRBLinExpr Here_now_C2R_mvN1  = var(v,    t,     R_Move::w2_mvN1);
-        const GRBLinExpr Here_now_C2R_mvN2  = var(v,    t,     R_Move::w2_mvN2);
-        const GRBLinExpr Here_now_C2R_mvN3  = var(v,    t,     R_Move::w2_mvN3);
-        const GRBLinExpr Here_now_C2R_mvN0  = var(v,    t,     R_Move::w2_mvN0);
-        const GRBLinExpr Here_now_C2R_accS  = var(v,    t,     R_Move::w2_accS);
-        const GRBLinExpr Here_now_C2R_mvS1  = var(v,    t,     R_Move::w2_mvS1);
-        const GRBLinExpr Here_now_C2R_mvS2  = var(v,    t,     R_Move::w2_mvS2);
-        const GRBLinExpr Here_now_C2R_mvS3  = var(v,    t,     R_Move::w2_mvS3);
-        const GRBLinExpr Here_now_C2R_mvS0  = var(v,    t,     R_Move::w2_mvS0);
+        CNF::Model m;
+	CNF::Clause c;
+        CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
+	CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
+	CNF::Var Here_now_R_accE    = var(v,    t,     R_Move::accE);
+	CNF::Var Here_now_R_mvE0    = var(v,    t,     R_Move::mvE0);
+	CNF::Var Here_now_R_accW    = var(v,    t,     R_Move::accW);
+	CNF::Var Here_now_R_mvW0    = var(v,    t,     R_Move::mvW0);
+	CNF::Var Here_now_R_accN    = var(v,    t,     R_Move::accN);
+	CNF::Var Here_now_R_mvN1    = var(v,    t,     R_Move::mvN1);
+	CNF::Var Here_now_R_mvN0    = var(v,    t,     R_Move::mvN0);
+	CNF::Var Here_now_R_accS    = var(v,    t,     R_Move::accS);
+	CNF::Var Here_now_R_mvS1    = var(v,    t,     R_Move::mvS1);
+	CNF::Var Here_now_R_mvS0    = var(v,    t,     R_Move::mvS0);
+	CNF::Var Here_now_R_lift    = var(v,    t,     R_Vertical::lift);
+	CNF::Var Here_now_R_lifting1= var(v,    t,     R_Vertical::l1);
+	CNF::Var Here_now_R_lifting2= var(v,    t,     R_Vertical::l2);
+	CNF::Var Here_now_R_lifting3= var(v,    t,     R_Vertical::l3);
+	CNF::Var Here_now_R_lifting4= var(v,    t,     R_Vertical::l4);
+	CNF::Var Here_now_R_drop    = var(v,    t,     R_Vertical::drop);
+	CNF::Var Here_now_C0R_ready = var(v,    t,     NdStat::C0R_ready);
+	CNF::Var Here_now_C0R_accE  = var(v,    t,     R_Move::w0_accE);
+	CNF::Var Here_now_C0R_mvE1  = var(v,    t,     R_Move::w0_mvE1);
+	CNF::Var Here_now_C0R_mvE0  = var(v,    t,     R_Move::w0_mvE0);
+	CNF::Var Here_now_C0R_accW  = var(v,    t,     R_Move::w0_accW);
+	CNF::Var Here_now_C0R_mvW1  = var(v,    t,     R_Move::w0_mvW1);
+	CNF::Var Here_now_C0R_mvW0  = var(v,    t,     R_Move::w0_mvW0);
+	CNF::Var Here_now_C0R_accN  = var(v,    t,     R_Move::w0_accN);
+	CNF::Var Here_now_C0R_mvN1  = var(v,    t,     R_Move::w0_mvN1);
+	CNF::Var Here_now_C0R_mvN2  = var(v,    t,     R_Move::w0_mvN2);
+	CNF::Var Here_now_C0R_mvN3  = var(v,    t,     R_Move::w0_mvN3);
+	CNF::Var Here_now_C0R_mvN0  = var(v,    t,     R_Move::w0_mvN0);
+	CNF::Var Here_now_C0R_accS  = var(v,    t,     R_Move::w0_accS);
+	CNF::Var Here_now_C0R_mvS1  = var(v,    t,     R_Move::w0_mvS1);
+	CNF::Var Here_now_C0R_mvS2  = var(v,    t,     R_Move::w0_mvS2);
+	CNF::Var Here_now_C0R_mvS3  = var(v,    t,     R_Move::w0_mvS3);
+	CNF::Var Here_now_C0R_mvS0  = var(v,    t,     R_Move::w0_mvS0);
+	CNF::Var Here_now_C1R_ready = var(v,    t,     NdStat::C1R_ready);
+	CNF::Var Here_now_C1R_accE  = var(v,    t,     R_Move::w1_accE);
+	CNF::Var Here_now_C1R_mvE1  = var(v,    t,     R_Move::w1_mvE1);
+	CNF::Var Here_now_C1R_mvE0  = var(v,    t,     R_Move::w1_mvE0);
+	CNF::Var Here_now_C1R_accW  = var(v,    t,     R_Move::w1_accW);
+	CNF::Var Here_now_C1R_mvW1  = var(v,    t,     R_Move::w1_mvW1);
+	CNF::Var Here_now_C1R_mvW0  = var(v,    t,     R_Move::w1_mvW0);
+	CNF::Var Here_now_C1R_accN  = var(v,    t,     R_Move::w1_accN);
+	CNF::Var Here_now_C1R_mvN1  = var(v,    t,     R_Move::w1_mvN1);
+	CNF::Var Here_now_C1R_mvN2  = var(v,    t,     R_Move::w1_mvN2);
+	CNF::Var Here_now_C1R_mvN3  = var(v,    t,     R_Move::w1_mvN3);
+	CNF::Var Here_now_C1R_mvN0  = var(v,    t,     R_Move::w1_mvN0);
+	CNF::Var Here_now_C1R_accS  = var(v,    t,     R_Move::w1_accS);
+	CNF::Var Here_now_C1R_mvS1  = var(v,    t,     R_Move::w1_mvS1);
+	CNF::Var Here_now_C1R_mvS2  = var(v,    t,     R_Move::w1_mvS2);
+	CNF::Var Here_now_C1R_mvS3  = var(v,    t,     R_Move::w1_mvS3);
+	CNF::Var Here_now_C1R_mvS0  = var(v,    t,     R_Move::w1_mvS0);
+	CNF::Var Here_now_C2R_ready = var(v,    t,     NdStat::C2R_ready);
+	CNF::Var Here_now_C2R_accE  = var(v,    t,     R_Move::w2_accE);
+	CNF::Var Here_now_C2R_mvE1  = var(v,    t,     R_Move::w2_mvE1);
+	CNF::Var Here_now_C2R_mvE0  = var(v,    t,     R_Move::w2_mvE0);
+	CNF::Var Here_now_C2R_accW  = var(v,    t,     R_Move::w2_accW);
+	CNF::Var Here_now_C2R_mvW1  = var(v,    t,     R_Move::w2_mvW1);
+	CNF::Var Here_now_C2R_mvW0  = var(v,    t,     R_Move::w2_mvW0);
+	CNF::Var Here_now_C2R_accN  = var(v,    t,     R_Move::w2_accN);
+	CNF::Var Here_now_C2R_mvN1  = var(v,    t,     R_Move::w2_mvN1);
+	CNF::Var Here_now_C2R_mvN2  = var(v,    t,     R_Move::w2_mvN2);
+	CNF::Var Here_now_C2R_mvN3  = var(v,    t,     R_Move::w2_mvN3);
+	CNF::Var Here_now_C2R_mvN0  = var(v,    t,     R_Move::w2_mvN0);
+	CNF::Var Here_now_C2R_accS  = var(v,    t,     R_Move::w2_accS);
+	CNF::Var Here_now_C2R_mvS1  = var(v,    t,     R_Move::w2_mvS1);
+	CNF::Var Here_now_C2R_mvS2  = var(v,    t,     R_Move::w2_mvS2);
+	CNF::Var Here_now_C2R_mvS3  = var(v,    t,     R_Move::w2_mvS3);
+	CNF::Var Here_now_C2R_mvS0  = var(v,    t,     R_Move::w2_mvS0);
 
 
-        const GRBLinExpr Here_will_nobodyhome= var(v,    t+1,   NdStat::nobodyhome);
-        const GRBLinExpr Here_will_R_ready   = var(v,    t+1,   NdStat::R_ready);
-        const GRBLinExpr Here_will_R_accE    = var(v,    t+1,   R_Move::accE);
-        const GRBLinExpr Here_will_R_mvE0    = var(v,    t+1,   R_Move::mvE0);
-        const GRBLinExpr Here_will_R_accW    = var(v,    t+1,   R_Move::accW);
-        const GRBLinExpr Here_will_R_mvW0    = var(v,    t+1,   R_Move::mvW0);
-        const GRBLinExpr Here_will_R_accN    = var(v,    t+1,   R_Move::accN);
-        const GRBLinExpr Here_will_R_mvN1    = var(v,    t+1,   R_Move::mvN1);
-        const GRBLinExpr Here_will_R_mvN0    = var(v,    t+1,   R_Move::mvN0);
-        const GRBLinExpr Here_will_R_accS    = var(v,    t+1,   R_Move::accS);
-        const GRBLinExpr Here_will_R_mvS1    = var(v,    t+1,   R_Move::mvS1);
-        const GRBLinExpr Here_will_R_mvS0    = var(v,    t+1,   R_Move::mvS0);
-        const GRBLinExpr Here_will_R_lift    = var(v,    t+1,   R_Vertical::lift);
-        const GRBLinExpr Here_will_R_lifting1= var(v,    t+1,   R_Vertical::l1);
-        const GRBLinExpr Here_will_R_lifting2= var(v,    t+1,   R_Vertical::l2);
-        const GRBLinExpr Here_will_R_lifting3= var(v,    t+1,   R_Vertical::l3);
-        const GRBLinExpr Here_will_R_lifting4= var(v,    t+1,   R_Vertical::l4);
-        const GRBLinExpr Here_will_R_drop    = var(v,    t+1,   R_Vertical::drop);
-        const GRBLinExpr Here_will_C0R_ready = var(v,    t+1,   NdStat::C0R_ready);
-        const GRBLinExpr Here_will_C0R_accE  = var(v,    t+1,   R_Move::w0_accE);
-        const GRBLinExpr Here_will_C0R_mvE1  = var(v,    t+1,   R_Move::w0_mvE1);
-        const GRBLinExpr Here_will_C0R_mvE0  = var(v,    t+1,   R_Move::w0_mvE0);
-        const GRBLinExpr Here_will_C0R_accW  = var(v,    t+1,   R_Move::w0_accW);
-        const GRBLinExpr Here_will_C0R_mvW1  = var(v,    t+1,   R_Move::w0_mvW1);
-        const GRBLinExpr Here_will_C0R_mvW0  = var(v,    t+1,   R_Move::w0_mvW0);
-        const GRBLinExpr Here_will_C0R_accN  = var(v,    t+1,   R_Move::w0_accN);
-        const GRBLinExpr Here_will_C0R_mvN1  = var(v,    t+1,   R_Move::w0_mvN1);
-        const GRBLinExpr Here_will_C0R_mvN2  = var(v,    t+1,   R_Move::w0_mvN2);
-        const GRBLinExpr Here_will_C0R_mvN3  = var(v,    t+1,   R_Move::w0_mvN3);
-        const GRBLinExpr Here_will_C0R_mvN0  = var(v,    t+1,   R_Move::w0_mvN0);
-        const GRBLinExpr Here_will_C0R_accS  = var(v,    t+1,   R_Move::w0_accS);
-        const GRBLinExpr Here_will_C0R_mvS1  = var(v,    t+1,   R_Move::w0_mvS1);
-        const GRBLinExpr Here_will_C0R_mvS2  = var(v,    t+1,   R_Move::w0_mvS2);
-        const GRBLinExpr Here_will_C0R_mvS3  = var(v,    t+1,   R_Move::w0_mvS3);
-        const GRBLinExpr Here_will_C0R_mvS0  = var(v,    t+1,   R_Move::w0_mvS0);
-        const GRBLinExpr Here_will_C1R_ready = var(v,    t+1,   NdStat::C1R_ready);
-        const GRBLinExpr Here_will_C1R_accE  = var(v,    t+1,   R_Move::w1_accE);
-        const GRBLinExpr Here_will_C1R_mvE1  = var(v,    t+1,   R_Move::w1_mvE1);
-        const GRBLinExpr Here_will_C1R_mvE0  = var(v,    t+1,   R_Move::w1_mvE0);
-        const GRBLinExpr Here_will_C1R_accW  = var(v,    t+1,   R_Move::w1_accW);
-        const GRBLinExpr Here_will_C1R_mvW1  = var(v,    t+1,   R_Move::w1_mvW1);
-        const GRBLinExpr Here_will_C1R_mvW0  = var(v,    t+1,   R_Move::w1_mvW0);
-        const GRBLinExpr Here_will_C1R_accN  = var(v,    t+1,   R_Move::w1_accN);
-        const GRBLinExpr Here_will_C1R_mvN1  = var(v,    t+1,   R_Move::w1_mvN1);
-        const GRBLinExpr Here_will_C1R_mvN2  = var(v,    t+1,   R_Move::w1_mvN2);
-        const GRBLinExpr Here_will_C1R_mvN3  = var(v,    t+1,   R_Move::w1_mvN3);
-        const GRBLinExpr Here_will_C1R_mvN0  = var(v,    t+1,   R_Move::w1_mvN0);
-        const GRBLinExpr Here_will_C1R_accS  = var(v,    t+1,   R_Move::w1_accS);
-        const GRBLinExpr Here_will_C1R_mvS1  = var(v,    t+1,   R_Move::w1_mvS1);
-        const GRBLinExpr Here_will_C1R_mvS2  = var(v,    t+1,   R_Move::w1_mvS2);
-        const GRBLinExpr Here_will_C1R_mvS3  = var(v,    t+1,   R_Move::w1_mvS3);
-        const GRBLinExpr Here_will_C1R_mvS0  = var(v,    t+1,   R_Move::w1_mvS0);
-        const GRBLinExpr Here_will_C2R_ready = var(v,    t+1,   NdStat::C2R_ready);
-        const GRBLinExpr Here_will_C2R_accE  = var(v,    t+1,   R_Move::w2_accE);
-        const GRBLinExpr Here_will_C2R_mvE1  = var(v,    t+1,   R_Move::w2_mvE1);
-        const GRBLinExpr Here_will_C2R_mvE0  = var(v,    t+1,   R_Move::w2_mvE0);
-        const GRBLinExpr Here_will_C2R_accW  = var(v,    t+1,   R_Move::w2_accW);
-        const GRBLinExpr Here_will_C2R_mvW1  = var(v,    t+1,   R_Move::w2_mvW1);
-        const GRBLinExpr Here_will_C2R_mvW0  = var(v,    t+1,   R_Move::w2_mvW0);
-        const GRBLinExpr Here_will_C2R_accN  = var(v,    t+1,   R_Move::w2_accN);
-        const GRBLinExpr Here_will_C2R_mvN1  = var(v,    t+1,   R_Move::w2_mvN1);
-        const GRBLinExpr Here_will_C2R_mvN2  = var(v,    t+1,   R_Move::w2_mvN2);
-        const GRBLinExpr Here_will_C2R_mvN3  = var(v,    t+1,   R_Move::w2_mvN3);
-        const GRBLinExpr Here_will_C2R_mvN0  = var(v,    t+1,   R_Move::w2_mvN0);
-        const GRBLinExpr Here_will_C2R_accS  = var(v,    t+1,   R_Move::w2_accS);
-        const GRBLinExpr Here_will_C2R_mvS1  = var(v,    t+1,   R_Move::w2_mvS1);
-        const GRBLinExpr Here_will_C2R_mvS2  = var(v,    t+1,   R_Move::w2_mvS2);
-        const GRBLinExpr Here_will_C2R_mvS3  = var(v,    t+1,   R_Move::w2_mvS3);
-        const GRBLinExpr Here_will_C2R_mvS0  = var(v,    t+1,   R_Move::w2_mvS0);
+	CNF::Var Here_will_nobodyhome= var(v,    t+1,   NdStat::nobodyhome);
+	CNF::Var Here_will_R_ready   = var(v,    t+1,   NdStat::R_ready);
+	CNF::Var Here_will_R_accE    = var(v,    t+1,   R_Move::accE);
+	CNF::Var Here_will_R_mvE0    = var(v,    t+1,   R_Move::mvE0);
+	CNF::Var Here_will_R_accW    = var(v,    t+1,   R_Move::accW);
+	CNF::Var Here_will_R_mvW0    = var(v,    t+1,   R_Move::mvW0);
+	CNF::Var Here_will_R_accN    = var(v,    t+1,   R_Move::accN);
+	CNF::Var Here_will_R_mvN1    = var(v,    t+1,   R_Move::mvN1);
+	CNF::Var Here_will_R_mvN0    = var(v,    t+1,   R_Move::mvN0);
+	CNF::Var Here_will_R_accS    = var(v,    t+1,   R_Move::accS);
+	CNF::Var Here_will_R_mvS1    = var(v,    t+1,   R_Move::mvS1);
+	CNF::Var Here_will_R_mvS0    = var(v,    t+1,   R_Move::mvS0);
+	CNF::Var Here_will_R_lift    = var(v,    t+1,   R_Vertical::lift);
+	CNF::Var Here_will_R_lifting1= var(v,    t+1,   R_Vertical::l1);
+	CNF::Var Here_will_R_lifting2= var(v,    t+1,   R_Vertical::l2);
+	CNF::Var Here_will_R_lifting3= var(v,    t+1,   R_Vertical::l3);
+	CNF::Var Here_will_R_lifting4= var(v,    t+1,   R_Vertical::l4);
+	CNF::Var Here_will_R_drop    = var(v,    t+1,   R_Vertical::drop);
+	CNF::Var Here_will_C0R_ready = var(v,    t+1,   NdStat::C0R_ready);
+	CNF::Var Here_will_C0R_accE  = var(v,    t+1,   R_Move::w0_accE);
+	CNF::Var Here_will_C0R_mvE1  = var(v,    t+1,   R_Move::w0_mvE1);
+	CNF::Var Here_will_C0R_mvE0  = var(v,    t+1,   R_Move::w0_mvE0);
+	CNF::Var Here_will_C0R_accW  = var(v,    t+1,   R_Move::w0_accW);
+	CNF::Var Here_will_C0R_mvW1  = var(v,    t+1,   R_Move::w0_mvW1);
+	CNF::Var Here_will_C0R_mvW0  = var(v,    t+1,   R_Move::w0_mvW0);
+	CNF::Var Here_will_C0R_accN  = var(v,    t+1,   R_Move::w0_accN);
+	CNF::Var Here_will_C0R_mvN1  = var(v,    t+1,   R_Move::w0_mvN1);
+	CNF::Var Here_will_C0R_mvN2  = var(v,    t+1,   R_Move::w0_mvN2);
+	CNF::Var Here_will_C0R_mvN3  = var(v,    t+1,   R_Move::w0_mvN3);
+	CNF::Var Here_will_C0R_mvN0  = var(v,    t+1,   R_Move::w0_mvN0);
+	CNF::Var Here_will_C0R_accS  = var(v,    t+1,   R_Move::w0_accS);
+	CNF::Var Here_will_C0R_mvS1  = var(v,    t+1,   R_Move::w0_mvS1);
+	CNF::Var Here_will_C0R_mvS2  = var(v,    t+1,   R_Move::w0_mvS2);
+	CNF::Var Here_will_C0R_mvS3  = var(v,    t+1,   R_Move::w0_mvS3);
+	CNF::Var Here_will_C0R_mvS0  = var(v,    t+1,   R_Move::w0_mvS0);
+	CNF::Var Here_will_C1R_ready = var(v,    t+1,   NdStat::C1R_ready);
+	CNF::Var Here_will_C1R_accE  = var(v,    t+1,   R_Move::w1_accE);
+	CNF::Var Here_will_C1R_mvE1  = var(v,    t+1,   R_Move::w1_mvE1);
+	CNF::Var Here_will_C1R_mvE0  = var(v,    t+1,   R_Move::w1_mvE0);
+	CNF::Var Here_will_C1R_accW  = var(v,    t+1,   R_Move::w1_accW);
+	CNF::Var Here_will_C1R_mvW1  = var(v,    t+1,   R_Move::w1_mvW1);
+	CNF::Var Here_will_C1R_mvW0  = var(v,    t+1,   R_Move::w1_mvW0);
+	CNF::Var Here_will_C1R_accN  = var(v,    t+1,   R_Move::w1_accN);
+	CNF::Var Here_will_C1R_mvN1  = var(v,    t+1,   R_Move::w1_mvN1);
+	CNF::Var Here_will_C1R_mvN2  = var(v,    t+1,   R_Move::w1_mvN2);
+	CNF::Var Here_will_C1R_mvN3  = var(v,    t+1,   R_Move::w1_mvN3);
+	CNF::Var Here_will_C1R_mvN0  = var(v,    t+1,   R_Move::w1_mvN0);
+	CNF::Var Here_will_C1R_accS  = var(v,    t+1,   R_Move::w1_accS);
+	CNF::Var Here_will_C1R_mvS1  = var(v,    t+1,   R_Move::w1_mvS1);
+	CNF::Var Here_will_C1R_mvS2  = var(v,    t+1,   R_Move::w1_mvS2);
+	CNF::Var Here_will_C1R_mvS3  = var(v,    t+1,   R_Move::w1_mvS3);
+	CNF::Var Here_will_C1R_mvS0  = var(v,    t+1,   R_Move::w1_mvS0);
+	CNF::Var Here_will_C2R_ready = var(v,    t+1,   NdStat::C2R_ready);
+	CNF::Var Here_will_C2R_accE  = var(v,    t+1,   R_Move::w2_accE);
+	CNF::Var Here_will_C2R_mvE1  = var(v,    t+1,   R_Move::w2_mvE1);
+	CNF::Var Here_will_C2R_mvE0  = var(v,    t+1,   R_Move::w2_mvE0);
+	CNF::Var Here_will_C2R_accW  = var(v,    t+1,   R_Move::w2_accW);
+	CNF::Var Here_will_C2R_mvW1  = var(v,    t+1,   R_Move::w2_mvW1);
+	CNF::Var Here_will_C2R_mvW0  = var(v,    t+1,   R_Move::w2_mvW0);
+	CNF::Var Here_will_C2R_accN  = var(v,    t+1,   R_Move::w2_accN);
+	CNF::Var Here_will_C2R_mvN1  = var(v,    t+1,   R_Move::w2_mvN1);
+	CNF::Var Here_will_C2R_mvN2  = var(v,    t+1,   R_Move::w2_mvN2);
+	CNF::Var Here_will_C2R_mvN3  = var(v,    t+1,   R_Move::w2_mvN3);
+	CNF::Var Here_will_C2R_mvN0  = var(v,    t+1,   R_Move::w2_mvN0);
+	CNF::Var Here_will_C2R_accS  = var(v,    t+1,   R_Move::w2_accS);
+	CNF::Var Here_will_C2R_mvS1  = var(v,    t+1,   R_Move::w2_mvS1);
+	CNF::Var Here_will_C2R_mvS2  = var(v,    t+1,   R_Move::w2_mvS2);
+	CNF::Var Here_will_C2R_mvS3  = var(v,    t+1,   R_Move::w2_mvS3);
+	CNF::Var Here_will_C2R_mvS0  = var(v,    t+1,   R_Move::w2_mvS0);
 
 
 
-        const GRBLinExpr W_now_R_accE    = var( G.west(v),    t,    R_Move::accE);
-        const GRBLinExpr W_now_R_mvE0    = var( G.west(v),    t,    R_Move::mvE0);
-        const GRBLinExpr W_now_C0R_mvE1  = var( G.west(v),    t,    R_Move::w0_mvE1);
-        const GRBLinExpr W_now_C1R_mvE1  = var( G.west(v),    t,    R_Move::w1_mvE1);
-        const GRBLinExpr W_now_C2R_mvE1  = var( G.west(v),    t,    R_Move::w2_mvE1);
+	CNF::Var W_now_R_accE    = var( G.west(v),    t,    R_Move::accE);
+	CNF::Var W_now_R_mvE0    = var( G.west(v),    t,    R_Move::mvE0);
+	CNF::Var W_now_C0R_mvE1  = var( G.west(v),    t,    R_Move::w0_mvE1);
+	CNF::Var W_now_C1R_mvE1  = var( G.west(v),    t,    R_Move::w1_mvE1);
+	CNF::Var W_now_C2R_mvE1  = var( G.west(v),    t,    R_Move::w2_mvE1);
 
-        const GRBLinExpr E_now_R_accW    = var( G.east(v),    t,    R_Move::accW);
-        const GRBLinExpr E_now_R_mvW0    = var( G.east(v),    t,    R_Move::mvW0);
-        const GRBLinExpr E_now_C0R_mvW1  = var( G.east(v),    t,    R_Move::w0_mvW1);
-        const GRBLinExpr E_now_C1R_mvW1  = var( G.east(v),    t,    R_Move::w1_mvW1);
-        const GRBLinExpr E_now_C2R_mvW1  = var( G.east(v),    t,    R_Move::w2_mvW1);
+	CNF::Var E_now_R_accW    = var( G.east(v),    t,    R_Move::accW);
+	CNF::Var E_now_R_mvW0    = var( G.east(v),    t,    R_Move::mvW0);
+	CNF::Var E_now_C0R_mvW1  = var( G.east(v),    t,    R_Move::w0_mvW1);
+	CNF::Var E_now_C1R_mvW1  = var( G.east(v),    t,    R_Move::w1_mvW1);
+	CNF::Var E_now_C2R_mvW1  = var( G.east(v),    t,    R_Move::w2_mvW1);
 
-        const GRBLinExpr S_now_R_mvN1    = var( G.south(v),    t,    R_Move::mvN1);
-        const GRBLinExpr S_now_C0R_mvN3  = var( G.south(v),    t,    R_Move::w0_mvN3);
-        const GRBLinExpr S_now_C1R_mvN3  = var( G.south(v),    t,    R_Move::w1_mvN3);
-        const GRBLinExpr S_now_C2R_mvN3  = var( G.south(v),    t,    R_Move::w2_mvN3);
+	CNF::Var S_now_R_mvN1    = var( G.south(v),    t,    R_Move::mvN1);
+	CNF::Var S_now_C0R_mvN3  = var( G.south(v),    t,    R_Move::w0_mvN3);
+	CNF::Var S_now_C1R_mvN3  = var( G.south(v),    t,    R_Move::w1_mvN3);
+	CNF::Var S_now_C2R_mvN3  = var( G.south(v),    t,    R_Move::w2_mvN3);
 
-        const GRBLinExpr N_now_R_mvS1    = var( G.north(v),    t,    R_Move::mvS1);
-        const GRBLinExpr N_now_C0R_mvS3  = var( G.north(v),    t,    R_Move::w0_mvS3);
-        const GRBLinExpr N_now_C1R_mvS3  = var( G.north(v),    t,    R_Move::w1_mvS3);
-        const GRBLinExpr N_now_C2R_mvS3  = var( G.north(v),    t,    R_Move::w2_mvS3);
+	CNF::Var N_now_R_mvS1    = var( G.north(v),    t,    R_Move::mvS1);
+	CNF::Var N_now_C0R_mvS3  = var( G.north(v),    t,    R_Move::w0_mvS3);
+	CNF::Var N_now_C1R_mvS3  = var( G.north(v),    t,    R_Move::w1_mvS3);
+	CNF::Var N_now_C2R_mvS3  = var( G.north(v),    t,    R_Move::w2_mvS3);
 
-        model.addConstr(    ( Here_now_R_ready                         ) IMPLIES ( Here_will_R_ready
-                                                                                   OR Here_will_R_accE OR Here_will_R_accN OR Here_will_R_accW OR Here_will_R_accS
-                                                                                   OR Here_will_R_lift                                                                )  );
-        model.addConstr(    ( Here_will_R_ready                        ) IMPLIES ( Here_now_R_ready
-                                                                                   OR W_now_R_mvE0 OR W_now_R_accE
-                                                                                   OR E_now_R_mvW0 OR E_now_R_accW
-                                                                                   OR S_now_R_mvN1
-                                                                                   OR N_now_R_mvS1
-                                                                                   OR Here_now_R_drop )  );
-
-        model.addConstr(    ( Here_now_C0R_ready                         ) IMPLIES ( Here_will_C0R_ready
-                                                                                     OR Here_will_C0R_accE OR Here_will_C0R_accN OR Here_will_C0R_accW OR Here_will_C0R_accS
-                                                                                     OR Here_will_R_drop                                                                     )  );
-        model.addConstr(    ( Here_will_C0R_ready                        ) IMPLIES ( Here_now_C0R_ready
-                                                                                     OR W_now_C0R_mvE1
-                                                                                     OR E_now_C0R_mvW1
-                                                                                     OR S_now_C0R_mvN3
-                                                                                     OR N_now_C0R_mvS3
-                                                                                     OR Here_now_R_lifting4 )  );
-        model.addConstr(    ( Here_now_C1R_ready                         ) IMPLIES ( Here_will_C1R_ready
-                                                                                     OR Here_will_C1R_accE OR Here_will_C1R_accN OR Here_will_C1R_accW OR Here_will_C1R_accS
-                                                                                     OR Here_will_R_drop                                                                     )  );
-        model.addConstr(    ( Here_will_C1R_ready                        ) IMPLIES ( Here_now_C1R_ready
-                                                                                     OR W_now_C1R_mvE1
-                                                                                     OR E_now_C1R_mvW1
-                                                                                     OR S_now_C1R_mvN3
-                                                                                     OR N_now_C1R_mvS3
-                                                                                     OR Here_now_R_lifting4 )  );
-        model.addConstr(    ( Here_now_C2R_ready                         ) IMPLIES ( Here_will_C2R_ready
-                                                                                     OR Here_will_C2R_accE OR Here_will_C2R_accN OR Here_will_C2R_accW OR Here_will_C2R_accS
-                                                                                     OR Here_will_R_drop                                                                     )  );
-        model.addConstr(    ( Here_will_C2R_ready                        ) IMPLIES ( Here_now_C2R_ready
-                                                                                     OR W_now_C2R_mvE1
-                                                                                     OR E_now_C2R_mvW1
-                                                                                     OR S_now_C2R_mvN3
-                                                                                     OR N_now_C2R_mvS3
-                                                                                     OR Here_now_R_lifting4 )  );
+	c = not(Here_now_R_ready)    or Here_will_R_ready                                                                                                   or Here_will_R_accE    or Here_will_R_accN   or Here_will_R_accW   or Here_will_R_accS                                 or Here_will_R_lift;
+	m.addClause(c);
+	c = not(Here_will_R_ready)   or Here_now_R_ready                                                                                                    or W_now_R_mvE0        or W_now_R_accE                                                                                 or E_now_R_mvW0        or E_now_R_accW                                                                                 or S_now_R_mvN1                                                                                                        or N_now_R_mvS1                                                                                                        or Here_now_R_drop;
+	m.addClause(c);
+	c = not(Here_now_C0R_ready)  or Here_will_C0R_ready                                                                                                 or Here_will_C0R_accE  or Here_will_C0R_accN or Here_will_C0R_accW or Here_will_C0R_accS                                                                                                                                                      or Here_will_R_drop;
+	m.addClause(c);
+	c = not(Here_will_C0R_ready) or Here_now_C0R_ready                                                                                                  or W_now_C0R_mvE1                                                                                                      or E_now_C0R_mvW1                                                                                                      or S_now_C0R_mvN3                                                                                                      or N_now_C0R_mvS3                                                                                                      or Here_now_R_lifting4;
+	m.addClause(c);
+	c = not(Here_now_C1R_ready)  or Here_will_C1R_ready                                                                                                 or Here_will_C1R_accE  or Here_will_C1R_accN or Here_will_C1R_accW or Here_will_C1R_accS                                                                                                                                                      or Here_will_R_drop;
+	m.addClause(c);
+	c = not(Here_will_C1R_ready) or Here_now_C1R_ready                                                                                                  or W_now_C1R_mvE1                                                                                                      or E_now_C1R_mvW1                                                                                                      or S_now_C1R_mvN3                                                                                                      or N_now_C1R_mvS3                                                                                                      or Here_now_R_lifting4;
+	m.addClause(c);
+	c = not(Here_now_C2R_ready)  or Here_will_C2R_ready                                                                                                 or Here_will_C2R_accE or Here_will_C2R_accN or Here_will_C2R_accW or Here_will_C2R_accS                                                                                                                                                       or Here_will_R_drop;
+	m.addClause(c);
+	c = not(Here_will_C2R_ready) or Here_now_C2R_ready                                                                                                  or W_now_C2R_mvE1                                                                                                      or E_now_C2R_mvW1                                                                                                      or S_now_C2R_mvN3                                                                                                      or N_now_C2R_mvS3                                                                                                      or Here_now_R_lifting4;
+	m.addClause(c);
     }
 
     // M O V E M E N T
     {
-        const GRBLinExpr Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
-        const GRBLinExpr Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
-        const GRBLinExpr Here_now_R_accE    = var(v,    t,     R_Move::accE);
-        const GRBLinExpr Here_now_R_mvE0    = var(v,    t,     R_Move::mvE0);
-        const GRBLinExpr Here_now_R_accW    = var(v,    t,     R_Move::accW);
-        const GRBLinExpr Here_now_R_mvW0    = var(v,    t,     R_Move::mvW0);
-        const GRBLinExpr Here_now_R_accN    = var(v,    t,     R_Move::accN);
-        const GRBLinExpr Here_now_R_mvN1    = var(v,    t,     R_Move::mvN1);
-        const GRBLinExpr Here_now_R_mvN0    = var(v,    t,     R_Move::mvN0);
-        const GRBLinExpr Here_now_R_accS    = var(v,    t,     R_Move::accS);
-        const GRBLinExpr Here_now_R_mvS1    = var(v,    t,     R_Move::mvS1);
-        const GRBLinExpr Here_now_R_mvS0    = var(v,    t,     R_Move::mvS0);
-        const GRBLinExpr Here_now_R_lift    = var(v,    t,     R_Vertical::lift);
-        const GRBLinExpr Here_now_R_lifting1= var(v,    t,     R_Vertical::l1);
-        const GRBLinExpr Here_now_R_lifting2= var(v,    t,     R_Vertical::l2);
-        const GRBLinExpr Here_now_R_lifting3= var(v,    t,     R_Vertical::l3);
-        const GRBLinExpr Here_now_R_lifting4= var(v,    t,     R_Vertical::l4);
-        const GRBLinExpr Here_now_R_drop    = var(v,    t,     R_Vertical::drop);
-        const GRBLinExpr Here_now_C0R_ready = var(v,    t,     NdStat::C0R_ready);
-        const GRBLinExpr Here_now_C0R_accE  = var(v,    t,     R_Move::w0_accE);
-        const GRBLinExpr Here_now_C0R_mvE1  = var(v,    t,     R_Move::w0_mvE1);
-        const GRBLinExpr Here_now_C0R_mvE0  = var(v,    t,     R_Move::w0_mvE0);
-        const GRBLinExpr Here_now_C0R_accW  = var(v,    t,     R_Move::w0_accW);
-        const GRBLinExpr Here_now_C0R_mvW1  = var(v,    t,     R_Move::w0_mvW1);
-        const GRBLinExpr Here_now_C0R_mvW0  = var(v,    t,     R_Move::w0_mvW0);
-        const GRBLinExpr Here_now_C0R_accN  = var(v,    t,     R_Move::w0_accN);
-        const GRBLinExpr Here_now_C0R_mvN1  = var(v,    t,     R_Move::w0_mvN1);
-        const GRBLinExpr Here_now_C0R_mvN2  = var(v,    t,     R_Move::w0_mvN2);
-        const GRBLinExpr Here_now_C0R_mvN3  = var(v,    t,     R_Move::w0_mvN3);
-        const GRBLinExpr Here_now_C0R_mvN0  = var(v,    t,     R_Move::w0_mvN0);
-        const GRBLinExpr Here_now_C0R_accS  = var(v,    t,     R_Move::w0_accS);
-        const GRBLinExpr Here_now_C0R_mvS1  = var(v,    t,     R_Move::w0_mvS1);
-        const GRBLinExpr Here_now_C0R_mvS2  = var(v,    t,     R_Move::w0_mvS2);
-        const GRBLinExpr Here_now_C0R_mvS3  = var(v,    t,     R_Move::w0_mvS3);
-        const GRBLinExpr Here_now_C0R_mvS0  = var(v,    t,     R_Move::w0_mvS0);
-        const GRBLinExpr Here_now_C1R_ready = var(v,    t,     NdStat::C1R_ready);
-        const GRBLinExpr Here_now_C1R_accE  = var(v,    t,     R_Move::w1_accE);
-        const GRBLinExpr Here_now_C1R_mvE1  = var(v,    t,     R_Move::w1_mvE1);
-        const GRBLinExpr Here_now_C1R_mvE0  = var(v,    t,     R_Move::w1_mvE0);
-        const GRBLinExpr Here_now_C1R_accW  = var(v,    t,     R_Move::w1_accW);
-        const GRBLinExpr Here_now_C1R_mvW1  = var(v,    t,     R_Move::w1_mvW1);
-        const GRBLinExpr Here_now_C1R_mvW0  = var(v,    t,     R_Move::w1_mvW0);
-        const GRBLinExpr Here_now_C1R_accN  = var(v,    t,     R_Move::w1_accN);
-        const GRBLinExpr Here_now_C1R_mvN1  = var(v,    t,     R_Move::w1_mvN1);
-        const GRBLinExpr Here_now_C1R_mvN2  = var(v,    t,     R_Move::w1_mvN2);
-        const GRBLinExpr Here_now_C1R_mvN3  = var(v,    t,     R_Move::w1_mvN3);
-        const GRBLinExpr Here_now_C1R_mvN0  = var(v,    t,     R_Move::w1_mvN0);
-        const GRBLinExpr Here_now_C1R_accS  = var(v,    t,     R_Move::w1_accS);
-        const GRBLinExpr Here_now_C1R_mvS1  = var(v,    t,     R_Move::w1_mvS1);
-        const GRBLinExpr Here_now_C1R_mvS2  = var(v,    t,     R_Move::w1_mvS2);
-        const GRBLinExpr Here_now_C1R_mvS3  = var(v,    t,     R_Move::w1_mvS3);
-        const GRBLinExpr Here_now_C1R_mvS0  = var(v,    t,     R_Move::w1_mvS0);
-        const GRBLinExpr Here_now_C2R_ready = var(v,    t,     NdStat::C2R_ready);
-        const GRBLinExpr Here_now_C2R_accE  = var(v,    t,     R_Move::w2_accE);
-        const GRBLinExpr Here_now_C2R_mvE1  = var(v,    t,     R_Move::w2_mvE1);
-        const GRBLinExpr Here_now_C2R_mvE0  = var(v,    t,     R_Move::w2_mvE0);
-        const GRBLinExpr Here_now_C2R_accW  = var(v,    t,     R_Move::w2_accW);
-        const GRBLinExpr Here_now_C2R_mvW1  = var(v,    t,     R_Move::w2_mvW1);
-        const GRBLinExpr Here_now_C2R_mvW0  = var(v,    t,     R_Move::w2_mvW0);
-        const GRBLinExpr Here_now_C2R_accN  = var(v,    t,     R_Move::w2_accN);
-        const GRBLinExpr Here_now_C2R_mvN1  = var(v,    t,     R_Move::w2_mvN1);
-        const GRBLinExpr Here_now_C2R_mvN2  = var(v,    t,     R_Move::w2_mvN2);
-        const GRBLinExpr Here_now_C2R_mvN3  = var(v,    t,     R_Move::w2_mvN3);
-        const GRBLinExpr Here_now_C2R_mvN0  = var(v,    t,     R_Move::w2_mvN0);
-        const GRBLinExpr Here_now_C2R_accS  = var(v,    t,     R_Move::w2_accS);
-        const GRBLinExpr Here_now_C2R_mvS1  = var(v,    t,     R_Move::w2_mvS1);
-        const GRBLinExpr Here_now_C2R_mvS2  = var(v,    t,     R_Move::w2_mvS2);
-        const GRBLinExpr Here_now_C2R_mvS3  = var(v,    t,     R_Move::w2_mvS3);
-        const GRBLinExpr Here_now_C2R_mvS0  = var(v,    t,     R_Move::w2_mvS0);
+        CNF::Model m;
+	CNF::Clause c;
+        CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
+	CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
+	CNF::Var Here_now_R_accE    = var(v,    t,     R_Move::accE);
+	CNF::Var Here_now_R_mvE0    = var(v,    t,     R_Move::mvE0);
+	CNF::Var Here_now_R_accW    = var(v,    t,     R_Move::accW);
+	CNF::Var Here_now_R_mvW0    = var(v,    t,     R_Move::mvW0);
+	CNF::Var Here_now_R_accN    = var(v,    t,     R_Move::accN);
+	CNF::Var Here_now_R_mvN1    = var(v,    t,     R_Move::mvN1);
+	CNF::Var Here_now_R_mvN0    = var(v,    t,     R_Move::mvN0);
+	CNF::Var Here_now_R_accS    = var(v,    t,     R_Move::accS);
+	CNF::Var Here_now_R_mvS1    = var(v,    t,     R_Move::mvS1);
+	CNF::Var Here_now_R_mvS0    = var(v,    t,     R_Move::mvS0);
+	CNF::Var Here_now_R_lift    = var(v,    t,     R_Vertical::lift);
+	CNF::Var Here_now_R_lifting1= var(v,    t,     R_Vertical::l1);
+	CNF::Var Here_now_R_lifting2= var(v,    t,     R_Vertical::l2);
+	CNF::Var Here_now_R_lifting3= var(v,    t,     R_Vertical::l3);
+	CNF::Var Here_now_R_lifting4= var(v,    t,     R_Vertical::l4);
+	CNF::Var Here_now_R_drop    = var(v,    t,     R_Vertical::drop);
+	CNF::Var Here_now_C0R_ready = var(v,    t,     NdStat::C0R_ready);
+	CNF::Var Here_now_C0R_accE  = var(v,    t,     R_Move::w0_accE);
+	CNF::Var Here_now_C0R_mvE1  = var(v,    t,     R_Move::w0_mvE1);
+	CNF::Var Here_now_C0R_mvE0  = var(v,    t,     R_Move::w0_mvE0);
+	CNF::Var Here_now_C0R_accW  = var(v,    t,     R_Move::w0_accW);
+	CNF::Var Here_now_C0R_mvW1  = var(v,    t,     R_Move::w0_mvW1);
+	CNF::Var Here_now_C0R_mvW0  = var(v,    t,     R_Move::w0_mvW0);
+	CNF::Var Here_now_C0R_accN  = var(v,    t,     R_Move::w0_accN);
+	CNF::Var Here_now_C0R_mvN1  = var(v,    t,     R_Move::w0_mvN1);
+	CNF::Var Here_now_C0R_mvN2  = var(v,    t,     R_Move::w0_mvN2);
+	CNF::Var Here_now_C0R_mvN3  = var(v,    t,     R_Move::w0_mvN3);
+	CNF::Var Here_now_C0R_mvN0  = var(v,    t,     R_Move::w0_mvN0);
+	CNF::Var Here_now_C0R_accS  = var(v,    t,     R_Move::w0_accS);
+	CNF::Var Here_now_C0R_mvS1  = var(v,    t,     R_Move::w0_mvS1);
+	CNF::Var Here_now_C0R_mvS2  = var(v,    t,     R_Move::w0_mvS2);
+	CNF::Var Here_now_C0R_mvS3  = var(v,    t,     R_Move::w0_mvS3);
+	CNF::Var Here_now_C0R_mvS0  = var(v,    t,     R_Move::w0_mvS0);
+	CNF::Var Here_now_C1R_ready = var(v,    t,     NdStat::C1R_ready);
+	CNF::Var Here_now_C1R_accE  = var(v,    t,     R_Move::w1_accE);
+	CNF::Var Here_now_C1R_mvE1  = var(v,    t,     R_Move::w1_mvE1);
+	CNF::Var Here_now_C1R_mvE0  = var(v,    t,     R_Move::w1_mvE0);
+	CNF::Var Here_now_C1R_accW  = var(v,    t,     R_Move::w1_accW);
+	CNF::Var Here_now_C1R_mvW1  = var(v,    t,     R_Move::w1_mvW1);
+	CNF::Var Here_now_C1R_mvW0  = var(v,    t,     R_Move::w1_mvW0);
+	CNF::Var Here_now_C1R_accN  = var(v,    t,     R_Move::w1_accN);
+	CNF::Var Here_now_C1R_mvN1  = var(v,    t,     R_Move::w1_mvN1);
+	CNF::Var Here_now_C1R_mvN2  = var(v,    t,     R_Move::w1_mvN2);
+	CNF::Var Here_now_C1R_mvN3  = var(v,    t,     R_Move::w1_mvN3);
+	CNF::Var Here_now_C1R_mvN0  = var(v,    t,     R_Move::w1_mvN0);
+	CNF::Var Here_now_C1R_accS  = var(v,    t,     R_Move::w1_accS);
+	CNF::Var Here_now_C1R_mvS1  = var(v,    t,     R_Move::w1_mvS1);
+	CNF::Var Here_now_C1R_mvS2  = var(v,    t,     R_Move::w1_mvS2);
+	CNF::Var Here_now_C1R_mvS3  = var(v,    t,     R_Move::w1_mvS3);
+	CNF::Var Here_now_C1R_mvS0  = var(v,    t,     R_Move::w1_mvS0);
+	CNF::Var Here_now_C2R_ready = var(v,    t,     NdStat::C2R_ready);
+	CNF::Var Here_now_C2R_accE  = var(v,    t,     R_Move::w2_accE);
+	CNF::Var Here_now_C2R_mvE1  = var(v,    t,     R_Move::w2_mvE1);
+	CNF::Var Here_now_C2R_mvE0  = var(v,    t,     R_Move::w2_mvE0);
+	CNF::Var Here_now_C2R_accW  = var(v,    t,     R_Move::w2_accW);
+	CNF::Var Here_now_C2R_mvW1  = var(v,    t,     R_Move::w2_mvW1);
+	CNF::Var Here_now_C2R_mvW0  = var(v,    t,     R_Move::w2_mvW0);
+	CNF::Var Here_now_C2R_accN  = var(v,    t,     R_Move::w2_accN);
+	CNF::Var Here_now_C2R_mvN1  = var(v,    t,     R_Move::w2_mvN1);
+	CNF::Var Here_now_C2R_mvN2  = var(v,    t,     R_Move::w2_mvN2);
+	CNF::Var Here_now_C2R_mvN3  = var(v,    t,     R_Move::w2_mvN3);
+	CNF::Var Here_now_C2R_mvN0  = var(v,    t,     R_Move::w2_mvN0);
+	CNF::Var Here_now_C2R_accS  = var(v,    t,     R_Move::w2_accS);
+	CNF::Var Here_now_C2R_mvS1  = var(v,    t,     R_Move::w2_mvS1);
+	CNF::Var Here_now_C2R_mvS2  = var(v,    t,     R_Move::w2_mvS2);
+	CNF::Var Here_now_C2R_mvS3  = var(v,    t,     R_Move::w2_mvS3);
+	CNF::Var Here_now_C2R_mvS0  = var(v,    t,     R_Move::w2_mvS0);
 
         // Abbreviations
-        const GRBLinExpr Here_now_CR_mvE1 = ( Here_now_C0R_mvE1 + Here_now_C1R_mvE1 + Here_now_C2R_mvE1 );
-        const GRBLinExpr Here_now_CR_mvE0 = ( Here_now_C0R_mvE0 + Here_now_C1R_mvE0 + Here_now_C2R_mvE0 );
+	CNF::Var Here_now_CR_mvE1;
+	// necessarly
+	c = not(Here_now_CR_mvE1)  or Here_now_C0R_mvE1      or Here_now_C1R_mvE1      or Here_now_C2R_mvE1;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvE1) or Here_now_C1R_mvE1      or Here_now_C2R_mvE1      or Here_now_CR_mvE1;
+	m.addClause(c);
+	c = Here_now_C0R_mvE1      or not(Here_now_C1R_mvE1) or Here_now_C2R_mvE1      or Here_now_CR_mvE1;
+	m.addClause(c);
+	c = Here_now_C0R_mvE1      or Here_now_C1R_mvE1      or not(Here_now_C2R_mvE1) or Here_now_CR_mvE1;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1) or not(Here_now_C1R_mvE1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE1) or not(Here_now_C2R_mvE1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE1) or not(Here_now_C2R_mvE1);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvE0;
+	// necessalry
+	c = not(Here_now_CR_mvE0)  or Here_now_C0R_mvE0      or Here_now_C1R_mvE0      or Here_now_C2R_mvE0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvE0) or Here_now_C1R_mvE0      or Here_now_C2R_mvE0      or Here_now_CR_mvE0;
+	m.addClause(c);
+	c = Here_now_C0R_mvE0      or not(Here_now_C1R_mvE0) or Here_now_C2R_mvE0      or Here_now_CR_mvE0;
+	m.addClause(c);
+	c = Here_now_C0R_mvE0      or Here_now_C1R_mvE0      or not(Here_now_C2R_mvE0) or Here_now_CR_mvE0;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0) or not(Here_now_C1R_mvE0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvE0) or not(Here_now_C2R_mvE0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvE0) or not(Here_now_C2R_mvE0);
+	m.addClause(c);
 
-        const GRBLinExpr Here_now_CR_mvW1 = ( Here_now_C0R_mvW1 + Here_now_C1R_mvW1 + Here_now_C2R_mvW1 );
-        const GRBLinExpr Here_now_CR_mvW0 = ( Here_now_C0R_mvW0 + Here_now_C1R_mvW0 + Here_now_C2R_mvW0 );
+	CNF::Var Here_now_CR_mvW1;
+	// necessarly
+	c = not(Here_now_CR_mvW1)  or Here_now_C0R_mvW1      or Here_now_C1R_mvW1      or Here_now_C2R_mvW1;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvW1) or Here_now_C1R_mvW1      or Here_now_C2R_mvW1      or Here_now_CR_mvW1;
+	m.addClause(c);
+	c = Here_now_C0R_mvW1      or not(Here_now_C1R_mvW1) or Here_now_C2R_mvW1      or Here_now_CR_mvW1;
+	m.addClause(c);
+	c = Here_now_C0R_mvW1      or Here_now_C1R_mvW1      or not(Here_now_C2R_mvW1) or Here_now_CR_mvW1;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1) or not(Here_now_C1R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW1) or not(Here_now_C2R_mvW1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW1) or not(Here_now_C2R_mvW1);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvW0;
+	// necessarly
+	c = not(Here_now_CR_mvW0)  or Here_now_C0R_mvW0      or Here_now_C1R_mvW0      or Here_now_C2R_mvW0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvW0) or Here_now_C1R_mvW0      or Here_now_C2R_mvW0      or Here_now_CR_mvW0;
+	m.addClause(c);
+	c = Here_now_C0R_mvW0      or not(Here_now_C1R_mvW0) or Here_now_C2R_mvW0      or Here_now_CR_mvW0;
+	m.addClause(c);
+	c = Here_now_C0R_mvW0      or Here_now_C1R_mvW0      or not(Here_now_C2R_mvW0) or Here_now_CR_mvW0;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0) or not(Here_now_C1R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvW0) or not(Here_now_C2R_mvW0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvW0) or not(Here_now_C2R_mvW0);
+	m.addClause(c);
 
-        const GRBLinExpr Here_now_CR_mvN1 = ( Here_now_C0R_mvN1 + Here_now_C1R_mvN1 + Here_now_C2R_mvN1 );
-        const GRBLinExpr Here_now_CR_mvN2 = ( Here_now_C0R_mvN2 + Here_now_C1R_mvN2 + Here_now_C2R_mvN2 );
-        const GRBLinExpr Here_now_CR_mvN3 = ( Here_now_C0R_mvN3 + Here_now_C1R_mvN3 + Here_now_C2R_mvN3 );
-        const GRBLinExpr Here_now_CR_mvN0 = ( Here_now_C0R_mvN0 + Here_now_C1R_mvN0 + Here_now_C2R_mvN0 );
+	CNF::Var Here_now_CR_mvN1;
+	// neccessarly
+	c = not(Here_now_CR_mvN1)  or Here_now_C0R_mvN1      or Here_now_C1R_mvN1      or Here_now_C2R_mvN1;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvN1) or Here_now_C1R_mvN1      or Here_now_C2R_mvN1      or Here_now_CR_mvN1;
+	m.addClause(c);
+	c = Here_now_C0R_mvN1      or not(Here_now_C1R_mvN1) or Here_now_C2R_mvN1      or Here_now_CR_mvN1;
+	m.addClause(c);
+	c = Here_now_C0R_mvN1      or Here_now_C1R_mvN1      or not(Here_now_C2R_mvN1) or Here_now_CR_mvN1;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1) or not(Here_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1) or not(Here_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN1) or not(Here_now_C2R_mvN1);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvN2;
+	// neccessarly
+	c = not(Here_now_CR_mvN2)  or Here_now_C0R_mvN2      or Here_now_C1R_mvN2       or Here_now_C2R_mvN2;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvN2) or Here_now_C1R_mvN2      or Here_now_C2R_mvN2       or Here_now_CR_mvN2;
+	m.addClause(c);
+	c = Here_now_C0R_mvN2      or not(Here_now_C1R_mvN2) or Here_now_C2R_mvN2       or Here_now_CR_mvN2;
+	m.addClause(c);
+	c = Here_now_C0R_mvN2      or Here_now_C1R_mvN2      or not(Here_now_C2R_mvN2)  or Here_now_CR_mvN2;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN2) or not(Here_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN2) or not(Here_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN2) or not(Here_now_C2R_mvN2);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvN3;
+	// neccessarly
+	c = not(Here_now_CR_mvN3)  or Here_now_C0R_mvN3      or Here_now_C1R_mvN3      or Here_now_C2R_mvN3;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvN3) or Here_now_C1R_mvN3      or Here_now_C2R_mvN3      or Here_now_CR_mvN3;
+	m.addClause(c);
+	c = Here_now_C0R_mvN3      or not(Here_now_C1R_mvN3) or Here_now_C2R_mvN3      or Here_now_CR_mvN3;
+	m.addClause(c);
+	c = Here_now_C0R_mvN3      or Here_now_C1R_mvN3      or not(Here_now_C2R_mvN3) or Here_now_CR_mvN3;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN3) or not(Here_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN3) or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN3) or not(Here_now_C2R_mvN3);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvN0;
+	// neccessarly
+	c = not(Here_now_CR_mvN0)  or Here_now_C0R_mvN0      or Here_now_C1R_mvN0      or Here_now_C2R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvN0) or Here_now_C1R_mvN0      or Here_now_C2R_mvN0      or Here_now_CR_mvN0;
+	m.addClause(c);
+	c = Here_now_C0R_mvN0      or not(Here_now_C1R_mvN0) or Here_now_C2R_mvN0      or Here_now_CR_mvN0;
+	m.addClause(c);
+	c = Here_now_C0R_mvN0      or Here_now_C1R_mvN0      or not(Here_now_C2R_mvN0) or Here_now_CR_mvN0;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN0) or not(Here_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN0) or not(Here_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN0) or not(Here_now_C2R_mvN0);
+	m.addClause(c);
 
-        const GRBLinExpr Here_now_CR_mvS1 = ( Here_now_C0R_mvS1 + Here_now_C1R_mvS1 + Here_now_C2R_mvS1 );
-        const GRBLinExpr Here_now_CR_mvS2 = ( Here_now_C0R_mvS2 + Here_now_C1R_mvS2 + Here_now_C2R_mvS2 );
-        const GRBLinExpr Here_now_CR_mvS3 = ( Here_now_C0R_mvS3 + Here_now_C1R_mvS3 + Here_now_C2R_mvS3 );
-        const GRBLinExpr Here_now_CR_mvS0 = ( Here_now_C0R_mvS0 + Here_now_C1R_mvS0 + Here_now_C2R_mvS0 );
+	CNF::Var Here_now_CR_mvS1;
+	// neccessarly
+	c = not(Here_now_CR_mvS1)  or Here_now_C0R_mvS1      or Here_now_C1R_mvS1      or Here_now_C2R_mvS1;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvS1) or Here_now_C1R_mvS1      or Here_now_C2R_mvS1      or Here_now_CR_mvS1;
+	m.addClause(c);
+	c = Here_now_C0R_mvS1      or not(Here_now_C1R_mvS1) or Here_now_C2R_mvS1      or Here_now_CR_mvS1;
+	m.addClause(c);
+	c = Here_now_C0R_mvS1      or Here_now_C1R_mvS1      or not(Here_now_C2R_mvS1) or Here_now_CR_mvS1;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS1) or not(Here_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS1) or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS1) or not(Here_now_C2R_mvS1);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvS2;
+	// neccessarly
+	c = not(Here_now_CR_mvS2)  or Here_now_C0R_mvS2      or Here_now_C1R_mvS2      or Here_now_C2R_mvS2;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvS2) or Here_now_C1R_mvS2      or Here_now_C2R_mvS2      or Here_now_CR_mvS2;
+	m.addClause(c);
+	c = Here_now_C0R_mvS2      or not(Here_now_C1R_mvS2) or Here_now_C2R_mvS2      or Here_now_CR_mvS2;
+	m.addClause(c);
+	c = Here_now_C0R_mvS2      or Here_now_C1R_mvS2      or not(Here_now_C2R_mvS2) or Here_now_CR_mvS2;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS2) or not(Here_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS2) or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS2) or not(Here_now_C2R_mvS2);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvS3;
+	// neccessarly
+	c = not(Here_now_CR_mvS3)  or Here_now_C0R_mvS3      or Here_now_C1R_mvS3      or Here_now_C2R_mvS3;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvS3) or Here_now_C1R_mvS3      or Here_now_C2R_mvS3      or Here_now_CR_mvS3;
+	m.addClause(c);
+	c = Here_now_C0R_mvS3      or not(Here_now_C1R_mvS3) or Here_now_C2R_mvS3      or Here_now_CR_mvS3;
+	m.addClause(c);
+	c = Here_now_C0R_mvS3      or Here_now_C1R_mvS3      or not(Here_now_C2R_mvS3) or Here_now_CR_mvS3;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS3) or not(Here_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS3) or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS3) or not(Here_now_C2R_mvS3);
+	m.addClause(c);
+	CNF::Var Here_now_CR_mvS0;
+	// neccessarly
+	c = not(Here_now_CR_mvS0)  or Here_now_C0R_mvS0      or Here_now_C1R_mvS0      or Here_now_C2R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_mvS0) or Here_now_C1R_mvS0      or Here_now_C2R_mvS0      or Here_now_CR_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_mvS0      or not(Here_now_C1R_mvS0) or Here_now_C2R_mvS0      or Here_now_CR_mvS0;
+	m.addClause(c);
+	c = Here_now_C0R_mvS0      or Here_now_C1R_mvS0      or not(Here_now_C2R_mvS0) or Here_now_CR_mvS0;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS0) or not(Here_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS0) or not(Here_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS0) or not(Here_now_C2R_mvS0);
+	m.addClause(c);
 
-        const GRBLinExpr E_now_nobodyhome= var( G.east(v),    t,    NdStat::nobodyhome);
-        const GRBLinExpr E_now_R_ready   = var( G.east(v),    t,    NdStat::R_ready);
-        const GRBLinExpr E_now_R_accE    = var( G.east(v),    t,    R_Move::accE);
-        const GRBLinExpr E_now_R_mvE0    = var( G.east(v),    t,    R_Move::mvE0);
-        const GRBLinExpr E_now_R_accW    = var( G.east(v),    t,    R_Move::accW);
-        const GRBLinExpr E_now_R_mvW0    = var( G.east(v),    t,    R_Move::mvW0);
-        const GRBLinExpr E_now_C0R_ready = var( G.east(v),    t,    NdStat::C0R_ready);
-        const GRBLinExpr E_now_C0R_accE  = var( G.east(v),    t,    R_Move::w0_accE);
-        const GRBLinExpr E_now_C0R_mvE1  = var( G.east(v),    t,    R_Move::w0_mvE1);
-        const GRBLinExpr E_now_C0R_mvE0  = var( G.east(v),    t,    R_Move::w0_mvE0);
-        const GRBLinExpr E_now_C0R_accW  = var( G.east(v),    t,    R_Move::w0_accW);
-        const GRBLinExpr E_now_C0R_mvW1  = var( G.east(v),    t,    R_Move::w0_mvW1);
-        const GRBLinExpr E_now_C0R_mvW0  = var( G.east(v),    t,    R_Move::w0_mvW0);
-        const GRBLinExpr E_now_C1R_ready = var( G.east(v),    t,    NdStat::C1R_ready);
-        const GRBLinExpr E_now_C1R_accE  = var( G.east(v),    t,    R_Move::w1_accE);
-        const GRBLinExpr E_now_C1R_mvE1  = var( G.east(v),    t,    R_Move::w1_mvE1);
-        const GRBLinExpr E_now_C1R_mvE0  = var( G.east(v),    t,    R_Move::w1_mvE0);
-        const GRBLinExpr E_now_C1R_accW  = var( G.east(v),    t,    R_Move::w1_accW);
-        const GRBLinExpr E_now_C1R_mvW1  = var( G.east(v),    t,    R_Move::w1_mvW1);
-        const GRBLinExpr E_now_C1R_mvW0  = var( G.east(v),    t,    R_Move::w1_mvW0);
-        const GRBLinExpr E_now_C2R_ready = var( G.east(v),    t,    NdStat::C2R_ready);
-        const GRBLinExpr E_now_C2R_accE  = var( G.east(v),    t,    R_Move::w2_accE);
-        const GRBLinExpr E_now_C2R_mvE1  = var( G.east(v),    t,    R_Move::w2_mvE1);
-        const GRBLinExpr E_now_C2R_mvE0  = var( G.east(v),    t,    R_Move::w2_mvE0);
-        const GRBLinExpr E_now_C2R_accW  = var( G.east(v),    t,    R_Move::w2_accW);
-        const GRBLinExpr E_now_C2R_mvW1  = var( G.east(v),    t,    R_Move::w2_mvW1);
-        const GRBLinExpr E_now_C2R_mvW0  = var( G.east(v),    t,    R_Move::w2_mvW0);
+
+	CNF::Var E_now_nobodyhome= var( G.east(v),    t,    NdStat::nobodyhome);
+	CNF::Var E_now_R_ready   = var( G.east(v),    t,    NdStat::R_ready);
+	CNF::Var E_now_R_accE    = var( G.east(v),    t,    R_Move::accE);
+	CNF::Var E_now_R_mvE0    = var( G.east(v),    t,    R_Move::mvE0);
+	CNF::Var E_now_R_accW    = var( G.east(v),    t,    R_Move::accW);
+	CNF::Var E_now_R_mvW0    = var( G.east(v),    t,    R_Move::mvW0);
+	CNF::Var E_now_C0R_ready = var( G.east(v),    t,    NdStat::C0R_ready);
+	CNF::Var E_now_C0R_accE  = var( G.east(v),    t,    R_Move::w0_accE);
+	CNF::Var E_now_C0R_mvE1  = var( G.east(v),    t,    R_Move::w0_mvE1);
+	CNF::Var E_now_C0R_mvE0  = var( G.east(v),    t,    R_Move::w0_mvE0);
+	CNF::Var E_now_C0R_accW  = var( G.east(v),    t,    R_Move::w0_accW);
+	CNF::Var E_now_C0R_mvW1  = var( G.east(v),    t,    R_Move::w0_mvW1);
+	CNF::Var E_now_C0R_mvW0  = var( G.east(v),    t,    R_Move::w0_mvW0);
+	CNF::Var E_now_C1R_ready = var( G.east(v),    t,    NdStat::C1R_ready);
+	CNF::Var E_now_C1R_accE  = var( G.east(v),    t,    R_Move::w1_accE);
+	CNF::Var E_now_C1R_mvE1  = var( G.east(v),    t,    R_Move::w1_mvE1);
+	CNF::Var E_now_C1R_mvE0  = var( G.east(v),    t,    R_Move::w1_mvE0);
+	CNF::Var E_now_C1R_accW  = var( G.east(v),    t,    R_Move::w1_accW);
+	CNF::Var E_now_C1R_mvW1  = var( G.east(v),    t,    R_Move::w1_mvW1);
+	CNF::Var E_now_C1R_mvW0  = var( G.east(v),    t,    R_Move::w1_mvW0);
+	CNF::Var E_now_C2R_ready = var( G.east(v),    t,    NdStat::C2R_ready);
+	CNF::Var E_now_C2R_accE  = var( G.east(v),    t,    R_Move::w2_accE);
+	CNF::Var E_now_C2R_mvE1  = var( G.east(v),    t,    R_Move::w2_mvE1);
+	CNF::Var E_now_C2R_mvE0  = var( G.east(v),    t,    R_Move::w2_mvE0);
+	CNF::Var E_now_C2R_accW  = var( G.east(v),    t,    R_Move::w2_accW);
+	CNF::Var E_now_C2R_mvW1  = var( G.east(v),    t,    R_Move::w2_mvW1);
+	CNF::Var E_now_C2R_mvW0  = var( G.east(v),    t,    R_Move::w2_mvW0);
 
         // Abbreviations
-        const GRBLinExpr E_now_CR_mvE1 = ( E_now_C0R_mvE1 + E_now_C1R_mvE1 + E_now_C2R_mvE1 );
-        const GRBLinExpr E_now_CR_mvE0 = ( E_now_C0R_mvE0 + E_now_C1R_mvE0 + E_now_C2R_mvE0 );
+	CNF::Var E_now_CR_mvE1;
+	// neccessarly
+	c = not(E_now_CR_mvE1)  or E_now_C0R_mvE1      or E_now_C1R_mvE1      or E_now_C2R_mvE1;
+	m.addClause(c);
+	// sufficient
+	c = not(E_now_C0R_mvE1) or E_now_C1R_mvE1      or E_now_C2R_mvE1      or E_now_CR_mvE1;
+	m.addClause(c);
+	c = E_now_C0R_mvE1      or not(E_now_C1R_mvE1) or E_now_C2R_mvE1      or E_now_CR_mvE1;
+	m.addClause(c);
+	c = E_now_C0R_mvE1      or E_now_C1R_mvE1      or not(E_now_C2R_mvE1) or E_now_CR_mvE1;
+	m.addClause(c);
+	c = not(E_now_C0R_mvE1) or not(E_now_C1R_mvE1);
+	m.addClause(c);
+	c = not(E_now_C0R_mvE1) or not(E_now_C2R_mvE1);
+	m.addClause(c);
+	c = not(E_now_C1R_mvE1) or not(E_now_C2R_mvE1);
+	m.addClause(c);
+	CNF::Var E_now_CR_mvE0;
+	// neccessarly
+	c = not(E_now_CR_mvE0)  or E_now_C0R_mvE0      or E_now_C1R_mvE0      or E_now_C2R_mvE0;
+	m.addClause(c);
+	// sufficient
+	c = not(E_now_C0R_mvE0) or E_now_C1R_mvE0      or E_now_C2R_mvE0      or E_now_CR_mvE0;
+	m.addClause(c);
+	c = E_now_C0R_mvE0      or not(E_now_C1R_mvE0) or E_now_C2R_mvE0      or E_now_CR_mvE0;
+	m.addClause(c);
+	c = E_now_C0R_mvE0      or E_now_C1R_mvE0      or not(E_now_C2R_mvE0) or E_now_CR_mvE0;
+	m.addClause(c);
+	c = not(E_now_C0R_mvE0) or not(E_now_C1R_mvE0);
+	m.addClause(c);
+	c = not(E_now_C0R_mvE0) or not(E_now_C2R_mvE0);
+	m.addClause(c);
+	c = not(E_now_C1R_mvE0) or not(E_now_C2R_mvE0);
+	m.addClause(c);
 
-        const GRBLinExpr E_now_CR_accW = ( E_now_C0R_accW + E_now_C1R_accW + E_now_C2R_accW );
-        const GRBLinExpr E_now_CR_mvW1 = ( E_now_C0R_mvW1 + E_now_C1R_mvW1 + E_now_C2R_mvW1 );
-        const GRBLinExpr E_now_CR_mvW0 = ( E_now_C0R_mvW0 + E_now_C1R_mvW0 + E_now_C2R_mvW0 );
+	CNF::Var E_now_CR_accW;
+	// neccessarly
+	c = not(E_now_CR_accW)  or E_now_C0R_accW      or E_now_C1R_accW      or E_now_C2R_accW;
+	m.addClause(c);
+	// sufficient
+	c = not(E_now_C0R_accW) or E_now_C1R_accW      or E_now_C2R_accW      or E_now_CR_accW;
+	m.addClause(c);
+	c = E_now_C0R_accW      or not(E_now_C1R_accW) or E_now_C2R_accW      or E_now_CR_accW;
+	m.addClause(c);
+	c = E_now_C0R_accW      or E_now_C1R_accW      or not(E_now_C2R_accW) or E_now_CR_accW;
+	m.addClause(c);
+	c = not(E_now_C0R_accW) or not(E_now_C1R_accW);
+	m.addClause(c);
+	c = not(E_now_C0R_accW) or not(E_now_C2R_accW);
+	m.addClause(c);
+	c = not(E_now_C1R_accW) or not(E_now_C2R_accW);
+	m.addClause(c);
+	CNF::Var E_now_CR_mvW1;
+	// neccessarly
+	c = not(E_now_CR_mvW1)  or E_now_C0R_mvW1      or E_now_C1R_mvW1      or E_now_C2R_mvW1;
+	m.addClause(c);
+	// sufficient
+	c = not(E_now_C0R_mvW1) or E_now_C1R_mvW1      or E_now_C2R_mvW1      or E_now_CR_mvW1;
+	m.addClause(c);
+	c = E_now_C0R_mvW1      or not(E_now_C1R_mvW1) or E_now_C2R_mvW1      or E_now_CR_mvW1;
+	m.addClause(c);
+	c = E_now_C0R_mvW1      or E_now_C1R_mvW1      or not(E_now_C2R_mvW1) or E_now_CR_mvW1;
+	m.addClause(c);
+	c = not(E_now_C0R_mvW1) or not(E_now_C1R_mvW1);
+	m.addClause(c);
+	c = not(E_now_C0R_mvW1) or not(E_now_C2R_mvW1);
+	m.addClause(c);
+	c = not(E_now_C1R_mvW1) or not(E_now_C2R_mvW1);
+	m.addClause(c);
+	CNF::Var E_now_CR_mvW0;
+	// neccessarly
+	c = not(E_now_CR_mvW0)  or E_now_C0R_mvW0      or E_now_C1R_mvW0      or E_now_C2R_mvW0;
+	m.addClause(c);
+	// sufficient
+	c = not(E_now_C0R_mvW0) or E_now_C1R_mvW0      or E_now_C2R_mvW0      or E_now_CR_mvW0;
+	m.addClause(c);
+	c = E_now_C0R_mvW0      or not(E_now_C1R_mvW0) or E_now_C2R_mvW0      or E_now_CR_mvW0;
+	m.addClause(c);
+	c = E_now_C0R_mvW0      or E_now_C1R_mvW0      or not(E_now_C2R_mvW0) or E_now_CR_mvW0;
+	m.addClause(c);
+	c = not(E_now_C0R_mvW0) or not(E_now_C1R_mvW0);
+	m.addClause(c);
+	c = not(E_now_C0R_mvW0) or not(E_now_C2R_mvW0);
+	m.addClause(c);
+	c = not(E_now_C1R_mvW0) or not(E_now_C2R_mvW0);
+	m.addClause(c);
 
 
-
-        const GRBLinExpr N_now_nobodyhome= var( G.north(v),    t,    NdStat::nobodyhome);
-        const GRBLinExpr N_now_R_ready   = var( G.north(v),    t,    NdStat::R_ready);
-        const GRBLinExpr N_now_R_accN    = var( G.north(v),    t,    R_Move::accN);
-        const GRBLinExpr N_now_R_mvN1    = var( G.north(v),    t,    R_Move::mvN1);
-        const GRBLinExpr N_now_R_mvN0    = var( G.north(v),    t,    R_Move::mvN0);
-        const GRBLinExpr N_now_R_accS    = var( G.north(v),    t,    R_Move::accS);
-        const GRBLinExpr N_now_R_mvS1    = var( G.north(v),    t,    R_Move::mvS1);
-        const GRBLinExpr N_now_R_mvS0    = var( G.north(v),    t,    R_Move::mvS0);
-        const GRBLinExpr N_now_C0R_ready = var( G.north(v),    t,    NdStat::C0R_ready);
-        const GRBLinExpr N_now_C0R_accN  = var( G.north(v),    t,    R_Move::w0_accN);
-        const GRBLinExpr N_now_C0R_mvN1  = var( G.north(v),    t,    R_Move::w0_mvN1);
-        const GRBLinExpr N_now_C0R_mvN2  = var( G.north(v),    t,    R_Move::w0_mvN2);
-        const GRBLinExpr N_now_C0R_mvN3  = var( G.north(v),    t,    R_Move::w0_mvN3);
-        const GRBLinExpr N_now_C0R_mvN0  = var( G.north(v),    t,    R_Move::w0_mvN0);
-        const GRBLinExpr N_now_C0R_accS  = var( G.north(v),    t,    R_Move::w0_accS);
-        const GRBLinExpr N_now_C0R_mvS1  = var( G.north(v),    t,    R_Move::w0_mvS1);
-        const GRBLinExpr N_now_C0R_mvS2  = var( G.north(v),    t,    R_Move::w0_mvS2);
-        const GRBLinExpr N_now_C0R_mvS3  = var( G.north(v),    t,    R_Move::w0_mvS3);
-        const GRBLinExpr N_now_C0R_mvS0  = var( G.north(v),    t,    R_Move::w0_mvS0);
-        const GRBLinExpr N_now_C1R_ready = var( G.north(v),    t,    NdStat::C1R_ready);
-        const GRBLinExpr N_now_C1R_accN  = var( G.north(v),    t,    R_Move::w1_accN);
-        const GRBLinExpr N_now_C1R_mvN1  = var( G.north(v),    t,    R_Move::w1_mvN1);
-        const GRBLinExpr N_now_C1R_mvN2  = var( G.north(v),    t,    R_Move::w1_mvN2);
-        const GRBLinExpr N_now_C1R_mvN3  = var( G.north(v),    t,    R_Move::w1_mvN3);
-        const GRBLinExpr N_now_C1R_mvN0  = var( G.north(v),    t,    R_Move::w1_mvN0);
-        const GRBLinExpr N_now_C1R_accS  = var( G.north(v),    t,    R_Move::w1_accS);
-        const GRBLinExpr N_now_C1R_mvS1  = var( G.north(v),    t,    R_Move::w1_mvS1);
-        const GRBLinExpr N_now_C1R_mvS2  = var( G.north(v),    t,    R_Move::w1_mvS2);
-        const GRBLinExpr N_now_C1R_mvS3  = var( G.north(v),    t,    R_Move::w1_mvS3);
-        const GRBLinExpr N_now_C1R_mvS0  = var( G.north(v),    t,    R_Move::w1_mvS0);
-        const GRBLinExpr N_now_C2R_ready = var( G.north(v),    t,    NdStat::C2R_ready);
-        const GRBLinExpr N_now_C2R_accN  = var( G.north(v),    t,    R_Move::w2_accN);
-        const GRBLinExpr N_now_C2R_mvN1  = var( G.north(v),    t,    R_Move::w2_mvN1);
-        const GRBLinExpr N_now_C2R_mvN2  = var( G.north(v),    t,    R_Move::w2_mvN2);
-        const GRBLinExpr N_now_C2R_mvN3  = var( G.north(v),    t,    R_Move::w2_mvN3);
-        const GRBLinExpr N_now_C2R_mvN0  = var( G.north(v),    t,    R_Move::w2_mvN0);
-        const GRBLinExpr N_now_C2R_accS  = var( G.north(v),    t,    R_Move::w2_accS);
-        const GRBLinExpr N_now_C2R_mvS1  = var( G.north(v),    t,    R_Move::w2_mvS1);
-        const GRBLinExpr N_now_C2R_mvS2  = var( G.north(v),    t,    R_Move::w2_mvS2);
-        const GRBLinExpr N_now_C2R_mvS3  = var( G.north(v),    t,    R_Move::w2_mvS3);
-        const GRBLinExpr N_now_C2R_mvS0  = var( G.north(v),    t,    R_Move::w2_mvS0);
-
-        // Abbreviations
-        const GRBLinExpr N_now_CR_accN = ( N_now_C0R_accN + N_now_C1R_accN + N_now_C2R_accN );
-        const GRBLinExpr N_now_CR_mvN1 = ( N_now_C0R_mvN1 + N_now_C1R_mvN1 + N_now_C2R_mvN1 );
-        const GRBLinExpr N_now_CR_mvN2 = ( N_now_C0R_mvN2 + N_now_C1R_mvN2 + N_now_C2R_mvN2 );
-        const GRBLinExpr N_now_CR_mvN3 = ( N_now_C0R_mvN3 + N_now_C1R_mvN3 + N_now_C2R_mvN3 );
-        const GRBLinExpr N_now_CR_mvN0 = ( N_now_C0R_mvN0 + N_now_C1R_mvN0 + N_now_C2R_mvN0 );
-
-        const GRBLinExpr N_now_CR_accS = ( N_now_C0R_accS + N_now_C1R_accS + N_now_C2R_accS );
-        const GRBLinExpr N_now_CR_mvS1 = ( N_now_C0R_mvS1 + N_now_C1R_mvS1 + N_now_C2R_mvS1 );
-        const GRBLinExpr N_now_CR_mvS2 = ( N_now_C0R_mvS2 + N_now_C1R_mvS2 + N_now_C2R_mvS2 );
-        const GRBLinExpr N_now_CR_mvS3 = ( N_now_C0R_mvS3 + N_now_C1R_mvS3 + N_now_C2R_mvS3 );
-        const GRBLinExpr N_now_CR_mvS0 = ( N_now_C0R_mvS0 + N_now_C1R_mvS0 + N_now_C2R_mvS0 );
-
-        const GRBLinExpr W_now_nobodyhome= var( G.west(v),    t,    NdStat::nobodyhome);
-        const GRBLinExpr W_now_R_ready   = var( G.west(v),    t,    NdStat::R_ready);
-        const GRBLinExpr W_now_R_accE    = var( G.west(v),    t,    R_Move::accE);
-        const GRBLinExpr W_now_R_mvE0    = var( G.west(v),    t,    R_Move::mvE0);
-        const GRBLinExpr W_now_R_accW    = var( G.west(v),    t,    R_Move::accW);
-        const GRBLinExpr W_now_R_mvW0    = var( G.west(v),    t,    R_Move::mvW0);
-        const GRBLinExpr W_now_C0R_ready = var( G.west(v),    t,    NdStat::C0R_ready);
-        const GRBLinExpr W_now_C0R_accE  = var( G.west(v),    t,    R_Move::w0_accE);
-        const GRBLinExpr W_now_C0R_mvE1  = var( G.west(v),    t,    R_Move::w0_mvE1);
-        const GRBLinExpr W_now_C0R_mvE0  = var( G.west(v),    t,    R_Move::w0_mvE0);
-        const GRBLinExpr W_now_C0R_accW  = var( G.west(v),    t,    R_Move::w0_accW);
-        const GRBLinExpr W_now_C0R_mvW1  = var( G.west(v),    t,    R_Move::w0_mvW1);
-        const GRBLinExpr W_now_C0R_mvW0  = var( G.west(v),    t,    R_Move::w0_mvW0);
-        const GRBLinExpr W_now_C1R_ready = var( G.west(v),    t,    NdStat::C1R_ready);
-        const GRBLinExpr W_now_C1R_accE  = var( G.west(v),    t,    R_Move::w1_accE);
-        const GRBLinExpr W_now_C1R_mvE1  = var( G.west(v),    t,    R_Move::w1_mvE1);
-        const GRBLinExpr W_now_C1R_mvE0  = var( G.west(v),    t,    R_Move::w1_mvE0);
-        const GRBLinExpr W_now_C1R_accW  = var( G.west(v),    t,    R_Move::w1_accW);
-        const GRBLinExpr W_now_C1R_mvW1  = var( G.west(v),    t,    R_Move::w1_mvW1);
-        const GRBLinExpr W_now_C1R_mvW0  = var( G.west(v),    t,    R_Move::w1_mvW0);
-        const GRBLinExpr W_now_C2R_ready = var( G.west(v),    t,    NdStat::C2R_ready);
-        const GRBLinExpr W_now_C2R_accE  = var( G.west(v),    t,    R_Move::w2_accE);
-        const GRBLinExpr W_now_C2R_mvE1  = var( G.west(v),    t,    R_Move::w2_mvE1);
-        const GRBLinExpr W_now_C2R_mvE0  = var( G.west(v),    t,    R_Move::w2_mvE0);
-        const GRBLinExpr W_now_C2R_accW  = var( G.west(v),    t,    R_Move::w2_accW);
-        const GRBLinExpr W_now_C2R_mvW1  = var( G.west(v),    t,    R_Move::w2_mvW1);
-        const GRBLinExpr W_now_C2R_mvW0  = var( G.west(v),    t,    R_Move::w2_mvW0);
-
-        // Abbreviations
-        const GRBLinExpr W_now_CR_accE = ( W_now_C0R_accE + W_now_C1R_accE + W_now_C2R_accE );
-        const GRBLinExpr W_now_CR_mvE1 = ( W_now_C0R_mvE1 + W_now_C1R_mvE1 + W_now_C2R_mvE1 );
-        const GRBLinExpr W_now_CR_mvE0 = ( W_now_C0R_mvE0 + W_now_C1R_mvE0 + W_now_C2R_mvE0 );
-
-        const GRBLinExpr W_now_CR_mvW1 = ( W_now_C0R_mvW1 + W_now_C1R_mvW1 + W_now_C2R_mvW1 );
-        const GRBLinExpr W_now_CR_mvW0 = ( W_now_C0R_mvW0 + W_now_C1R_mvW0 + W_now_C2R_mvW0 );
-
-        const GRBLinExpr S_now_nobodyhome= var( G.south(v),    t,    NdStat::nobodyhome);
-        const GRBLinExpr S_now_R_ready   = var( G.south(v),    t,    NdStat::R_ready);
-        const GRBLinExpr S_now_R_accN    = var( G.south(v),    t,    R_Move::accN);
-        const GRBLinExpr S_now_R_mvN1    = var( G.south(v),    t,    R_Move::mvN1);
-        const GRBLinExpr S_now_R_mvN0    = var( G.south(v),    t,    R_Move::mvN0);
-        const GRBLinExpr S_now_R_accS    = var( G.south(v),    t,    R_Move::accS);
-        const GRBLinExpr S_now_R_mvS1    = var( G.south(v),    t,    R_Move::mvS1);
-        const GRBLinExpr S_now_R_mvS0    = var( G.south(v),    t,    R_Move::mvS0);
-        const GRBLinExpr S_now_C0R_ready = var( G.south(v),    t,    NdStat::C0R_ready);
-        const GRBLinExpr S_now_C0R_accN  = var( G.south(v),    t,    R_Move::w0_accN);
-        const GRBLinExpr S_now_C0R_mvN1  = var( G.south(v),    t,    R_Move::w0_mvN1);
-        const GRBLinExpr S_now_C0R_mvN2  = var( G.south(v),    t,    R_Move::w0_mvN2);
-        const GRBLinExpr S_now_C0R_mvN3  = var( G.south(v),    t,    R_Move::w0_mvN3);
-        const GRBLinExpr S_now_C0R_mvN0  = var( G.south(v),    t,    R_Move::w0_mvN0);
-        const GRBLinExpr S_now_C0R_accS  = var( G.south(v),    t,    R_Move::w0_accS);
-        const GRBLinExpr S_now_C0R_mvS1  = var( G.south(v),    t,    R_Move::w0_mvS1);
-        const GRBLinExpr S_now_C0R_mvS2  = var( G.south(v),    t,    R_Move::w0_mvS2);
-        const GRBLinExpr S_now_C0R_mvS3  = var( G.south(v),    t,    R_Move::w0_mvS3);
-        const GRBLinExpr S_now_C0R_mvS0  = var( G.south(v),    t,    R_Move::w0_mvS0);
-        const GRBLinExpr S_now_C1R_ready = var( G.south(v),    t,    NdStat::C1R_ready);
-        const GRBLinExpr S_now_C1R_accN  = var( G.south(v),    t,    R_Move::w1_accN);
-        const GRBLinExpr S_now_C1R_mvN1  = var( G.south(v),    t,    R_Move::w1_mvN1);
-        const GRBLinExpr S_now_C1R_mvN2  = var( G.south(v),    t,    R_Move::w1_mvN2);
-        const GRBLinExpr S_now_C1R_mvN3  = var( G.south(v),    t,    R_Move::w1_mvN3);
-        const GRBLinExpr S_now_C1R_mvN0  = var( G.south(v),    t,    R_Move::w1_mvN0);
-        const GRBLinExpr S_now_C1R_accS  = var( G.south(v),    t,    R_Move::w1_accS);
-        const GRBLinExpr S_now_C1R_mvS1  = var( G.south(v),    t,    R_Move::w1_mvS1);
-        const GRBLinExpr S_now_C1R_mvS2  = var( G.south(v),    t,    R_Move::w1_mvS2);
-        const GRBLinExpr S_now_C1R_mvS3  = var( G.south(v),    t,    R_Move::w1_mvS3);
-        const GRBLinExpr S_now_C1R_mvS0  = var( G.south(v),    t,    R_Move::w1_mvS0);
-        const GRBLinExpr S_now_C2R_ready = var( G.south(v),    t,    NdStat::C2R_ready);
-        const GRBLinExpr S_now_C2R_accN  = var( G.south(v),    t,    R_Move::w2_accN);
-        const GRBLinExpr S_now_C2R_mvN1  = var( G.south(v),    t,    R_Move::w2_mvN1);
-        const GRBLinExpr S_now_C2R_mvN2  = var( G.south(v),    t,    R_Move::w2_mvN2);
-        const GRBLinExpr S_now_C2R_mvN3  = var( G.south(v),    t,    R_Move::w2_mvN3);
-        const GRBLinExpr S_now_C2R_mvN0  = var( G.south(v),    t,    R_Move::w2_mvN0);
-        const GRBLinExpr S_now_C2R_accS  = var( G.south(v),    t,    R_Move::w2_accS);
-        const GRBLinExpr S_now_C2R_mvS1  = var( G.south(v),    t,    R_Move::w2_mvS1);
-        const GRBLinExpr S_now_C2R_mvS2  = var( G.south(v),    t,    R_Move::w2_mvS2);
-        const GRBLinExpr S_now_C2R_mvS3  = var( G.south(v),    t,    R_Move::w2_mvS3);
-        const GRBLinExpr S_now_C2R_mvS0  = var( G.south(v),    t,    R_Move::w2_mvS0);
+	CNF::Var N_now_nobodyhome= var( G.north(v),    t,    NdStat::nobodyhome);
+	CNF::Var N_now_R_ready   = var( G.north(v),    t,    NdStat::R_ready);
+	CNF::Var N_now_R_accN    = var( G.north(v),    t,    R_Move::accN);
+	CNF::Var N_now_R_mvN1    = var( G.north(v),    t,    R_Move::mvN1);
+	CNF::Var N_now_R_mvN0    = var( G.north(v),    t,    R_Move::mvN0);
+	CNF::Var N_now_R_accS    = var( G.north(v),    t,    R_Move::accS);
+	CNF::Var N_now_R_mvS1    = var( G.north(v),    t,    R_Move::mvS1);
+	CNF::Var N_now_R_mvS0    = var( G.north(v),    t,    R_Move::mvS0);
+	CNF::Var N_now_C0R_ready = var( G.north(v),    t,    NdStat::C0R_ready);
+	CNF::Var N_now_C0R_accN  = var( G.north(v),    t,    R_Move::w0_accN);
+	CNF::Var N_now_C0R_mvN1  = var( G.north(v),    t,    R_Move::w0_mvN1);
+	CNF::Var N_now_C0R_mvN2  = var( G.north(v),    t,    R_Move::w0_mvN2);
+	CNF::Var N_now_C0R_mvN3  = var( G.north(v),    t,    R_Move::w0_mvN3);
+	CNF::Var N_now_C0R_mvN0  = var( G.north(v),    t,    R_Move::w0_mvN0);
+	CNF::Var N_now_C0R_accS  = var( G.north(v),    t,    R_Move::w0_accS);
+	CNF::Var N_now_C0R_mvS1  = var( G.north(v),    t,    R_Move::w0_mvS1);
+	CNF::Var N_now_C0R_mvS2  = var( G.north(v),    t,    R_Move::w0_mvS2);
+	CNF::Var N_now_C0R_mvS3  = var( G.north(v),    t,    R_Move::w0_mvS3);
+	CNF::Var N_now_C0R_mvS0  = var( G.north(v),    t,    R_Move::w0_mvS0);
+	CNF::Var N_now_C1R_ready = var( G.north(v),    t,    NdStat::C1R_ready);
+	CNF::Var N_now_C1R_accN  = var( G.north(v),    t,    R_Move::w1_accN);
+	CNF::Var N_now_C1R_mvN1  = var( G.north(v),    t,    R_Move::w1_mvN1);
+	CNF::Var N_now_C1R_mvN2  = var( G.north(v),    t,    R_Move::w1_mvN2);
+	CNF::Var N_now_C1R_mvN3  = var( G.north(v),    t,    R_Move::w1_mvN3);
+	CNF::Var N_now_C1R_mvN0  = var( G.north(v),    t,    R_Move::w1_mvN0);
+	CNF::Var N_now_C1R_accS  = var( G.north(v),    t,    R_Move::w1_accS);
+	CNF::Var N_now_C1R_mvS1  = var( G.north(v),    t,    R_Move::w1_mvS1);
+	CNF::Var N_now_C1R_mvS2  = var( G.north(v),    t,    R_Move::w1_mvS2);
+	CNF::Var N_now_C1R_mvS3  = var( G.north(v),    t,    R_Move::w1_mvS3);
+	CNF::Var N_now_C1R_mvS0  = var( G.north(v),    t,    R_Move::w1_mvS0);
+	CNF::Var N_now_C2R_ready = var( G.north(v),    t,    NdStat::C2R_ready);
+	CNF::Var N_now_C2R_accN  = var( G.north(v),    t,    R_Move::w2_accN);
+	CNF::Var N_now_C2R_mvN1  = var( G.north(v),    t,    R_Move::w2_mvN1);
+	CNF::Var N_now_C2R_mvN2  = var( G.north(v),    t,    R_Move::w2_mvN2);
+	CNF::Var N_now_C2R_mvN3  = var( G.north(v),    t,    R_Move::w2_mvN3);
+	CNF::Var N_now_C2R_mvN0  = var( G.north(v),    t,    R_Move::w2_mvN0);
+	CNF::Var N_now_C2R_accS  = var( G.north(v),    t,    R_Move::w2_accS);
+	CNF::Var N_now_C2R_mvS1  = var( G.north(v),    t,    R_Move::w2_mvS1);
+	CNF::Var N_now_C2R_mvS2  = var( G.north(v),    t,    R_Move::w2_mvS2);
+	CNF::Var N_now_C2R_mvS3  = var( G.north(v),    t,    R_Move::w2_mvS3);
+	CNF::Var N_now_C2R_mvS0  = var( G.north(v),    t,    R_Move::w2_mvS0);
 
         // Abbreviations
-        const GRBLinExpr S_now_CR_accN = ( S_now_C0R_accN + S_now_C1R_accN + S_now_C2R_accN );
-        const GRBLinExpr S_now_CR_mvN1 = ( S_now_C0R_mvN1 + S_now_C1R_mvN1 + S_now_C2R_mvN1 );
-        const GRBLinExpr S_now_CR_mvN2 = ( S_now_C0R_mvN2 + S_now_C1R_mvN2 + S_now_C2R_mvN2 );
-        const GRBLinExpr S_now_CR_mvN3 = ( S_now_C0R_mvN3 + S_now_C1R_mvN3 + S_now_C2R_mvN3 );
-        const GRBLinExpr S_now_CR_mvN0 = ( S_now_C0R_mvN0 + S_now_C1R_mvN0 + S_now_C2R_mvN0 );
+	CNF::Var N_now_CR_accN;
+	// neccessarly
+	c = not(N_now_CR_accN)  or N_now_C0R_accN      or N_now_C1R_accN      or N_now_C2R_accN;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_accN) or N_now_C1R_accN      or N_now_C2R_accN      or N_now_CR_accN;
+	m.addClause(c);
+	c = N_now_C0R_accN      or not(N_now_C1R_accN) or N_now_C2R_accN      or N_now_CR_accN;
+	m.addClause(c);
+	c = N_now_C0R_accN      or N_now_C1R_accN      or not(N_now_C2R_accN) or N_now_CR_accN;
+	m.addClause(c);
+	c = not(N_now_C0R_accN) or not(N_now_C1R_accN);
+	m.addClause(c);
+	c = not(N_now_C0R_accN) or not(N_now_C2R_accN);
+	m.addClause(c);
+	c = not(N_now_C1R_accN) or not(N_now_C2R_accN);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvN1;
+	// neccessarly
+	c = not(N_now_CR_mvN1)  or N_now_C0R_mvN1      or N_now_C1R_mvN1      or N_now_C2R_mvN1;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvN1) or N_now_C1R_mvN1      or N_now_C2R_mvN1      or N_now_CR_mvN1;
+	m.addClause(c);
+	c = N_now_C0R_mvN1      or not(N_now_C1R_mvN1) or N_now_C2R_mvN1      or N_now_CR_mvN1;
+	m.addClause(c);
+	c = N_now_C0R_mvN1      or N_now_C1R_mvN1      or not(N_now_C2R_mvN1) or N_now_CR_mvN1;
+	m.addClause(c);
+	c = not(N_now_C0R_mvN1) or not(N_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(N_now_C0R_mvN1) or not(N_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(N_now_C1R_mvN1) or not(N_now_C2R_mvN1);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvN2;
+	// neccessarly
+	c = not(N_now_CR_mvN2)  or N_now_C0R_mvN2      or N_now_C1R_mvN2      or N_now_C2R_mvN2;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvN2) or N_now_C1R_mvN2      or N_now_C2R_mvN2      or N_now_CR_mvN2;
+	m.addClause(c);
+	c = N_now_C0R_mvN2      or not(N_now_C1R_mvN2) or N_now_C2R_mvN2      or N_now_CR_mvN2;
+	m.addClause(c);
+	c = N_now_C0R_mvN2      or N_now_C1R_mvN2      or not(N_now_C2R_mvN2) or N_now_CR_mvN2;
+	m.addClause(c);
+	c = not(N_now_C0R_mvN2) or not(N_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(N_now_C0R_mvN2) or not(N_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(N_now_C1R_mvN2) or not(N_now_C2R_mvN2);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvN3;
+	// neccessarly
+	c = not(N_now_CR_mvN3)  or N_now_C0R_mvN3      or N_now_C1R_mvN3      or N_now_C2R_mvN3;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvN3) or N_now_C1R_mvN3      or N_now_C2R_mvN3      or N_now_CR_mvN3;
+	m.addClause(c);
+	c = N_now_C0R_mvN3      or not(N_now_C1R_mvN3) or N_now_C2R_mvN3      or N_now_CR_mvN3;
+	m.addClause(c);
+	c = N_now_C0R_mvN3      or N_now_C1R_mvN3      or not(N_now_C2R_mvN3) or N_now_CR_mvN3;
+	m.addClause(c);
+	c = not(N_now_C0R_mvN3) or not(N_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(N_now_C0R_mvN3) or not(N_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(N_now_C1R_mvN3) or not(N_now_C2R_mvN3);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvN0;
+	// neccessarly
+	c = not(N_now_CR_mvN0)  or N_now_C0R_mvN0      or N_now_C1R_mvN0      or N_now_C2R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvN0) or N_now_C1R_mvN0      or N_now_C2R_mvN0      or N_now_CR_mvN0;
+	m.addClause(c);
+	c = N_now_C0R_mvN0      or not(N_now_C1R_mvN0) or N_now_C2R_mvN0      or N_now_CR_mvN0;
+	m.addClause(c);
+	c = N_now_C0R_mvN0      or N_now_C1R_mvN0      or not(N_now_C2R_mvN0) or N_now_CR_mvN0;
+	m.addClause(c);
+	c = not(N_now_C0R_mvN0) or not(N_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(N_now_C0R_mvN0) or not(N_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(N_now_C1R_mvN0) or not(N_now_C2R_mvN0);
+	m.addClause(c);
 
-        const GRBLinExpr S_now_CR_mvS1 = ( S_now_C0R_mvS1 + S_now_C1R_mvS1 + S_now_C2R_mvS1 );
-        const GRBLinExpr S_now_CR_mvS2 = ( S_now_C0R_mvS2 + S_now_C1R_mvS2 + S_now_C2R_mvS2 );
-        const GRBLinExpr S_now_CR_mvS3 = ( S_now_C0R_mvS3 + S_now_C1R_mvS3 + S_now_C2R_mvS3 );
-        const GRBLinExpr S_now_CR_mvS0 = ( S_now_C0R_mvS0 + S_now_C1R_mvS0 + S_now_C2R_mvS0 );
+	CNF::Var N_now_CR_accS;
+	// neccessarly
+	c = not(N_now_CR_accS)  or N_now_C0R_accS      or N_now_C1R_accS      or N_now_C2R_accS;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_accS) or N_now_C1R_accS      or N_now_C2R_accS      or N_now_CR_accS;
+	m.addClause(c);
+	c = N_now_C0R_accS      or not(N_now_C1R_accS) or N_now_C2R_accS      or N_now_CR_accS;
+	m.addClause(c);
+	c = N_now_C0R_accS      or N_now_C1R_accS      or not(N_now_C2R_accS) or N_now_CR_accS;
+	m.addClause(c);
+	c = not(N_now_C0R_accS) or not(N_now_C1R_accS);
+	m.addClause(c);
+	c = not(N_now_C0R_accS) or not(N_now_C2R_accS);
+	m.addClause(c);
+	c = not(N_now_C1R_accS) or not(N_now_C2R_accS);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvS1;
+	// neccessarly
+	c = not(N_now_CR_mvS1)  or N_now_C0R_mvS1      or N_now_C1R_mvS1      or N_now_C2R_mvS1;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvS1) or N_now_C1R_mvS1      or N_now_C2R_mvS1      or N_now_CR_mvS1;
+	m.addClause(c);
+	c = N_now_C0R_mvS1      or not(N_now_C1R_mvS1) or N_now_C2R_mvS1      or N_now_CR_mvS1;
+	m.addClause(c);
+	c = N_now_C0R_mvS1      or N_now_C1R_mvS1      or not(N_now_C2R_mvS1) or N_now_CR_mvS1;
+	m.addClause(c);
+	c = not(N_now_C0R_mvS1) or not(N_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(N_now_C0R_mvS1) or not(N_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(N_now_C1R_mvS1) or not(N_now_C2R_mvS1);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvS2;
+	// neccessarly
+	c = not(N_now_CR_mvS2)  or N_now_C0R_mvS2      or N_now_C1R_mvS2      or N_now_C2R_mvS2;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvS2) or N_now_C1R_mvS2      or N_now_C2R_mvS2      or N_now_CR_mvS2;
+	m.addClause(c);
+	c = N_now_C0R_mvS2      or not(N_now_C1R_mvS2) or N_now_C2R_mvS2      or N_now_CR_mvS2;
+	m.addClause(c);
+	c = N_now_C0R_mvS2      or N_now_C1R_mvS2      or not(N_now_C2R_mvS2) or N_now_CR_mvS2;
+	m.addClause(c);
+	c = not(N_now_C0R_mvS2) or not(N_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(N_now_C0R_mvS2) or not(N_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(N_now_C1R_mvS2) or not(N_now_C2R_mvS2);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvS3;
+	// neccessarly
+	c = not(N_now_CR_mvS3)  or N_now_C0R_mvS3      or N_now_C1R_mvS3      or N_now_C2R_mvS3;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvS3) or N_now_C1R_mvS3      or N_now_C2R_mvS3      or N_now_CR_mvS3;
+	m.addClause(c);
+	c = N_now_C0R_mvS3      or not(N_now_C1R_mvS3) or N_now_C2R_mvS3      or N_now_CR_mvS3;
+	m.addClause(c);
+	c = N_now_C0R_mvS3      or N_now_C1R_mvS3      or not(N_now_C2R_mvS3) or N_now_CR_mvS3;
+	m.addClause(c);
+	c = not(N_now_C0R_mvS3) or not(N_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(N_now_C0R_mvS3) or not(N_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(N_now_C1R_mvS3) or not(N_now_C2R_mvS3);
+	m.addClause(c);
+	CNF::Var N_now_CR_mvS0;
+	// neccessarly
+	c = not(N_now_CR_mvS0)  or N_now_C0R_mvS0      or N_now_C1R_mvS0      or N_now_C2R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(N_now_C0R_mvS0) or N_now_C1R_mvS0      or N_now_C2R_mvS0      or N_now_CR_mvS0;
+	m.addClause(c);
+	c = N_now_C0R_mvS0      or not(N_now_C1R_mvS0) or N_now_C2R_mvS0      or N_now_CR_mvS0;
+	m.addClause(c);
+	c = N_now_C0R_mvS0      or N_now_C1R_mvS0      or not(N_now_C2R_mvS0) or N_now_CR_mvS0;
+	m.addClause(c);
+	c = not(N_now_C0R_mvS0) or not(N_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(N_now_C0R_mvS0) or not(N_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(N_now_C1R_mvS0) or not(N_now_C2R_mvS0);
+	m.addClause(c);
 
 
+	CNF::Var W_now_nobodyhome= var( G.west(v),    t,    NdStat::nobodyhome);
+	CNF::Var W_now_R_ready   = var( G.west(v),    t,    NdStat::R_ready);
+	CNF::Var W_now_R_accE    = var( G.west(v),    t,    R_Move::accE);
+	CNF::Var W_now_R_mvE0    = var( G.west(v),    t,    R_Move::mvE0);
+	CNF::Var W_now_R_accW    = var( G.west(v),    t,    R_Move::accW);
+	CNF::Var W_now_R_mvW0    = var( G.west(v),    t,    R_Move::mvW0);
+	CNF::Var W_now_C0R_ready = var( G.west(v),    t,    NdStat::C0R_ready);
+	CNF::Var W_now_C0R_accE  = var( G.west(v),    t,    R_Move::w0_accE);
+	CNF::Var W_now_C0R_mvE1  = var( G.west(v),    t,    R_Move::w0_mvE1);
+	CNF::Var W_now_C0R_mvE0  = var( G.west(v),    t,    R_Move::w0_mvE0);
+	CNF::Var W_now_C0R_accW  = var( G.west(v),    t,    R_Move::w0_accW);
+	CNF::Var W_now_C0R_mvW1  = var( G.west(v),    t,    R_Move::w0_mvW1);
+	CNF::Var W_now_C0R_mvW0  = var( G.west(v),    t,    R_Move::w0_mvW0);
+	CNF::Var W_now_C1R_ready = var( G.west(v),    t,    NdStat::C1R_ready);
+	CNF::Var W_now_C1R_accE  = var( G.west(v),    t,    R_Move::w1_accE);
+	CNF::Var W_now_C1R_mvE1  = var( G.west(v),    t,    R_Move::w1_mvE1);
+	CNF::Var W_now_C1R_mvE0  = var( G.west(v),    t,    R_Move::w1_mvE0);
+	CNF::Var W_now_C1R_accW  = var( G.west(v),    t,    R_Move::w1_accW);
+	CNF::Var W_now_C1R_mvW1  = var( G.west(v),    t,    R_Move::w1_mvW1);
+	CNF::Var W_now_C1R_mvW0  = var( G.west(v),    t,    R_Move::w1_mvW0);
+	CNF::Var W_now_C2R_ready = var( G.west(v),    t,    NdStat::C2R_ready);
+	CNF::Var W_now_C2R_accE  = var( G.west(v),    t,    R_Move::w2_accE);
+	CNF::Var W_now_C2R_mvE1  = var( G.west(v),    t,    R_Move::w2_mvE1);
+	CNF::Var W_now_C2R_mvE0  = var( G.west(v),    t,    R_Move::w2_mvE0);
+	CNF::Var W_now_C2R_accW  = var( G.west(v),    t,    R_Move::w2_accW);
+	CNF::Var W_now_C2R_mvW1  = var( G.west(v),    t,    R_Move::w2_mvW1);
+	CNF::Var W_now_C2R_mvW0  = var( G.west(v),    t,    R_Move::w2_mvW0);
 
+        // Abbreviations
+	CNF::Var W_now_CR_accE;
+	// neccessarly
+	c = not(W_now_CR_accE)  or W_now_C0R_accE      or W_now_C1R_accE      or W_now_C2R_accE;
+	m.addClause(c);
+	// sufficient
+	c = not(W_now_C0R_accE) or W_now_C1R_accE      or W_now_C2R_accE      or W_now_CR_accE;
+	m.addClause(c);
+	c = W_now_C0R_accE      or not(W_now_C1R_accE) or W_now_C2R_accE      or W_now_CR_accE;
+	m.addClause(c);
+	c = W_now_C0R_accE      or W_now_C1R_accE      or not(W_now_C2R_accE) or W_now_CR_accE;
+	m.addClause(c);
+	c = not(W_now_C0R_accE) or not(W_now_C1R_accE);
+	m.addClause(c);
+	c = not(W_now_C0R_accE) or not(W_now_C2R_accE);
+	m.addClause(c);
+	c = not(W_now_C1R_accE) or not(W_now_C2R_accE);
+	m.addClause(c);
+	CNF::Var W_now_CR_mvE1;
+	// neccessarly
+	c = not(W_now_CR_mvE1)  or W_now_C0R_mvE1      or W_now_C1R_mvE1      or W_now_C2R_mvE1;
+	m.addClause(c);
+	// sufficient
+	c = not(W_now_C0R_mvE1) or W_now_C1R_mvE1      or W_now_C2R_mvE1      or W_now_CR_mvE1;
+	m.addClause(c);
+	c = W_now_C0R_mvE1      or not(W_now_C1R_mvE1) or W_now_C2R_mvE1      or W_now_CR_mvE1;
+	m.addClause(c);
+	c = W_now_C0R_mvE1      or W_now_C1R_mvE1      or not(W_now_C2R_mvE1) or W_now_CR_mvE1;
+	m.addClause(c);
+	c = not(W_now_C0R_mvE1) or not(W_now_C1R_mvE1);
+	m.addClause(c);
+	c = not(W_now_C0R_mvE1) or not(W_now_C2R_mvE1);
+	m.addClause(c);
+	c = not(W_now_C1R_mvE1) or not(W_now_C2R_mvE1);
+	m.addClause(c);
+	CNF::Var W_now_CR_mvE0;
+	// neccessarly
+	c = not(W_now_CR_mvE0)  or W_now_C0R_mvE0      or W_now_C1R_mvE0      or W_now_C2R_mvE0;
+	m.addClause(c);
+	// sufficient
+	c = not(W_now_C0R_mvE0) or W_now_C1R_mvE0      or W_now_C2R_mvE0      or W_now_CR_mvE0;
+	m.addClause(c);
+	c = W_now_C0R_mvE0      or not(W_now_C1R_mvE0) or W_now_C2R_mvE0      or W_now_CR_mvE0;
+	m.addClause(c);
+	c = W_now_C0R_mvE0      or W_now_C1R_mvE0      or not(W_now_C2R_mvE0) or W_now_CR_mvE0;
+	m.addClause(c);
+	c = not(W_now_C0R_mvE0) or not(W_now_C1R_mvE0);
+	m.addClause(c);
+	c = not(W_now_C0R_mvE0) or not(W_now_C2R_mvE0);
+	m.addClause(c);
+	c = not(W_now_C1R_mvE0) or not(W_now_C2R_mvE0);
+	m.addClause(c);
+
+	CNF::Var W_now_CR_mvW1;
+	// neccessarly
+	c = not(W_now_CR_mvW1)  or W_now_C0R_mvW1      or W_now_C1R_mvW1      or W_now_C2R_mvW1;
+	m.addClause(c);
+	// sufficient
+	c = not(W_now_C0R_mvW1) or W_now_C1R_mvW1      or W_now_C2R_mvW1      or W_now_CR_mvW1;
+	m.addClause(c);
+	c = W_now_C0R_mvW1      or not(W_now_C1R_mvW1) or W_now_C2R_mvW1      or W_now_CR_mvW1;
+	m.addClause(c);
+	c = W_now_C0R_mvW1      or W_now_C1R_mvW1      or not(W_now_C2R_mvW1) or W_now_CR_mvW1;
+	m.addClause(c);
+	c = not(W_now_C0R_mvW1) or not(W_now_C1R_mvW1);
+	m.addClause(c);
+	c = not(W_now_C0R_mvW1) or not(W_now_C2R_mvW1);
+	m.addClause(c);
+	c = not(W_now_C1R_mvW1) or not(W_now_C2R_mvW1);
+	m.addClause(c);
+	CNF::Var W_now_CR_mvW0;
+	// neccessarly
+	c = not(W_now_CR_mvW0)  or W_now_C0R_mvW0      or W_now_C1R_mvW0      or W_now_C2R_mvW0;
+	m.addClause(c);
+	// sufficient
+	c = not(W_now_C0R_mvW0) or W_now_C1R_mvW0      or W_now_C2R_mvW0      or W_now_CR_mvW0;
+	m.addClause(c);
+	c = W_now_C0R_mvW0      or not(W_now_C1R_mvW0) or W_now_C2R_mvW0      or W_now_CR_mvW0;
+	m.addClause(c);
+	c = W_now_C0R_mvW0      or W_now_C1R_mvW0      or not(W_now_C2R_mvW0) or W_now_CR_mvW0;
+	m.addClause(c);
+	c = not(W_now_C0R_mvW0) or not(W_now_C1R_mvW0);
+	m.addClause(c);
+	c = not(W_now_C0R_mvW0) or not(W_now_C2R_mvW0);
+	m.addClause(c);
+	c = not(W_now_C1R_mvW0) or not(W_now_C2R_mvW0);
+	m.addClause(c);
+
+
+	CNF::Var S_now_nobodyhome= var( G.south(v),    t,    NdStat::nobodyhome);
+	CNF::Var S_now_R_ready   = var( G.south(v),    t,    NdStat::R_ready);
+	CNF::Var S_now_R_accN    = var( G.south(v),    t,    R_Move::accN);
+	CNF::Var S_now_R_mvN1    = var( G.south(v),    t,    R_Move::mvN1);
+	CNF::Var S_now_R_mvN0    = var( G.south(v),    t,    R_Move::mvN0);
+	CNF::Var S_now_R_accS    = var( G.south(v),    t,    R_Move::accS);
+	CNF::Var S_now_R_mvS1    = var( G.south(v),    t,    R_Move::mvS1);
+	CNF::Var S_now_R_mvS0    = var( G.south(v),    t,    R_Move::mvS0);
+	CNF::Var S_now_C0R_ready = var( G.south(v),    t,    NdStat::C0R_ready);
+	CNF::Var S_now_C0R_accN  = var( G.south(v),    t,    R_Move::w0_accN);
+	CNF::Var S_now_C0R_mvN1  = var( G.south(v),    t,    R_Move::w0_mvN1);
+	CNF::Var S_now_C0R_mvN2  = var( G.south(v),    t,    R_Move::w0_mvN2);
+	CNF::Var S_now_C0R_mvN3  = var( G.south(v),    t,    R_Move::w0_mvN3);
+	CNF::Var S_now_C0R_mvN0  = var( G.south(v),    t,    R_Move::w0_mvN0);
+	CNF::Var S_now_C0R_accS  = var( G.south(v),    t,    R_Move::w0_accS);
+	CNF::Var S_now_C0R_mvS1  = var( G.south(v),    t,    R_Move::w0_mvS1);
+	CNF::Var S_now_C0R_mvS2  = var( G.south(v),    t,    R_Move::w0_mvS2);
+	CNF::Var S_now_C0R_mvS3  = var( G.south(v),    t,    R_Move::w0_mvS3);
+	CNF::Var S_now_C0R_mvS0  = var( G.south(v),    t,    R_Move::w0_mvS0);
+	CNF::Var S_now_C1R_ready = var( G.south(v),    t,    NdStat::C1R_ready);
+	CNF::Var S_now_C1R_accN  = var( G.south(v),    t,    R_Move::w1_accN);
+	CNF::Var S_now_C1R_mvN1  = var( G.south(v),    t,    R_Move::w1_mvN1);
+	CNF::Var S_now_C1R_mvN2  = var( G.south(v),    t,    R_Move::w1_mvN2);
+	CNF::Var S_now_C1R_mvN3  = var( G.south(v),    t,    R_Move::w1_mvN3);
+	CNF::Var S_now_C1R_mvN0  = var( G.south(v),    t,    R_Move::w1_mvN0);
+	CNF::Var S_now_C1R_accS  = var( G.south(v),    t,    R_Move::w1_accS);
+	CNF::Var S_now_C1R_mvS1  = var( G.south(v),    t,    R_Move::w1_mvS1);
+	CNF::Var S_now_C1R_mvS2  = var( G.south(v),    t,    R_Move::w1_mvS2);
+	CNF::Var S_now_C1R_mvS3  = var( G.south(v),    t,    R_Move::w1_mvS3);
+	CNF::Var S_now_C1R_mvS0  = var( G.south(v),    t,    R_Move::w1_mvS0);
+	CNF::Var S_now_C2R_ready = var( G.south(v),    t,    NdStat::C2R_ready);
+	CNF::Var S_now_C2R_accN  = var( G.south(v),    t,    R_Move::w2_accN);
+	CNF::Var S_now_C2R_mvN1  = var( G.south(v),    t,    R_Move::w2_mvN1);
+	CNF::Var S_now_C2R_mvN2  = var( G.south(v),    t,    R_Move::w2_mvN2);
+	CNF::Var S_now_C2R_mvN3  = var( G.south(v),    t,    R_Move::w2_mvN3);
+	CNF::Var S_now_C2R_mvN0  = var( G.south(v),    t,    R_Move::w2_mvN0);
+	CNF::Var S_now_C2R_accS  = var( G.south(v),    t,    R_Move::w2_accS);
+	CNF::Var S_now_C2R_mvS1  = var( G.south(v),    t,    R_Move::w2_mvS1);
+	CNF::Var S_now_C2R_mvS2  = var( G.south(v),    t,    R_Move::w2_mvS2);
+	CNF::Var S_now_C2R_mvS3  = var( G.south(v),    t,    R_Move::w2_mvS3);
+	CNF::Var S_now_C2R_mvS0  = var( G.south(v),    t,    R_Move::w2_mvS0);
+
+        // Abbreviations
+	CNF::Var S_now_CR_accN;
+	// neccessarly
+	c = not(S_now_CR_accN)  or S_now_C0R_accN      or S_now_C1R_accN      or S_now_C2R_accN;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_accN) or S_now_C1R_accN      or S_now_C2R_accN      or S_now_CR_accN;
+	m.addClause(c);
+	c = S_now_C0R_accN      or not(S_now_C1R_accN) or S_now_C2R_accN      or S_now_CR_accN;
+	m.addClause(c);
+	c = S_now_C0R_accN      or S_now_C1R_accN      or not(S_now_C2R_accN) or S_now_CR_accN;
+	m.addClause(c);
+	c = not(S_now_C0R_accN) or not(S_now_C1R_accN);
+	m.addClause(c);
+	c = not(S_now_C0R_accN) or not(S_now_C2R_accN);
+	m.addClause(c);
+	c = not(S_now_C1R_accN) or not(S_now_C2R_accN);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvN1;
+	// neccessarly
+	c = not(S_now_CR_mvN1)  or S_now_C0R_mvN1      or S_now_C1R_mvN1      or S_now_C2R_mvN1;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvN1) or S_now_C1R_mvN1      or S_now_C2R_mvN1      or S_now_CR_mvN1;
+	m.addClause(c);
+	c = S_now_C0R_mvN1      or not(S_now_C1R_mvN1) or S_now_C2R_mvN1      or S_now_CR_mvN1;
+	m.addClause(c);
+	c = S_now_C0R_mvN1      or S_now_C1R_mvN1      or not(S_now_C2R_mvN1) or S_now_CR_mvN1;
+	m.addClause(c);
+	c = not(S_now_C0R_mvN1) or not(S_now_C1R_mvN1);
+	m.addClause(c);
+	c = not(S_now_C0R_mvN1) or not(S_now_C2R_mvN1);
+	m.addClause(c);
+	c = not(S_now_C1R_mvN1) or not(S_now_C2R_mvN1);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvN2;
+	// neccessarly
+	c = not(S_now_CR_mvN2)  or S_now_C0R_mvN2      or S_now_C1R_mvN2      or S_now_C2R_mvN2;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvN2) or S_now_C1R_mvN2      or S_now_C2R_mvN2      or S_now_CR_mvN2;
+	m.addClause(c);
+	c = S_now_C0R_mvN2      or not(S_now_C1R_mvN2) or S_now_C2R_mvN2      or S_now_CR_mvN2;
+	m.addClause(c);
+	c = S_now_C0R_mvN2      or S_now_C1R_mvN2      or not(S_now_C2R_mvN2) or S_now_CR_mvN2;
+	m.addClause(c);
+	c = not(S_now_C0R_mvN2) or not(S_now_C1R_mvN2);
+	m.addClause(c);
+	c = not(S_now_C0R_mvN2) or not(S_now_C2R_mvN2);
+	m.addClause(c);
+	c = not(S_now_C1R_mvN2) or not(S_now_C2R_mvN2);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvN3;
+	// neccessarly
+	c = not(S_now_CR_mvN3)  or S_now_C0R_mvN3      or S_now_C1R_mvN3      or S_now_C2R_mvN3;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvN3) or S_now_C1R_mvN3      or S_now_C2R_mvN3      or S_now_CR_mvN3;
+	m.addClause(c);
+	c = S_now_C0R_mvN3      or not(S_now_C1R_mvN3) or S_now_C2R_mvN3      or S_now_CR_mvN3;
+	m.addClause(c);
+	c = S_now_C0R_mvN3      or S_now_C1R_mvN3      or not(S_now_C2R_mvN3) or S_now_CR_mvN3;
+	m.addClause(c);
+	c = not(S_now_C0R_mvN3) or not(S_now_C1R_mvN3);
+	m.addClause(c);
+	c = not(S_now_C0R_mvN3) or not(S_now_C2R_mvN3);
+	m.addClause(c);
+	c = not(S_now_C1R_mvN3) or not(S_now_C2R_mvN3);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvN0;
+	// neccessarly
+	c = not(S_now_CR_mvN0)  or S_now_C0R_mvN0      or S_now_C1R_mvN0      or S_now_C2R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvN0) or S_now_C1R_mvN0      or S_now_C2R_mvN0      or S_now_CR_mvN0;
+	m.addClause(c);
+	c = S_now_C0R_mvN0      or not(S_now_C1R_mvN0) or S_now_C2R_mvN0      or S_now_CR_mvN0;
+	m.addClause(c);
+	c = S_now_C0R_mvN0      or S_now_C1R_mvN0      or not(S_now_C2R_mvN0) or S_now_CR_mvN0;
+	m.addClause(c);
+	c = not(S_now_C0R_mvN0) or not(S_now_C1R_mvN0);
+	m.addClause(c);
+	c = not(S_now_C0R_mvN0) or not(S_now_C2R_mvN0);
+	m.addClause(c);
+	c = not(S_now_C1R_mvN0) or not(S_now_C2R_mvN0);
+	m.addClause(c);
+
+	CNF::Var S_now_CR_mvS1;
+	// neccessarly
+	c = not(S_now_CR_mvS1)  or S_now_C0R_mvS1      or S_now_C1R_mvS1      or S_now_C2R_mvS1;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvS1) or S_now_C1R_mvS1      or S_now_C2R_mvS1      or S_now_CR_mvS1;
+	m.addClause(c);
+	c = S_now_C0R_mvS1      or not(S_now_C1R_mvS1) or S_now_C2R_mvS1      or S_now_CR_mvS1;
+	m.addClause(c);
+	c = S_now_C0R_mvS1      or S_now_C1R_mvS1      or not(S_now_C2R_mvS1) or S_now_CR_mvS1;
+	m.addClause(c);
+	c = not(S_now_C0R_mvS1) or not(S_now_C1R_mvS1);
+	m.addClause(c);
+	c = not(S_now_C0R_mvS1) or not(S_now_C2R_mvS1);
+	m.addClause(c);
+	c = not(S_now_C1R_mvS1) or not(S_now_C2R_mvS1);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvS2;
+	// neccessarly
+	c = not(S_now_CR_mvS2)  or S_now_C0R_mvS2      or S_now_C1R_mvS2      or S_now_C2R_mvS2;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvS2) or S_now_C1R_mvS2      or S_now_C2R_mvS2      or S_now_CR_mvS2;
+	m.addClause(c);
+	c = S_now_C0R_mvS2      or not(S_now_C1R_mvS2) or S_now_C2R_mvS2      or S_now_CR_mvS2;
+	m.addClause(c);
+	c = S_now_C0R_mvS2      or S_now_C1R_mvS2      or not(S_now_C2R_mvS2) or S_now_CR_mvS2;
+	m.addClause(c);
+	c = not(S_now_C0R_mvS2) or not(S_now_C1R_mvS2);
+	m.addClause(c);
+	c = not(S_now_C0R_mvS2) or not(S_now_C2R_mvS2);
+	m.addClause(c);
+	c = not(S_now_C1R_mvS2) or not(S_now_C2R_mvS2);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvS3;
+	// neccessarly
+	c = not(S_now_CR_mvS3)  or S_now_C0R_mvS3      or S_now_C1R_mvS3      or S_now_C2R_mvS3;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvS3) or S_now_C1R_mvS3      or S_now_C2R_mvS3      or S_now_CR_mvS3;
+	m.addClause(c);
+	c = S_now_C0R_mvS3      or not(S_now_C1R_mvS3) or S_now_C2R_mvS3      or S_now_CR_mvS3;
+	m.addClause(c);
+	c = S_now_C0R_mvS3      or S_now_C1R_mvS3      or not(S_now_C2R_mvS3) or S_now_CR_mvS3;
+	m.addClause(c);
+	c = not(S_now_C0R_mvS3) or not(S_now_C1R_mvS3);
+	m.addClause(c);
+	c = not(S_now_C0R_mvS3) or not(S_now_C2R_mvS3);
+	m.addClause(c);
+	c = not(S_now_C1R_mvS3) or not(S_now_C2R_mvS3);
+	m.addClause(c);
+	CNF::Var S_now_CR_mvS0;
+	// neccessarly
+	c = not(S_now_CR_mvS0)  or S_now_C0R_mvS0      or S_now_C1R_mvS0      or S_now_C2R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(S_now_C0R_mvS0) or S_now_C1R_mvS0      or S_now_C2R_mvS0      or S_now_CR_mvS0;
+	m.addClause(c);
+	c = S_now_C0R_mvS0      or not(S_now_C1R_mvS0) or S_now_C2R_mvS0      or S_now_CR_mvS0;
+	m.addClause(c);
+	c = S_now_C0R_mvS0      or S_now_C1R_mvS0      or not(S_now_C2R_mvS0) or S_now_CR_mvS0;
+	m.addClause(c);
+	c = not(S_now_C0R_mvS0) or not(S_now_C1R_mvS0);
+	m.addClause(c);
+	c = not(S_now_C0R_mvS0) or not(S_now_C2R_mvS0);
+	m.addClause(c);
+	c = not(S_now_C1R_mvS0) or not(S_now_C2R_mvS0);
+	m.addClause(c);
+	
+        
+        
         // Future
-        const GRBLinExpr Here_will_nobodyhome= var(v,    t+1,     NdStat::nobodyhome);
-        const GRBLinExpr Here_will_R_ready   = var(v,    t+1,     NdStat::R_ready);
-        const GRBLinExpr Here_will_R_accE    = var(v,    t+1,     R_Move::accE);
-        const GRBLinExpr Here_will_R_mvE0    = var(v,    t+1,     R_Move::mvE0);
-        const GRBLinExpr Here_will_R_accW    = var(v,    t+1,     R_Move::accW);
-        const GRBLinExpr Here_will_R_mvW0    = var(v,    t+1,     R_Move::mvW0);
-        const GRBLinExpr Here_will_R_accN    = var(v,    t+1,     R_Move::accN);
-        const GRBLinExpr Here_will_R_mvN1    = var(v,    t+1,     R_Move::mvN1);
-        const GRBLinExpr Here_will_R_mvN0    = var(v,    t+1,     R_Move::mvN0);
-        const GRBLinExpr Here_will_R_accS    = var(v,    t+1,     R_Move::accS);
-        const GRBLinExpr Here_will_R_mvS1    = var(v,    t+1,     R_Move::mvS1);
-        const GRBLinExpr Here_will_R_mvS0    = var(v,    t+1,     R_Move::mvS0);
-        const GRBLinExpr Here_will_R_lift    = var(v,    t+1,     R_Vertical::lift);
-        const GRBLinExpr Here_will_R_lifting1= var(v,    t+1,     R_Vertical::l1);
-        const GRBLinExpr Here_will_R_lifting2= var(v,    t+1,     R_Vertical::l2);
-        const GRBLinExpr Here_will_R_lifting3= var(v,    t+1,     R_Vertical::l3);
-        const GRBLinExpr Here_will_R_lifting4= var(v,    t+1,     R_Vertical::l4);
-        const GRBLinExpr Here_will_R_drop    = var(v,    t+1,     R_Vertical::drop);
-        const GRBLinExpr Here_will_C0R_ready = var(v,    t+1,     NdStat::C0R_ready);
-        const GRBLinExpr Here_will_C0R_accE  = var(v,    t+1,     R_Move::w0_accE);
-        const GRBLinExpr Here_will_C0R_mvE1  = var(v,    t+1,     R_Move::w0_mvE1);
-        const GRBLinExpr Here_will_C0R_mvE0  = var(v,    t+1,     R_Move::w0_mvE0);
-        const GRBLinExpr Here_will_C0R_accW  = var(v,    t+1,     R_Move::w0_accW);
-        const GRBLinExpr Here_will_C0R_mvW1  = var(v,    t+1,     R_Move::w0_mvW1);
-        const GRBLinExpr Here_will_C0R_mvW0  = var(v,    t+1,     R_Move::w0_mvW0);
-        const GRBLinExpr Here_will_C0R_accN  = var(v,    t+1,     R_Move::w0_accN);
-        const GRBLinExpr Here_will_C0R_mvN1  = var(v,    t+1,     R_Move::w0_mvN1);
-        const GRBLinExpr Here_will_C0R_mvN2  = var(v,    t+1,     R_Move::w0_mvN2);
-        const GRBLinExpr Here_will_C0R_mvN3  = var(v,    t+1,     R_Move::w0_mvN3);
-        const GRBLinExpr Here_will_C0R_mvN0  = var(v,    t+1,     R_Move::w0_mvN0);
-        const GRBLinExpr Here_will_C0R_accS  = var(v,    t+1,     R_Move::w0_accS);
-        const GRBLinExpr Here_will_C0R_mvS1  = var(v,    t+1,     R_Move::w0_mvS1);
-        const GRBLinExpr Here_will_C0R_mvS2  = var(v,    t+1,     R_Move::w0_mvS2);
-        const GRBLinExpr Here_will_C0R_mvS3  = var(v,    t+1,     R_Move::w0_mvS3);
-        const GRBLinExpr Here_will_C0R_mvS0  = var(v,    t+1,     R_Move::w0_mvS0);
-        const GRBLinExpr Here_will_C1R_ready = var(v,    t+1,     NdStat::C1R_ready);
-        const GRBLinExpr Here_will_C1R_accE  = var(v,    t+1,     R_Move::w1_accE);
-        const GRBLinExpr Here_will_C1R_mvE1  = var(v,    t+1,     R_Move::w1_mvE1);
-        const GRBLinExpr Here_will_C1R_mvE0  = var(v,    t+1,     R_Move::w1_mvE0);
-        const GRBLinExpr Here_will_C1R_accW  = var(v,    t+1,     R_Move::w1_accW);
-        const GRBLinExpr Here_will_C1R_mvW1  = var(v,    t+1,     R_Move::w1_mvW1);
-        const GRBLinExpr Here_will_C1R_mvW0  = var(v,    t+1,     R_Move::w1_mvW0);
-        const GRBLinExpr Here_will_C1R_accN  = var(v,    t+1,     R_Move::w1_accN);
-        const GRBLinExpr Here_will_C1R_mvN1  = var(v,    t+1,     R_Move::w1_mvN1);
-        const GRBLinExpr Here_will_C1R_mvN2  = var(v,    t+1,     R_Move::w1_mvN2);
-        const GRBLinExpr Here_will_C1R_mvN3  = var(v,    t+1,     R_Move::w1_mvN3);
-        const GRBLinExpr Here_will_C1R_mvN0  = var(v,    t+1,     R_Move::w1_mvN0);
-        const GRBLinExpr Here_will_C1R_accS  = var(v,    t+1,     R_Move::w1_accS);
-        const GRBLinExpr Here_will_C1R_mvS1  = var(v,    t+1,     R_Move::w1_mvS1);
-        const GRBLinExpr Here_will_C1R_mvS2  = var(v,    t+1,     R_Move::w1_mvS2);
-        const GRBLinExpr Here_will_C1R_mvS3  = var(v,    t+1,     R_Move::w1_mvS3);
-        const GRBLinExpr Here_will_C1R_mvS0  = var(v,    t+1,     R_Move::w1_mvS0);
-        const GRBLinExpr Here_will_C2R_ready = var(v,    t+1,     NdStat::C2R_ready);
-        const GRBLinExpr Here_will_C2R_accE  = var(v,    t+1,     R_Move::w2_accE);
-        const GRBLinExpr Here_will_C2R_mvE1  = var(v,    t+1,     R_Move::w2_mvE1);
-        const GRBLinExpr Here_will_C2R_mvE0  = var(v,    t+1,     R_Move::w2_mvE0);
-        const GRBLinExpr Here_will_C2R_accW  = var(v,    t+1,     R_Move::w2_accW);
-        const GRBLinExpr Here_will_C2R_mvW1  = var(v,    t+1,     R_Move::w2_mvW1);
-        const GRBLinExpr Here_will_C2R_mvW0  = var(v,    t+1,     R_Move::w2_mvW0);
-        const GRBLinExpr Here_will_C2R_accN  = var(v,    t+1,     R_Move::w2_accN);
-        const GRBLinExpr Here_will_C2R_mvN1  = var(v,    t+1,     R_Move::w2_mvN1);
-        const GRBLinExpr Here_will_C2R_mvN2  = var(v,    t+1,     R_Move::w2_mvN2);
-        const GRBLinExpr Here_will_C2R_mvN3  = var(v,    t+1,     R_Move::w2_mvN3);
-        const GRBLinExpr Here_will_C2R_mvN0  = var(v,    t+1,     R_Move::w2_mvN0);
-        const GRBLinExpr Here_will_C2R_accS  = var(v,    t+1,     R_Move::w2_accS);
-        const GRBLinExpr Here_will_C2R_mvS1  = var(v,    t+1,     R_Move::w2_mvS1);
-        const GRBLinExpr Here_will_C2R_mvS2  = var(v,    t+1,     R_Move::w2_mvS2);
-        const GRBLinExpr Here_will_C2R_mvS3  = var(v,    t+1,     R_Move::w2_mvS3);
-        const GRBLinExpr Here_will_C2R_mvS0  = var(v,    t+1,     R_Move::w2_mvS0);
+	CNF::Var Here_will_nobodyhome= var(v,    t+1,     NdStat::nobodyhome);
+	CNF::Var Here_will_R_ready   = var(v,    t+1,     NdStat::R_ready);
+	CNF::Var Here_will_R_accE    = var(v,    t+1,     R_Move::accE);
+	CNF::Var Here_will_R_mvE0    = var(v,    t+1,     R_Move::mvE0);
+	CNF::Var Here_will_R_accW    = var(v,    t+1,     R_Move::accW);
+	CNF::Var Here_will_R_mvW0    = var(v,    t+1,     R_Move::mvW0);
+	CNF::Var Here_will_R_accN    = var(v,    t+1,     R_Move::accN);
+	CNF::Var Here_will_R_mvN1    = var(v,    t+1,     R_Move::mvN1);
+	CNF::Var Here_will_R_mvN0    = var(v,    t+1,     R_Move::mvN0);
+	CNF::Var Here_will_R_accS    = var(v,    t+1,     R_Move::accS);
+	CNF::Var Here_will_R_mvS1    = var(v,    t+1,     R_Move::mvS1);
+	CNF::Var Here_will_R_mvS0    = var(v,    t+1,     R_Move::mvS0);
+	CNF::Var Here_will_R_lift    = var(v,    t+1,     R_Vertical::lift);
+	CNF::Var Here_will_R_lifting1= var(v,    t+1,     R_Vertical::l1);
+	CNF::Var Here_will_R_lifting2= var(v,    t+1,     R_Vertical::l2);
+	CNF::Var Here_will_R_lifting3= var(v,    t+1,     R_Vertical::l3);
+	CNF::Var Here_will_R_lifting4= var(v,    t+1,     R_Vertical::l4);
+	CNF::Var Here_will_R_drop    = var(v,    t+1,     R_Vertical::drop);
+	CNF::Var Here_will_C0R_ready = var(v,    t+1,     NdStat::C0R_ready);
+	CNF::Var Here_will_C0R_accE  = var(v,    t+1,     R_Move::w0_accE);
+	CNF::Var Here_will_C0R_mvE1  = var(v,    t+1,     R_Move::w0_mvE1);
+	CNF::Var Here_will_C0R_mvE0  = var(v,    t+1,     R_Move::w0_mvE0);
+	CNF::Var Here_will_C0R_accW  = var(v,    t+1,     R_Move::w0_accW);
+	CNF::Var Here_will_C0R_mvW1  = var(v,    t+1,     R_Move::w0_mvW1);
+	CNF::Var Here_will_C0R_mvW0  = var(v,    t+1,     R_Move::w0_mvW0);
+	CNF::Var Here_will_C0R_accN  = var(v,    t+1,     R_Move::w0_accN);
+	CNF::Var Here_will_C0R_mvN1  = var(v,    t+1,     R_Move::w0_mvN1);
+	CNF::Var Here_will_C0R_mvN2  = var(v,    t+1,     R_Move::w0_mvN2);
+	CNF::Var Here_will_C0R_mvN3  = var(v,    t+1,     R_Move::w0_mvN3);
+	CNF::Var Here_will_C0R_mvN0  = var(v,    t+1,     R_Move::w0_mvN0);
+	CNF::Var Here_will_C0R_accS  = var(v,    t+1,     R_Move::w0_accS);
+	CNF::Var Here_will_C0R_mvS1  = var(v,    t+1,     R_Move::w0_mvS1);
+	CNF::Var Here_will_C0R_mvS2  = var(v,    t+1,     R_Move::w0_mvS2);
+	CNF::Var Here_will_C0R_mvS3  = var(v,    t+1,     R_Move::w0_mvS3);
+	CNF::Var Here_will_C0R_mvS0  = var(v,    t+1,     R_Move::w0_mvS0);
+	CNF::Var Here_will_C1R_ready = var(v,    t+1,     NdStat::C1R_ready);
+	CNF::Var Here_will_C1R_accE  = var(v,    t+1,     R_Move::w1_accE);
+	CNF::Var Here_will_C1R_mvE1  = var(v,    t+1,     R_Move::w1_mvE1);
+	CNF::Var Here_will_C1R_mvE0  = var(v,    t+1,     R_Move::w1_mvE0);
+	CNF::Var Here_will_C1R_accW  = var(v,    t+1,     R_Move::w1_accW);
+	CNF::Var Here_will_C1R_mvW1  = var(v,    t+1,     R_Move::w1_mvW1);
+	CNF::Var Here_will_C1R_mvW0  = var(v,    t+1,     R_Move::w1_mvW0);
+	CNF::Var Here_will_C1R_accN  = var(v,    t+1,     R_Move::w1_accN);
+	CNF::Var Here_will_C1R_mvN1  = var(v,    t+1,     R_Move::w1_mvN1);
+	CNF::Var Here_will_C1R_mvN2  = var(v,    t+1,     R_Move::w1_mvN2);
+	CNF::Var Here_will_C1R_mvN3  = var(v,    t+1,     R_Move::w1_mvN3);
+	CNF::Var Here_will_C1R_mvN0  = var(v,    t+1,     R_Move::w1_mvN0);
+	CNF::Var Here_will_C1R_accS  = var(v,    t+1,     R_Move::w1_accS);
+	CNF::Var Here_will_C1R_mvS1  = var(v,    t+1,     R_Move::w1_mvS1);
+	CNF::Var Here_will_C1R_mvS2  = var(v,    t+1,     R_Move::w1_mvS2);
+	CNF::Var Here_will_C1R_mvS3  = var(v,    t+1,     R_Move::w1_mvS3);
+	CNF::Var Here_will_C1R_mvS0  = var(v,    t+1,     R_Move::w1_mvS0);
+	CNF::Var Here_will_C2R_ready = var(v,    t+1,     NdStat::C2R_ready);
+	CNF::Var Here_will_C2R_accE  = var(v,    t+1,     R_Move::w2_accE);
+	CNF::Var Here_will_C2R_mvE1  = var(v,    t+1,     R_Move::w2_mvE1);
+	CNF::Var Here_will_C2R_mvE0  = var(v,    t+1,     R_Move::w2_mvE0);
+	CNF::Var Here_will_C2R_accW  = var(v,    t+1,     R_Move::w2_accW);
+	CNF::Var Here_will_C2R_mvW1  = var(v,    t+1,     R_Move::w2_mvW1);
+	CNF::Var Here_will_C2R_mvW0  = var(v,    t+1,     R_Move::w2_mvW0);
+	CNF::Var Here_will_C2R_accN  = var(v,    t+1,     R_Move::w2_accN);
+	CNF::Var Here_will_C2R_mvN1  = var(v,    t+1,     R_Move::w2_mvN1);
+	CNF::Var Here_will_C2R_mvN2  = var(v,    t+1,     R_Move::w2_mvN2);
+	CNF::Var Here_will_C2R_mvN3  = var(v,    t+1,     R_Move::w2_mvN3);
+	CNF::Var Here_will_C2R_mvN0  = var(v,    t+1,     R_Move::w2_mvN0);
+	CNF::Var Here_will_C2R_accS  = var(v,    t+1,     R_Move::w2_accS);
+	CNF::Var Here_will_C2R_mvS1  = var(v,    t+1,     R_Move::w2_mvS1);
+	CNF::Var Here_will_C2R_mvS2  = var(v,    t+1,     R_Move::w2_mvS2);
+	CNF::Var Here_will_C2R_mvS3  = var(v,    t+1,     R_Move::w2_mvS3);
+	CNF::Var Here_will_C2R_mvS0  = var(v,    t+1,     R_Move::w2_mvS0);
 
         // Abbreviations
-        const GRBLinExpr Here_will_CR_mvE1 = ( Here_will_C0R_mvE1 + Here_will_C1R_mvE1 + Here_will_C2R_mvE1 );
-        const GRBLinExpr Here_will_CR_mvE0 = ( Here_will_C0R_mvE0 + Here_will_C1R_mvE0 + Here_will_C2R_mvE0 );
+	CNF::Var Here_will_CR_mvE1;
+	// necessarly
+	c = not(Here_will_CR_mvE1)  or Here_will_C0R_mvE1      or Here_will_C1R_mvE1      or Here_will_C2R_mvE1;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_mvE1) or Here_will_C1R_mvE1      or Here_will_C2R_mvE1      or Here_will_CR_mvE1;
+	m.addClause(c);
+	c = Here_will_C0R_mvE1      or not(Here_will_C1R_mvE1) or Here_will_C2R_mvE1      or Here_will_CR_mvE1;
+	m.addClause(c);
+	c = Here_will_C0R_mvE1      or Here_will_C1R_mvE1      or not(Here_will_C2R_mvE1) or Here_will_CR_mvE1;
+	m.addClause(c);
+	c = not(Here_will_C0R_mvE1) or not(Here_will_C1R_mvE1);
+	m.addClause(c);
+	c = not(Here_will_C0R_mvE1) or not(Here_will_C2R_mvE1);
+	m.addClause(c);
+	c = not(Here_will_C1R_mvE1) or not(Here_will_C2R_mvE1);
+	m.addClause(c);
+	CNF::Var Here_will_CR_mvE0;
+	// necessalry
+	c = not(Here_will_CR_mvE0)  or Here_will_C0R_mvE0      or Here_will_C1R_mvE0      or Here_will_C2R_mvE0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_mvE0) or Here_will_C1R_mvE0      or Here_will_C2R_mvE0      or Here_will_CR_mvE0;
+	m.addClause(c);
+	c = Here_will_C0R_mvE0      or not(Here_will_C1R_mvE0) or Here_will_C2R_mvE0      or Here_will_CR_mvE0;
+	m.addClause(c);
+	c = Here_will_C0R_mvE0      or Here_will_C1R_mvE0      or not(Here_will_C2R_mvE0) or Here_will_CR_mvE0;
+	m.addClause(c);
+	c = not(Here_will_C0R_mvE0) or not(Here_will_C1R_mvE0);
+	m.addClause(c);
+	c = not(Here_will_C0R_mvE0) or not(Here_will_C2R_mvE0);
+	m.addClause(c);
+	c = not(Here_will_C1R_mvE0) or not(Here_will_C2R_mvE0);
+	m.addClause(c);
 
-        const GRBLinExpr Here_will_CR_mvW1 = ( Here_will_C0R_mvW1 + Here_will_C1R_mvW1 + Here_will_C2R_mvW1 );
-        const GRBLinExpr Here_will_CR_mvW0 = ( Here_will_C0R_mvW0 + Here_will_C1R_mvW0 + Here_will_C2R_mvW0 );
+	CNF::Var Here_will_CR_mvW1;
+	// necessarly
+	c = not(Here_will_CR_mvW1)  or Here_will_C0R_mvW1      or Here_will_C1R_mvW1      or Here_will_C2R_mvW1;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_mvW1) or Here_will_C1R_mvW1      or Here_will_C2R_mvW1      or Here_will_CR_mvW1;
+	m.addClause(c);
+	c = Here_will_C0R_mvW1      or not(Here_will_C1R_mvW1) or Here_will_C2R_mvW1      or Here_will_CR_mvW1;
+	m.addClause(c);
+	c = Here_will_C0R_mvW1      or Here_will_C1R_mvW1      or not(Here_will_C2R_mvW1) or Here_will_CR_mvW1;
+	m.addClause(c);
+	c = not(Here_will_C0R_mvW1) or not(Here_will_C1R_mvW1);
+	m.addClause(c);
+	c = not(Here_will_C0R_mvW1) or not(Here_will_C2R_mvW1);
+	m.addClause(c);
+	c = not(Here_will_C1R_mvW1) or not(Here_will_C2R_mvW1);
+	m.addClause(c);
+	CNF::Var Here_will_CR_mvW0;
+	// necessarly
+	c = not(Here_will_CR_mvW0)  or Here_will_C0R_mvW0      or Here_will_C1R_mvW0      or Here_will_C2R_mvW0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_mvW0) or Here_will_C1R_mvW0      or Here_will_C2R_mvW0      or Here_will_CR_mvW0;
+	m.addClause(c);
+	c = Here_will_C0R_mvW0      or not(Here_will_C1R_mvW0) or Here_will_C2R_mvW0      or Here_will_CR_mvW0;
+	m.addClause(c);
+	c = Here_will_C0R_mvW0      or Here_will_C1R_mvW0      or not(Here_will_C2R_mvW0) or Here_will_CR_mvW0;
+	m.addClause(c);
+	c = not(Here_will_C0R_mvW0) or not(Here_will_C1R_mvW0);
+	m.addClause(c);
+	c = not(Here_will_C0R_mvW0) or not(Here_will_C2R_mvW0);
+	m.addClause(c);
+	c = not(Here_will_C1R_mvW0) or not(Here_will_C2R_mvW0);
+	m.addClause(c);
 
-        const GRBLinExpr Here_will_CR_mvN1 = ( Here_will_C0R_mvN1 + Here_will_C1R_mvN1 + Here_will_C2R_mvN1 );
-        const GRBLinExpr Here_will_CR_mvN2 = ( Here_will_C0R_mvN2 + Here_will_C1R_mvN2 + Here_will_C2R_mvN2 );
-        const GRBLinExpr Here_will_CR_mvN3 = ( Here_will_C0R_mvN3 + Here_will_C1R_mvN3 + Here_will_C2R_mvN3 );
-        const GRBLinExpr Here_will_CR_mvN0 = ( Here_will_C0R_mvN0 + Here_will_C1R_mvN0 + Here_will_C2R_mvN0 );
+	CNF::Var Here_will_CR_mvN1;
+	// neccessarly
+	c = not(Here_will_CR_mvN1)  or Here_will_C0R_mvN1      or Here_will_C1R_mvN1      or Here_will_C2R_mvN1;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_mvN1) or Here_will_C1R_mvN1      or Here_will_C2R_mvN1      or Here_will_CR_mvN1;
+	m.addClause(c);
+	c = Here_will_C0R_mvN1      or not(Here_will_C1R_mvN1) or Here_will_C2R_mvN1      or Here_will_CR_mvN1;
+	m.addClause(c);
+	c = Here_will_C0R_mvN1      or Here_will_C1R_mvN1      or not(Here_will_C2R_mvN1) or Here_will_CR_mvN1;
+	m.addClause(c);
+	c = not(Here_will_C0R_mvN1) or not(Here_will_C1R_mvN1);
+	m.addClause(c);
+	c = not(Here_will_C0R_mvN1) or not(Here_will_C2R_mvN1);
+	m.addClause(c);
+	c = not(Here_will_C1R_mvN1) or not(Here_will_C2R_mvN1);
+	m.addClause(c);
+	CNF::Var Here_will_CR_mvN2;
+	// neccessarly
+	c = not(Here_will_CR_mvN2)  or Here_will_C0R_mvN2      or Here_will_C1R_mvN2       or Here_will_C2R_mvN2;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_mvN2) or Here_will_C1R_mvN2      or Here_will_C2R_mvN2       or Here_will_CR_mvN2;
+	m.addClause(c);
+	c = Here_will_C0R_mvN2      or not(Here_will_C1R_mvN2) or Here_will_C2R_mvN2       or Here_will_CR_mvN2;
+	m.addClause(c);
+	c = Here_will_C0R_mvN2      or Here_will_C1R_mvN2      or not(Here_will_C2R_mvN2)  or Here_will_CR_mvN2;
+	m.addClause(c);
+	c = not(Here_will_C0R_mvN2) or not(Here_will_C1R_mvN2);
+	m.addClause(c);
+	c = not(Here_will_C0R_mvN2) or not(Here_will_C2R_mvN2);
+	m.addClause(c);
+	c = not(Here_will_C1R_mvN2) or not(Here_will_C2R_mvN2);
+	m.addClause(c);
+	CNF::Var Here_will_CR_mvN3;
+	// neccessarly
+	c = not(Here_will_CR_mvN3)  or Here_will_C0R_mvN3      or Here_will_C1R_mvN3      or Here_will_C2R_mvN3;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_mvN3) or Here_will_C1R_mvN3      or Here_will_C2R_mvN3      or Here_will_CR_mvN3;
+	m.addClause(c);
+	c = Here_will_C0R_mvN3      or not(Here_will_C1R_mvN3) or Here_will_C2R_mvN3      or Here_will_CR_mvN3;
+	m.addClause(c);
+	c = Here_will_C0R_mvN3      or Here_will_C1R_mvN3      or not(Here_will_C2R_mvN3) or Here_will_CR_mvN3;
+	m.addClause(c);
+	c = not(Here_will_C0R_mvN3) or not(Here_will_C1R_mvN3);
+	m.addClause(c);
+	c = not(Here_will_C0R_mvN3) or not(Here_will_C2R_mvN3);
+	m.addClause(c);
+	c = not(Here_will_C1R_mvN3) or not(Here_will_C2R_mvN3);
+	m.addClause(c);
+	CNF::Var Here_will_CR_mvN0;
+	// neccessarly
+	c = not(Here_will_CR_mvN0)  or Here_will_C0R_mvN0      or Here_will_C1R_mvN0      or Here_will_C2R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_mvN0) or Here_will_C1R_mvN0      or Here_will_C2R_mvN0      or Here_will_CR_mvN0;
+	m.addClause(c);
+	c = Here_will_C0R_mvN0      or not(Here_will_C1R_mvN0) or Here_will_C2R_mvN0      or Here_will_CR_mvN0;
+	m.addClause(c);
+	c = Here_will_C0R_mvN0      or Here_will_C1R_mvN0      or not(Here_will_C2R_mvN0) or Here_will_CR_mvN0;
+	m.addClause(c);
+	c = not(Here_will_C0R_mvN0) or not(Here_will_C1R_mvN0);
+	m.addClause(c);
+	c = not(Here_will_C0R_mvN0) or not(Here_will_C2R_mvN0);
+	m.addClause(c);
+	c = not(Here_will_C1R_mvN0) or not(Here_will_C2R_mvN0);
+	m.addClause(c);
 
-        const GRBLinExpr Here_will_CR_mvS1 = ( Here_will_C0R_mvS1 + Here_will_C1R_mvS1 + Here_will_C2R_mvS1 );
-        const GRBLinExpr Here_will_CR_mvS2 = ( Here_will_C0R_mvS2 + Here_will_C1R_mvS2 + Here_will_C2R_mvS2 );
-        const GRBLinExpr Here_will_CR_mvS3 = ( Here_will_C0R_mvS3 + Here_will_C1R_mvS3 + Here_will_C2R_mvS3 );
-        const GRBLinExpr Here_will_CR_mvS0 = ( Here_will_C0R_mvS0 + Here_will_C1R_mvS0 + Here_will_C2R_mvS0 );
 
-        const GRBLinExpr E_will_nobodyhome= var( G.east(v),    t+1,    NdStat::nobodyhome);
-        const GRBLinExpr E_will_R_ready   = var( G.east(v),    t+1,    NdStat::R_ready);
-        const GRBLinExpr E_will_R_accE    = var( G.east(v),    t+1,    R_Move::accE);
-        const GRBLinExpr E_will_R_mvE0    = var( G.east(v),    t+1,    R_Move::mvE0);
-        const GRBLinExpr E_will_R_accW    = var( G.east(v),    t+1,    R_Move::accW);
-        const GRBLinExpr E_will_R_mvW0    = var( G.east(v),    t+1,    R_Move::mvW0);
-        const GRBLinExpr E_will_C0R_ready = var( G.east(v),    t+1,    NdStat::C0R_ready);
-        const GRBLinExpr E_will_C0R_accE  = var( G.east(v),    t+1,    R_Move::w0_accE);
-        const GRBLinExpr E_will_C0R_mvE1  = var( G.east(v),    t+1,    R_Move::w0_mvE1);
-        const GRBLinExpr E_will_C0R_mvE0  = var( G.east(v),    t+1,    R_Move::w0_mvE0);
-        const GRBLinExpr E_will_C0R_accW  = var( G.east(v),    t+1,    R_Move::w0_accW);
-        const GRBLinExpr E_will_C0R_mvW1  = var( G.east(v),    t+1,    R_Move::w0_mvW1);
-        const GRBLinExpr E_will_C0R_mvW0  = var( G.east(v),    t+1,    R_Move::w0_mvW0);
-        const GRBLinExpr E_will_C1R_ready = var( G.east(v),    t+1,    NdStat::C1R_ready);
-        const GRBLinExpr E_will_C1R_accE  = var( G.east(v),    t+1,    R_Move::w1_accE);
-        const GRBLinExpr E_will_C1R_mvE1  = var( G.east(v),    t+1,    R_Move::w1_mvE1);
-        const GRBLinExpr E_will_C1R_mvE0  = var( G.east(v),    t+1,    R_Move::w1_mvE0);
-        const GRBLinExpr E_will_C1R_accW  = var( G.east(v),    t+1,    R_Move::w1_accW);
-        const GRBLinExpr E_will_C1R_mvW1  = var( G.east(v),    t+1,    R_Move::w1_mvW1);
-        const GRBLinExpr E_will_C1R_mvW0  = var( G.east(v),    t+1,    R_Move::w1_mvW0);
-        const GRBLinExpr E_will_C2R_ready = var( G.east(v),    t+1,    NdStat::C2R_ready);
-        const GRBLinExpr E_will_C2R_accE  = var( G.east(v),    t+1,    R_Move::w2_accE);
-        const GRBLinExpr E_will_C2R_mvE1  = var( G.east(v),    t+1,    R_Move::w2_mvE1);
-        const GRBLinExpr E_will_C2R_mvE0  = var( G.east(v),    t+1,    R_Move::w2_mvE0);
-        const GRBLinExpr E_will_C2R_accW  = var( G.east(v),    t+1,    R_Move::w2_accW);
-        const GRBLinExpr E_will_C2R_mvW1  = var( G.east(v),    t+1,    R_Move::w2_mvW1);
-        const GRBLinExpr E_will_C2R_mvW0  = var( G.east(v),    t+1,    R_Move::w2_mvW0);
+	CNF::Var Here_will_CR_mvS1;
+	// neccessarly
+	c = not(Here_will_CR_mvS1)  or Here_will_C0R_mvS1      or Here_will_C1R_mvS1      or Here_will_C2R_mvS1;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_mvS1) or Here_will_C1R_mvS1      or Here_will_C2R_mvS1      or Here_will_CR_mvS1;
+	m.addClause(c);
+	c = Here_will_C0R_mvS1      or not(Here_will_C1R_mvS1) or Here_will_C2R_mvS1      or Here_will_CR_mvS1;
+	m.addClause(c);
+	c = Here_will_C0R_mvS1      or Here_will_C1R_mvS1      or not(Here_will_C2R_mvS1) or Here_will_CR_mvS1;
+	m.addClause(c);
+	c = not(Here_will_C0R_mvS1) or not(Here_will_C1R_mvS1);
+	m.addClause(c);
+	c = not(Here_will_C0R_mvS1) or not(Here_will_C2R_mvS1);
+	m.addClause(c);
+	c = not(Here_will_C1R_mvS1) or not(Here_will_C2R_mvS1);
+	m.addClause(c);
+	CNF::Var Here_will_CR_mvS2;
+	// neccessarly
+	c = not(Here_will_CR_mvS2)  or Here_will_C0R_mvS2      or Here_will_C1R_mvS2      or Here_will_C2R_mvS2;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_mvS2) or Here_will_C1R_mvS2      or Here_will_C2R_mvS2      or Here_will_CR_mvS2;
+	m.addClause(c);
+	c = Here_will_C0R_mvS2      or not(Here_will_C1R_mvS2) or Here_will_C2R_mvS2      or Here_will_CR_mvS2;
+	m.addClause(c);
+	c = Here_will_C0R_mvS2      or Here_will_C1R_mvS2      or not(Here_will_C2R_mvS2) or Here_will_CR_mvS2;
+	m.addClause(c);
+	c = not(Here_will_C0R_mvS2) or not(Here_will_C1R_mvS2);
+	m.addClause(c);
+	c = not(Here_will_C0R_mvS2) or not(Here_will_C2R_mvS2);
+	m.addClause(c);
+	c = not(Here_will_C1R_mvS2) or not(Here_will_C2R_mvS2);
+	m.addClause(c);
+	CNF::Var Here_will_CR_mvS3;
+	// neccessarly
+	c = not(Here_will_CR_mvS3)  or Here_will_C0R_mvS3      or Here_will_C1R_mvS3      or Here_will_C2R_mvS3;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_mvS3) or Here_will_C1R_mvS3      or Here_will_C2R_mvS3      or Here_will_CR_mvS3;
+	m.addClause(c);
+	c = Here_will_C0R_mvS3      or not(Here_will_C1R_mvS3) or Here_will_C2R_mvS3      or Here_will_CR_mvS3;
+	m.addClause(c);
+	c = Here_will_C0R_mvS3      or Here_will_C1R_mvS3      or not(Here_will_C2R_mvS3) or Here_will_CR_mvS3;
+	m.addClause(c);
+	c = not(Here_will_C0R_mvS3) or not(Here_will_C1R_mvS3);
+	m.addClause(c);
+	c = not(Here_will_C0R_mvS3) or not(Here_will_C2R_mvS3);
+	m.addClause(c);
+	c = not(Here_will_C1R_mvS3) or not(Here_will_C2R_mvS3);
+	m.addClause(c);
+	CNF::Var Here_will_CR_mvS0;
+	// neccessarly
+	c = not(Here_will_CR_mvS0)  or Here_will_C0R_mvS0      or Here_will_C1R_mvS0      or Here_will_C2R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_mvS0) or Here_will_C1R_mvS0      or Here_will_C2R_mvS0      or Here_will_CR_mvS0;
+	m.addClause(c);
+	c = Here_will_C0R_mvS0      or not(Here_will_C1R_mvS0) or Here_will_C2R_mvS0      or Here_will_CR_mvS0;
+	m.addClause(c);
+	c = Here_will_C0R_mvS0      or Here_will_C1R_mvS0      or not(Here_will_C2R_mvS0) or Here_will_CR_mvS0;
+	m.addClause(c);
+	c = not(Here_will_C0R_mvS0) or not(Here_will_C1R_mvS0);
+	m.addClause(c);
+	c = not(Here_will_C0R_mvS0) or not(Here_will_C2R_mvS0);
+	m.addClause(c);
+	c = not(Here_will_C1R_mvS0) or not(Here_will_C2R_mvS0);
+	m.addClause(c);
+
+
+	CNF::Var E_will_nobodyhome= var( G.east(v),    t+1,    NdStat::nobodyhome);
+	CNF::Var E_will_R_ready   = var( G.east(v),    t+1,    NdStat::R_ready);
+	CNF::Var E_will_R_accE    = var( G.east(v),    t+1,    R_Move::accE);
+	CNF::Var E_will_R_mvE0    = var( G.east(v),    t+1,    R_Move::mvE0);
+	CNF::Var E_will_R_accW    = var( G.east(v),    t+1,    R_Move::accW);
+	CNF::Var E_will_R_mvW0    = var( G.east(v),    t+1,    R_Move::mvW0);
+	CNF::Var E_will_C0R_ready = var( G.east(v),    t+1,    NdStat::C0R_ready);
+	CNF::Var E_will_C0R_accE  = var( G.east(v),    t+1,    R_Move::w0_accE);
+	CNF::Var E_will_C0R_mvE1  = var( G.east(v),    t+1,    R_Move::w0_mvE1);
+	CNF::Var E_will_C0R_mvE0  = var( G.east(v),    t+1,    R_Move::w0_mvE0);
+	CNF::Var E_will_C0R_accW  = var( G.east(v),    t+1,    R_Move::w0_accW);
+	CNF::Var E_will_C0R_mvW1  = var( G.east(v),    t+1,    R_Move::w0_mvW1);
+	CNF::Var E_will_C0R_mvW0  = var( G.east(v),    t+1,    R_Move::w0_mvW0);
+	CNF::Var E_will_C1R_ready = var( G.east(v),    t+1,    NdStat::C1R_ready);
+	CNF::Var E_will_C1R_accE  = var( G.east(v),    t+1,    R_Move::w1_accE);
+	CNF::Var E_will_C1R_mvE1  = var( G.east(v),    t+1,    R_Move::w1_mvE1);
+	CNF::Var E_will_C1R_mvE0  = var( G.east(v),    t+1,    R_Move::w1_mvE0);
+	CNF::Var E_will_C1R_accW  = var( G.east(v),    t+1,    R_Move::w1_accW);
+	CNF::Var E_will_C1R_mvW1  = var( G.east(v),    t+1,    R_Move::w1_mvW1);
+	CNF::Var E_will_C1R_mvW0  = var( G.east(v),    t+1,    R_Move::w1_mvW0);
+	CNF::Var E_will_C2R_ready = var( G.east(v),    t+1,    NdStat::C2R_ready);
+	CNF::Var E_will_C2R_accE  = var( G.east(v),    t+1,    R_Move::w2_accE);
+	CNF::Var E_will_C2R_mvE1  = var( G.east(v),    t+1,    R_Move::w2_mvE1);
+	CNF::Var E_will_C2R_mvE0  = var( G.east(v),    t+1,    R_Move::w2_mvE0);
+	CNF::Var E_will_C2R_accW  = var( G.east(v),    t+1,    R_Move::w2_accW);
+	CNF::Var E_will_C2R_mvW1  = var( G.east(v),    t+1,    R_Move::w2_mvW1);
+	CNF::Var E_will_C2R_mvW0  = var( G.east(v),    t+1,    R_Move::w2_mvW0);
 
         // Abbreviations
-        const GRBLinExpr E_will_CR_mvE1 = ( E_will_C0R_mvE1 + E_will_C1R_mvE1 + E_will_C2R_mvE1 );
-        const GRBLinExpr E_will_CR_mvE0 = ( E_will_C0R_mvE0 + E_will_C1R_mvE0 + E_will_C2R_mvE0 );
+	CNF::Var E_will_CR_mvE1;
+	// neccessarly
+	c = not(E_will_CR_mvE1)  or E_will_C0R_mvE1      or E_will_C1R_mvE1      or E_will_C2R_mvE1;
+	m.addClause(c);
+	// sufficient
+	c = not(E_will_C0R_mvE1) or E_will_C1R_mvE1      or E_will_C2R_mvE1      or E_will_CR_mvE1;
+	m.addClause(c);
+	c = E_will_C0R_mvE1      or not(E_will_C1R_mvE1) or E_will_C2R_mvE1      or E_will_CR_mvE1;
+	m.addClause(c);
+	c = E_will_C0R_mvE1      or E_will_C1R_mvE1      or not(E_will_C2R_mvE1) or E_will_CR_mvE1;
+	m.addClause(c);
+	c = not(E_will_C0R_mvE1) or not(E_will_C1R_mvE1);
+	m.addClause(c);
+	c = not(E_will_C0R_mvE1) or not(E_will_C2R_mvE1);
+	m.addClause(c);
+	c = not(E_will_C1R_mvE1) or not(E_will_C2R_mvE1);
+	m.addClause(c);
+	CNF::Var E_will_CR_mvE0;
+	// neccessarly
+	c = not(E_will_CR_mvE0)  or E_will_C0R_mvE0      or E_will_C1R_mvE0      or E_will_C2R_mvE0;
+	m.addClause(c);
+	// sufficient
+	c = not(E_will_C0R_mvE0) or E_will_C1R_mvE0      or E_will_C2R_mvE0      or E_will_CR_mvE0;
+	m.addClause(c);
+	c = E_will_C0R_mvE0      or not(E_will_C1R_mvE0) or E_will_C2R_mvE0      or E_will_CR_mvE0;
+	m.addClause(c);
+	c = E_will_C0R_mvE0      or E_will_C1R_mvE0      or not(E_will_C2R_mvE0) or E_will_CR_mvE0;
+	m.addClause(c);
+	c = not(E_will_C0R_mvE0) or not(E_will_C1R_mvE0);
+	m.addClause(c);
+	c = not(E_will_C0R_mvE0) or not(E_will_C2R_mvE0);
+	m.addClause(c);
+	c = not(E_will_C1R_mvE0) or not(E_will_C2R_mvE0);
+	m.addClause(c);
 
-        const GRBLinExpr E_will_CR_accW = ( E_will_C0R_accW + E_will_C1R_accW + E_will_C2R_accW );
-        const GRBLinExpr E_will_CR_mvW1 = ( E_will_C0R_mvW1 + E_will_C1R_mvW1 + E_will_C2R_mvW1 );
-        const GRBLinExpr E_will_CR_mvW0 = ( E_will_C0R_mvW0 + E_will_C1R_mvW0 + E_will_C2R_mvW0 );
+	CNF::Var E_will_CR_accW;
+	// neccessarly
+	c = not(E_will_CR_accW)  or E_will_C0R_accW      or E_will_C1R_accW      or E_will_C2R_accW;
+	m.addClause(c);
+	// sufficient
+	c = not(E_will_C0R_accW) or E_will_C1R_accW      or E_will_C2R_accW      or E_will_CR_accW;
+	m.addClause(c);
+	c = E_will_C0R_accW      or not(E_will_C1R_accW) or E_will_C2R_accW      or E_will_CR_accW;
+	m.addClause(c);
+	c = E_will_C0R_accW      or E_will_C1R_accW      or not(E_will_C2R_accW) or E_will_CR_accW;
+	m.addClause(c);
+	c = not(E_will_C0R_accW) or not(E_will_C1R_accW);
+	m.addClause(c);
+	c = not(E_will_C0R_accW) or not(E_will_C2R_accW);
+	m.addClause(c);
+	c = not(E_will_C1R_accW) or not(E_will_C2R_accW);
+	m.addClause(c);
+	CNF::Var E_will_CR_mvW1;
+	// neccessarly
+	c = not(E_will_CR_mvW1)  or E_will_C0R_mvW1      or E_will_C1R_mvW1      or E_will_C2R_mvW1;
+	m.addClause(c);
+	// sufficient
+	c = not(E_will_C0R_mvW1) or E_will_C1R_mvW1      or E_will_C2R_mvW1      or E_will_CR_mvW1;
+	m.addClause(c);
+	c = E_will_C0R_mvW1      or not(E_will_C1R_mvW1) or E_will_C2R_mvW1      or E_will_CR_mvW1;
+	m.addClause(c);
+	c = E_will_C0R_mvW1      or E_will_C1R_mvW1      or not(E_will_C2R_mvW1) or E_will_CR_mvW1;
+	m.addClause(c);
+	c = not(E_will_C0R_mvW1) or not(E_will_C1R_mvW1);
+	m.addClause(c);
+	c = not(E_will_C0R_mvW1) or not(E_will_C2R_mvW1);
+	m.addClause(c);
+	c = not(E_will_C1R_mvW1) or not(E_will_C2R_mvW1);
+	m.addClause(c);
+	CNF::Var E_will_CR_mvW0;
+	// neccessarly
+	c = not(E_will_CR_mvW0)  or E_will_C0R_mvW0      or E_will_C1R_mvW0      or E_will_C2R_mvW0;
+	m.addClause(c);
+	// sufficient
+	c = not(E_will_C0R_mvW0) or E_will_C1R_mvW0      or E_will_C2R_mvW0      or E_will_CR_mvW0;
+	m.addClause(c);
+	c = E_will_C0R_mvW0      or not(E_will_C1R_mvW0) or E_will_C2R_mvW0      or E_will_CR_mvW0;
+	m.addClause(c);
+	c = E_will_C0R_mvW0      or E_will_C1R_mvW0      or not(E_will_C2R_mvW0) or E_will_CR_mvW0;
+	m.addClause(c);
+	c = not(E_will_C0R_mvW0) or not(E_will_C1R_mvW0);
+	m.addClause(c);
+	c = not(E_will_C0R_mvW0) or not(E_will_C2R_mvW0);
+	m.addClause(c);
+	c = not(E_will_C1R_mvW0) or not(E_will_C2R_mvW0);
+	m.addClause(c);
 
 
-
-        const GRBLinExpr N_will_nobodyhome= var( G.north(v),    t+1,    NdStat::nobodyhome);
-        const GRBLinExpr N_will_R_ready   = var( G.north(v),    t+1,    NdStat::R_ready);
-        const GRBLinExpr N_will_R_accN    = var( G.north(v),    t+1,    R_Move::accN);
-        const GRBLinExpr N_will_R_mvN1    = var( G.north(v),    t+1,    R_Move::mvN1);
-        const GRBLinExpr N_will_R_mvN0    = var( G.north(v),    t+1,    R_Move::mvN0);
-        const GRBLinExpr N_will_R_accS    = var( G.north(v),    t+1,    R_Move::accS);
-        const GRBLinExpr N_will_R_mvS1    = var( G.north(v),    t+1,    R_Move::mvS1);
-        const GRBLinExpr N_will_R_mvS0    = var( G.north(v),    t+1,    R_Move::mvS0);
-        const GRBLinExpr N_will_C0R_ready = var( G.north(v),    t+1,    NdStat::C0R_ready);
-        const GRBLinExpr N_will_C0R_accN  = var( G.north(v),    t+1,    R_Move::w0_accN);
-        const GRBLinExpr N_will_C0R_mvN1  = var( G.north(v),    t+1,    R_Move::w0_mvN1);
-        const GRBLinExpr N_will_C0R_mvN2  = var( G.north(v),    t+1,    R_Move::w0_mvN2);
-        const GRBLinExpr N_will_C0R_mvN3  = var( G.north(v),    t+1,    R_Move::w0_mvN3);
-        const GRBLinExpr N_will_C0R_mvN0  = var( G.north(v),    t+1,    R_Move::w0_mvN0);
-        const GRBLinExpr N_will_C0R_accS  = var( G.north(v),    t+1,    R_Move::w0_accS);
-        const GRBLinExpr N_will_C0R_mvS1  = var( G.north(v),    t+1,    R_Move::w0_mvS1);
-        const GRBLinExpr N_will_C0R_mvS2  = var( G.north(v),    t+1,    R_Move::w0_mvS2);
-        const GRBLinExpr N_will_C0R_mvS3  = var( G.north(v),    t+1,    R_Move::w0_mvS3);
-        const GRBLinExpr N_will_C0R_mvS0  = var( G.north(v),    t+1,    R_Move::w0_mvS0);
-        const GRBLinExpr N_will_C1R_ready = var( G.north(v),    t+1,    NdStat::C1R_ready);
-        const GRBLinExpr N_will_C1R_accN  = var( G.north(v),    t+1,    R_Move::w1_accN);
-        const GRBLinExpr N_will_C1R_mvN1  = var( G.north(v),    t+1,    R_Move::w1_mvN1);
-        const GRBLinExpr N_will_C1R_mvN2  = var( G.north(v),    t+1,    R_Move::w1_mvN2);
-        const GRBLinExpr N_will_C1R_mvN3  = var( G.north(v),    t+1,    R_Move::w1_mvN3);
-        const GRBLinExpr N_will_C1R_mvN0  = var( G.north(v),    t+1,    R_Move::w1_mvN0);
-        const GRBLinExpr N_will_C1R_accS  = var( G.north(v),    t+1,    R_Move::w1_accS);
-        const GRBLinExpr N_will_C1R_mvS1  = var( G.north(v),    t+1,    R_Move::w1_mvS1);
-        const GRBLinExpr N_will_C1R_mvS2  = var( G.north(v),    t+1,    R_Move::w1_mvS2);
-        const GRBLinExpr N_will_C1R_mvS3  = var( G.north(v),    t+1,    R_Move::w1_mvS3);
-        const GRBLinExpr N_will_C1R_mvS0  = var( G.north(v),    t+1,    R_Move::w1_mvS0);
-        const GRBLinExpr N_will_C2R_ready = var( G.north(v),    t+1,    NdStat::C2R_ready);
-        const GRBLinExpr N_will_C2R_accN  = var( G.north(v),    t+1,    R_Move::w2_accN);
-        const GRBLinExpr N_will_C2R_mvN1  = var( G.north(v),    t+1,    R_Move::w2_mvN1);
-        const GRBLinExpr N_will_C2R_mvN2  = var( G.north(v),    t+1,    R_Move::w2_mvN2);
-        const GRBLinExpr N_will_C2R_mvN3  = var( G.north(v),    t+1,    R_Move::w2_mvN3);
-        const GRBLinExpr N_will_C2R_mvN0  = var( G.north(v),    t+1,    R_Move::w2_mvN0);
-        const GRBLinExpr N_will_C2R_accS  = var( G.north(v),    t+1,    R_Move::w2_accS);
-        const GRBLinExpr N_will_C2R_mvS1  = var( G.north(v),    t+1,    R_Move::w2_mvS1);
-        const GRBLinExpr N_will_C2R_mvS2  = var( G.north(v),    t+1,    R_Move::w2_mvS2);
-        const GRBLinExpr N_will_C2R_mvS3  = var( G.north(v),    t+1,    R_Move::w2_mvS3);
-        const GRBLinExpr N_will_C2R_mvS0  = var( G.north(v),    t+1,    R_Move::w2_mvS0);
-
-        // Abbreviations
-        const GRBLinExpr N_will_CR_accN = ( N_will_C0R_accN + N_will_C1R_accN + N_will_C2R_accN );
-        const GRBLinExpr N_will_CR_mvN1 = ( N_will_C0R_mvN1 + N_will_C1R_mvN1 + N_will_C2R_mvN1 );
-        const GRBLinExpr N_will_CR_mvN2 = ( N_will_C0R_mvN2 + N_will_C1R_mvN2 + N_will_C2R_mvN2 );
-        const GRBLinExpr N_will_CR_mvN3 = ( N_will_C0R_mvN3 + N_will_C1R_mvN3 + N_will_C2R_mvN3 );
-        const GRBLinExpr N_will_CR_mvN0 = ( N_will_C0R_mvN0 + N_will_C1R_mvN0 + N_will_C2R_mvN0 );
-
-        const GRBLinExpr N_will_CR_accS = ( N_will_C0R_accS + N_will_C1R_accS + N_will_C2R_accS );
-        const GRBLinExpr N_will_CR_mvS1 = ( N_will_C0R_mvS1 + N_will_C1R_mvS1 + N_will_C2R_mvS1 );
-        const GRBLinExpr N_will_CR_mvS2 = ( N_will_C0R_mvS2 + N_will_C1R_mvS2 + N_will_C2R_mvS2 );
-        const GRBLinExpr N_will_CR_mvS3 = ( N_will_C0R_mvS3 + N_will_C1R_mvS3 + N_will_C2R_mvS3 );
-        const GRBLinExpr N_will_CR_mvS0 = ( N_will_C0R_mvS0 + N_will_C1R_mvS0 + N_will_C2R_mvS0 );
-
-        const GRBLinExpr W_will_nobodyhome= var( G.west(v),    t+1,    NdStat::nobodyhome);
-        const GRBLinExpr W_will_R_ready   = var( G.west(v),    t+1,    NdStat::R_ready);
-        const GRBLinExpr W_will_R_accE    = var( G.west(v),    t+1,    R_Move::accE);
-        const GRBLinExpr W_will_R_mvE0    = var( G.west(v),    t+1,    R_Move::mvE0);
-        const GRBLinExpr W_will_R_accW    = var( G.west(v),    t+1,    R_Move::accW);
-        const GRBLinExpr W_will_R_mvW0    = var( G.west(v),    t+1,    R_Move::mvW0);
-        const GRBLinExpr W_will_C0R_ready = var( G.west(v),    t+1,    NdStat::C0R_ready);
-        const GRBLinExpr W_will_C0R_accE  = var( G.west(v),    t+1,    R_Move::w0_accE);
-        const GRBLinExpr W_will_C0R_mvE1  = var( G.west(v),    t+1,    R_Move::w0_mvE1);
-        const GRBLinExpr W_will_C0R_mvE0  = var( G.west(v),    t+1,    R_Move::w0_mvE0);
-        const GRBLinExpr W_will_C0R_accW  = var( G.west(v),    t+1,    R_Move::w0_accW);
-        const GRBLinExpr W_will_C0R_mvW1  = var( G.west(v),    t+1,    R_Move::w0_mvW1);
-        const GRBLinExpr W_will_C0R_mvW0  = var( G.west(v),    t+1,    R_Move::w0_mvW0);
-        const GRBLinExpr W_will_C1R_ready = var( G.west(v),    t+1,    NdStat::C1R_ready);
-        const GRBLinExpr W_will_C1R_accE  = var( G.west(v),    t+1,    R_Move::w1_accE);
-        const GRBLinExpr W_will_C1R_mvE1  = var( G.west(v),    t+1,    R_Move::w1_mvE1);
-        const GRBLinExpr W_will_C1R_mvE0  = var( G.west(v),    t+1,    R_Move::w1_mvE0);
-        const GRBLinExpr W_will_C1R_accW  = var( G.west(v),    t+1,    R_Move::w1_accW);
-        const GRBLinExpr W_will_C1R_mvW1  = var( G.west(v),    t+1,    R_Move::w1_mvW1);
-        const GRBLinExpr W_will_C1R_mvW0  = var( G.west(v),    t+1,    R_Move::w1_mvW0);
-        const GRBLinExpr W_will_C2R_ready = var( G.west(v),    t+1,    NdStat::C2R_ready);
-        const GRBLinExpr W_will_C2R_accE  = var( G.west(v),    t+1,    R_Move::w2_accE);
-        const GRBLinExpr W_will_C2R_mvE1  = var( G.west(v),    t+1,    R_Move::w2_mvE1);
-        const GRBLinExpr W_will_C2R_mvE0  = var( G.west(v),    t+1,    R_Move::w2_mvE0);
-        const GRBLinExpr W_will_C2R_accW  = var( G.west(v),    t+1,    R_Move::w2_accW);
-        const GRBLinExpr W_will_C2R_mvW1  = var( G.west(v),    t+1,    R_Move::w2_mvW1);
-        const GRBLinExpr W_will_C2R_mvW0  = var( G.west(v),    t+1,    R_Move::w2_mvW0);
-
-        // Abbreviations
-        const GRBLinExpr W_will_CR_accE = ( W_will_C0R_accE + W_will_C1R_accE + W_will_C2R_accE );
-        const GRBLinExpr W_will_CR_mvE1 = ( W_will_C0R_mvE1 + W_will_C1R_mvE1 + W_will_C2R_mvE1 );
-        const GRBLinExpr W_will_CR_mvE0 = ( W_will_C0R_mvE0 + W_will_C1R_mvE0 + W_will_C2R_mvE0 );
-
-        const GRBLinExpr W_will_CR_mvW1 = ( W_will_C0R_mvW1 + W_will_C1R_mvW1 + W_will_C2R_mvW1 );
-        const GRBLinExpr W_will_CR_mvW0 = ( W_will_C0R_mvW0 + W_will_C1R_mvW0 + W_will_C2R_mvW0 );
-
-        const GRBLinExpr S_will_nobodyhome= var( G.south(v),    t+1,    NdStat::nobodyhome);
-        const GRBLinExpr S_will_R_ready   = var( G.south(v),    t+1,    NdStat::R_ready);
-        const GRBLinExpr S_will_R_accN    = var( G.south(v),    t+1,    R_Move::accN);
-        const GRBLinExpr S_will_R_mvN1    = var( G.south(v),    t+1,    R_Move::mvN1);
-        const GRBLinExpr S_will_R_mvN0    = var( G.south(v),    t+1,    R_Move::mvN0);
-        const GRBLinExpr S_will_R_accS    = var( G.south(v),    t+1,    R_Move::accS);
-        const GRBLinExpr S_will_R_mvS1    = var( G.south(v),    t+1,    R_Move::mvS1);
-        const GRBLinExpr S_will_R_mvS0    = var( G.south(v),    t+1,    R_Move::mvS0);
-        const GRBLinExpr S_will_C0R_ready = var( G.south(v),    t+1,    NdStat::C0R_ready);
-        const GRBLinExpr S_will_C0R_accN  = var( G.south(v),    t+1,    R_Move::w0_accN);
-        const GRBLinExpr S_will_C0R_mvN1  = var( G.south(v),    t+1,    R_Move::w0_mvN1);
-        const GRBLinExpr S_will_C0R_mvN2  = var( G.south(v),    t+1,    R_Move::w0_mvN2);
-        const GRBLinExpr S_will_C0R_mvN3  = var( G.south(v),    t+1,    R_Move::w0_mvN3);
-        const GRBLinExpr S_will_C0R_mvN0  = var( G.south(v),    t+1,    R_Move::w0_mvN0);
-        const GRBLinExpr S_will_C0R_accS  = var( G.south(v),    t+1,    R_Move::w0_accS);
-        const GRBLinExpr S_will_C0R_mvS1  = var( G.south(v),    t+1,    R_Move::w0_mvS1);
-        const GRBLinExpr S_will_C0R_mvS2  = var( G.south(v),    t+1,    R_Move::w0_mvS2);
-        const GRBLinExpr S_will_C0R_mvS3  = var( G.south(v),    t+1,    R_Move::w0_mvS3);
-        const GRBLinExpr S_will_C0R_mvS0  = var( G.south(v),    t+1,    R_Move::w0_mvS0);
-        const GRBLinExpr S_will_C1R_ready = var( G.south(v),    t+1,    NdStat::C1R_ready);
-        const GRBLinExpr S_will_C1R_accN  = var( G.south(v),    t+1,    R_Move::w1_accN);
-        const GRBLinExpr S_will_C1R_mvN1  = var( G.south(v),    t+1,    R_Move::w1_mvN1);
-        const GRBLinExpr S_will_C1R_mvN2  = var( G.south(v),    t+1,    R_Move::w1_mvN2);
-        const GRBLinExpr S_will_C1R_mvN3  = var( G.south(v),    t+1,    R_Move::w1_mvN3);
-        const GRBLinExpr S_will_C1R_mvN0  = var( G.south(v),    t+1,    R_Move::w1_mvN0);
-        const GRBLinExpr S_will_C1R_accS  = var( G.south(v),    t+1,    R_Move::w1_accS);
-        const GRBLinExpr S_will_C1R_mvS1  = var( G.south(v),    t+1,    R_Move::w1_mvS1);
-        const GRBLinExpr S_will_C1R_mvS2  = var( G.south(v),    t+1,    R_Move::w1_mvS2);
-        const GRBLinExpr S_will_C1R_mvS3  = var( G.south(v),    t+1,    R_Move::w1_mvS3);
-        const GRBLinExpr S_will_C1R_mvS0  = var( G.south(v),    t+1,    R_Move::w1_mvS0);
-        const GRBLinExpr S_will_C2R_ready = var( G.south(v),    t+1,    NdStat::C2R_ready);
-        const GRBLinExpr S_will_C2R_accN  = var( G.south(v),    t+1,    R_Move::w2_accN);
-        const GRBLinExpr S_will_C2R_mvN1  = var( G.south(v),    t+1,    R_Move::w2_mvN1);
-        const GRBLinExpr S_will_C2R_mvN2  = var( G.south(v),    t+1,    R_Move::w2_mvN2);
-        const GRBLinExpr S_will_C2R_mvN3  = var( G.south(v),    t+1,    R_Move::w2_mvN3);
-        const GRBLinExpr S_will_C2R_mvN0  = var( G.south(v),    t+1,    R_Move::w2_mvN0);
-        const GRBLinExpr S_will_C2R_accS  = var( G.south(v),    t+1,    R_Move::w2_accS);
-        const GRBLinExpr S_will_C2R_mvS1  = var( G.south(v),    t+1,    R_Move::w2_mvS1);
-        const GRBLinExpr S_will_C2R_mvS2  = var( G.south(v),    t+1,    R_Move::w2_mvS2);
-        const GRBLinExpr S_will_C2R_mvS3  = var( G.south(v),    t+1,    R_Move::w2_mvS3);
-        const GRBLinExpr S_will_C2R_mvS0  = var( G.south(v),    t+1,    R_Move::w2_mvS0);
+	CNF::Var N_will_nobodyhome= var( G.north(v),    t+1,    NdStat::nobodyhome);
+	CNF::Var N_will_R_ready   = var( G.north(v),    t+1,    NdStat::R_ready);
+	CNF::Var N_will_R_accN    = var( G.north(v),    t+1,    R_Move::accN);
+	CNF::Var N_will_R_mvN1    = var( G.north(v),    t+1,    R_Move::mvN1);
+	CNF::Var N_will_R_mvN0    = var( G.north(v),    t+1,    R_Move::mvN0);
+	CNF::Var N_will_R_accS    = var( G.north(v),    t+1,    R_Move::accS);
+	CNF::Var N_will_R_mvS1    = var( G.north(v),    t+1,    R_Move::mvS1);
+	CNF::Var N_will_R_mvS0    = var( G.north(v),    t+1,    R_Move::mvS0);
+	CNF::Var N_will_C0R_ready = var( G.north(v),    t+1,    NdStat::C0R_ready);
+	CNF::Var N_will_C0R_accN  = var( G.north(v),    t+1,    R_Move::w0_accN);
+	CNF::Var N_will_C0R_mvN1  = var( G.north(v),    t+1,    R_Move::w0_mvN1);
+	CNF::Var N_will_C0R_mvN2  = var( G.north(v),    t+1,    R_Move::w0_mvN2);
+	CNF::Var N_will_C0R_mvN3  = var( G.north(v),    t+1,    R_Move::w0_mvN3);
+	CNF::Var N_will_C0R_mvN0  = var( G.north(v),    t+1,    R_Move::w0_mvN0);
+	CNF::Var N_will_C0R_accS  = var( G.north(v),    t+1,    R_Move::w0_accS);
+	CNF::Var N_will_C0R_mvS1  = var( G.north(v),    t+1,    R_Move::w0_mvS1);
+	CNF::Var N_will_C0R_mvS2  = var( G.north(v),    t+1,    R_Move::w0_mvS2);
+	CNF::Var N_will_C0R_mvS3  = var( G.north(v),    t+1,    R_Move::w0_mvS3);
+	CNF::Var N_will_C0R_mvS0  = var( G.north(v),    t+1,    R_Move::w0_mvS0);
+	CNF::Var N_will_C1R_ready = var( G.north(v),    t+1,    NdStat::C1R_ready);
+	CNF::Var N_will_C1R_accN  = var( G.north(v),    t+1,    R_Move::w1_accN);
+	CNF::Var N_will_C1R_mvN1  = var( G.north(v),    t+1,    R_Move::w1_mvN1);
+	CNF::Var N_will_C1R_mvN2  = var( G.north(v),    t+1,    R_Move::w1_mvN2);
+	CNF::Var N_will_C1R_mvN3  = var( G.north(v),    t+1,    R_Move::w1_mvN3);
+	CNF::Var N_will_C1R_mvN0  = var( G.north(v),    t+1,    R_Move::w1_mvN0);
+	CNF::Var N_will_C1R_accS  = var( G.north(v),    t+1,    R_Move::w1_accS);
+	CNF::Var N_will_C1R_mvS1  = var( G.north(v),    t+1,    R_Move::w1_mvS1);
+	CNF::Var N_will_C1R_mvS2  = var( G.north(v),    t+1,    R_Move::w1_mvS2);
+	CNF::Var N_will_C1R_mvS3  = var( G.north(v),    t+1,    R_Move::w1_mvS3);
+	CNF::Var N_will_C1R_mvS0  = var( G.north(v),    t+1,    R_Move::w1_mvS0);
+	CNF::Var N_will_C2R_ready = var( G.north(v),    t+1,    NdStat::C2R_ready);
+	CNF::Var N_will_C2R_accN  = var( G.north(v),    t+1,    R_Move::w2_accN);
+	CNF::Var N_will_C2R_mvN1  = var( G.north(v),    t+1,    R_Move::w2_mvN1);
+	CNF::Var N_will_C2R_mvN2  = var( G.north(v),    t+1,    R_Move::w2_mvN2);
+	CNF::Var N_will_C2R_mvN3  = var( G.north(v),    t+1,    R_Move::w2_mvN3);
+	CNF::Var N_will_C2R_mvN0  = var( G.north(v),    t+1,    R_Move::w2_mvN0);
+	CNF::Var N_will_C2R_accS  = var( G.north(v),    t+1,    R_Move::w2_accS);
+	CNF::Var N_will_C2R_mvS1  = var( G.north(v),    t+1,    R_Move::w2_mvS1);
+	CNF::Var N_will_C2R_mvS2  = var( G.north(v),    t+1,    R_Move::w2_mvS2);
+	CNF::Var N_will_C2R_mvS3  = var( G.north(v),    t+1,    R_Move::w2_mvS3);
+	CNF::Var N_will_C2R_mvS0  = var( G.north(v),    t+1,    R_Move::w2_mvS0);
 
         // Abbreviations
-        const GRBLinExpr S_will_CR_accN = ( S_will_C0R_accN + S_will_C1R_accN + S_will_C2R_accN );
-        const GRBLinExpr S_will_CR_mvN1 = ( S_will_C0R_mvN1 + S_will_C1R_mvN1 + S_will_C2R_mvN1 );
-        const GRBLinExpr S_will_CR_mvN2 = ( S_will_C0R_mvN2 + S_will_C1R_mvN2 + S_will_C2R_mvN2 );
-        const GRBLinExpr S_will_CR_mvN3 = ( S_will_C0R_mvN3 + S_will_C1R_mvN3 + S_will_C2R_mvN3 );
-        const GRBLinExpr S_will_CR_mvN0 = ( S_will_C0R_mvN0 + S_will_C1R_mvN0 + S_will_C2R_mvN0 );
+	CNF::Var N_will_CR_accN;
+	// neccessarly
+	c = not(N_will_CR_accN)  or N_will_C0R_accN      or N_will_C1R_accN      or N_will_C2R_accN;
+	m.addClause(c);
+	// sufficient
+	c = not(N_will_C0R_accN) or N_will_C1R_accN      or N_will_C2R_accN      or N_will_CR_accN;
+	m.addClause(c);
+	c = N_will_C0R_accN      or not(N_will_C1R_accN) or N_will_C2R_accN      or N_will_CR_accN;
+	m.addClause(c);
+	c = N_will_C0R_accN      or N_will_C1R_accN      or not(N_will_C2R_accN) or N_will_CR_accN;
+	m.addClause(c);
+	c = not(N_will_C0R_accN) or not(N_will_C1R_accN);
+	m.addClause(c);
+	c = not(N_will_C0R_accN) or not(N_will_C2R_accN);
+	m.addClause(c);
+	c = not(N_will_C1R_accN) or not(N_will_C2R_accN);
+	m.addClause(c);
+	CNF::Var N_will_CR_mvN1;
+	// neccessarly
+	c = not(N_will_CR_mvN1)  or N_will_C0R_mvN1      or N_will_C1R_mvN1      or N_will_C2R_mvN1;
+	m.addClause(c);
+	// sufficient
+	c = not(N_will_C0R_mvN1) or N_will_C1R_mvN1      or N_will_C2R_mvN1      or N_will_CR_mvN1;
+	m.addClause(c);
+	c = N_will_C0R_mvN1      or not(N_will_C1R_mvN1) or N_will_C2R_mvN1      or N_will_CR_mvN1;
+	m.addClause(c);
+	c = N_will_C0R_mvN1      or N_will_C1R_mvN1      or not(N_will_C2R_mvN1) or N_will_CR_mvN1;
+	m.addClause(c);
+	c = not(N_will_C0R_mvN1) or not(N_will_C1R_mvN1);
+	m.addClause(c);
+	c = not(N_will_C0R_mvN1) or not(N_will_C2R_mvN1);
+	m.addClause(c);
+	c = not(N_will_C1R_mvN1) or not(N_will_C2R_mvN1);
+	m.addClause(c);
+	CNF::Var N_will_CR_mvN2;
+	// neccessarly
+	c = not(N_will_CR_mvN2)  or N_will_C0R_mvN2      or N_will_C1R_mvN2      or N_will_C2R_mvN2;
+	m.addClause(c);
+	// sufficient
+	c = not(N_will_C0R_mvN2) or N_will_C1R_mvN2      or N_will_C2R_mvN2      or N_will_CR_mvN2;
+	m.addClause(c);
+	c = N_will_C0R_mvN2      or not(N_will_C1R_mvN2) or N_will_C2R_mvN2      or N_will_CR_mvN2;
+	m.addClause(c);
+	c = N_will_C0R_mvN2      or N_will_C1R_mvN2      or not(N_will_C2R_mvN2) or N_will_CR_mvN2;
+	m.addClause(c);
+	c = not(N_will_C0R_mvN2) or not(N_will_C1R_mvN2);
+	m.addClause(c);
+	c = not(N_will_C0R_mvN2) or not(N_will_C2R_mvN2);
+	m.addClause(c);
+	c = not(N_will_C1R_mvN2) or not(N_will_C2R_mvN2);
+	m.addClause(c);
+	CNF::Var N_will_CR_mvN3;
+	// neccessarly
+	c = not(N_will_CR_mvN3)  or N_will_C0R_mvN3      or N_will_C1R_mvN3      or N_will_C2R_mvN3;
+	m.addClause(c);
+	// sufficient
+	c = not(N_will_C0R_mvN3) or N_will_C1R_mvN3      or N_will_C2R_mvN3      or N_will_CR_mvN3;
+	m.addClause(c);
+	c = N_will_C0R_mvN3      or not(N_will_C1R_mvN3) or N_will_C2R_mvN3      or N_will_CR_mvN3;
+	m.addClause(c);
+	c = N_will_C0R_mvN3      or N_will_C1R_mvN3      or not(N_will_C2R_mvN3) or N_will_CR_mvN3;
+	m.addClause(c);
+	c = not(N_will_C0R_mvN3) or not(N_will_C1R_mvN3);
+	m.addClause(c);
+	c = not(N_will_C0R_mvN3) or not(N_will_C2R_mvN3);
+	m.addClause(c);
+	c = not(N_will_C1R_mvN3) or not(N_will_C2R_mvN3);
+	m.addClause(c);
+	CNF::Var N_will_CR_mvN0;
+	// neccessarly
+	c = not(N_will_CR_mvN0)  or N_will_C0R_mvN0      or N_will_C1R_mvN0      or N_will_C2R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(N_will_C0R_mvN0) or N_will_C1R_mvN0      or N_will_C2R_mvN0      or N_will_CR_mvN0;
+	m.addClause(c);
+	c = N_will_C0R_mvN0      or not(N_will_C1R_mvN0) or N_will_C2R_mvN0      or N_will_CR_mvN0;
+	m.addClause(c);
+	c = N_will_C0R_mvN0      or N_will_C1R_mvN0      or not(N_will_C2R_mvN0) or N_will_CR_mvN0;
+	m.addClause(c);
+	c = not(N_will_C0R_mvN0) or not(N_will_C1R_mvN0);
+	m.addClause(c);
+	c = not(N_will_C0R_mvN0) or not(N_will_C2R_mvN0);
+	m.addClause(c);
+	c = not(N_will_C1R_mvN0) or not(N_will_C2R_mvN0);
+	m.addClause(c);
 
-        const GRBLinExpr S_will_CR_mvS1 = ( S_will_C0R_mvS1 + S_will_C1R_mvS1 + S_will_C2R_mvS1 );
-        const GRBLinExpr S_will_CR_mvS2 = ( S_will_C0R_mvS2 + S_will_C1R_mvS2 + S_will_C2R_mvS2 );
-        const GRBLinExpr S_will_CR_mvS3 = ( S_will_C0R_mvS3 + S_will_C1R_mvS3 + S_will_C2R_mvS3 );
-        const GRBLinExpr S_will_CR_mvS0 = ( S_will_C0R_mvS0 + S_will_C1R_mvS0 + S_will_C2R_mvS0 );
+	CNF::Var N_will_CR_accS;
+	// neccessarly
+	c = not(N_will_CR_accS)  or N_will_C0R_accS      or N_will_C1R_accS      or N_will_C2R_accS;
+	m.addClause(c);
+	// sufficient
+	c = not(N_will_C0R_accS) or N_will_C1R_accS      or N_will_C2R_accS      or N_will_CR_accS;
+	m.addClause(c);
+	c = N_will_C0R_accS      or not(N_will_C1R_accS) or N_will_C2R_accS      or N_will_CR_accS;
+	m.addClause(c);
+	c = N_will_C0R_accS      or N_will_C1R_accS      or not(N_will_C2R_accS) or N_will_CR_accS;
+	m.addClause(c);
+	c = not(N_will_C0R_accS) or not(N_will_C1R_accS);
+	m.addClause(c);
+	c = not(N_will_C0R_accS) or not(N_will_C2R_accS);
+	m.addClause(c);
+	c = not(N_will_C1R_accS) or not(N_will_C2R_accS);
+	m.addClause(c);
+	CNF::Var N_will_CR_mvS1;
+	// neccessarly
+	c = not(N_will_CR_mvS1)  or N_will_C0R_mvS1      or N_will_C1R_mvS1      or N_will_C2R_mvS1;
+	m.addClause(c);
+	// sufficient
+	c = not(N_will_C0R_mvS1) or N_will_C1R_mvS1      or N_will_C2R_mvS1      or N_will_CR_mvS1;
+	m.addClause(c);
+	c = N_will_C0R_mvS1      or not(N_will_C1R_mvS1) or N_will_C2R_mvS1      or N_will_CR_mvS1;
+	m.addClause(c);
+	c = N_will_C0R_mvS1      or N_will_C1R_mvS1      or not(N_will_C2R_mvS1) or N_will_CR_mvS1;
+	m.addClause(c);
+	c = not(N_will_C0R_mvS1) or not(N_will_C1R_mvS1);
+	m.addClause(c);
+	c = not(N_will_C0R_mvS1) or not(N_will_C2R_mvS1);
+	m.addClause(c);
+	c = not(N_will_C1R_mvS1) or not(N_will_C2R_mvS1);
+	m.addClause(c);
+	CNF::Var N_will_CR_mvS2;
+	// neccessarly
+	c = not(N_will_CR_mvS2)  or N_will_C0R_mvS2      or N_will_C1R_mvS2      or N_will_C2R_mvS2;
+	m.addClause(c);
+	// sufficient
+	c = not(N_will_C0R_mvS2) or N_will_C1R_mvS2      or N_will_C2R_mvS2      or N_will_CR_mvS2;
+	m.addClause(c);
+	c = N_will_C0R_mvS2      or not(N_will_C1R_mvS2) or N_will_C2R_mvS2      or N_will_CR_mvS2;
+	m.addClause(c);
+	c = N_will_C0R_mvS2      or N_will_C1R_mvS2      or not(N_will_C2R_mvS2) or N_will_CR_mvS2;
+	m.addClause(c);
+	c = not(N_will_C0R_mvS2) or not(N_will_C1R_mvS2);
+	m.addClause(c);
+	c = not(N_will_C0R_mvS2) or not(N_will_C2R_mvS2);
+	m.addClause(c);
+	c = not(N_will_C1R_mvS2) or not(N_will_C2R_mvS2);
+	m.addClause(c);
+	CNF::Var N_will_CR_mvS3;
+	// neccessarly
+	c = not(N_will_CR_mvS3)  or N_will_C0R_mvS3      or N_will_C1R_mvS3      or N_will_C2R_mvS3;
+	m.addClause(c);
+	// sufficient
+	c = not(N_will_C0R_mvS3) or N_will_C1R_mvS3      or N_will_C2R_mvS3      or N_will_CR_mvS3;
+	m.addClause(c);
+	c = N_will_C0R_mvS3      or not(N_will_C1R_mvS3) or N_will_C2R_mvS3      or N_will_CR_mvS3;
+	m.addClause(c);
+	c = N_will_C0R_mvS3      or N_will_C1R_mvS3      or not(N_will_C2R_mvS3) or N_will_CR_mvS3;
+	m.addClause(c);
+	c = not(N_will_C0R_mvS3) or not(N_will_C1R_mvS3);
+	m.addClause(c);
+	c = not(N_will_C0R_mvS3) or not(N_will_C2R_mvS3);
+	m.addClause(c);
+	c = not(N_will_C1R_mvS3) or not(N_will_C2R_mvS3);
+	m.addClause(c);
+	CNF::Var N_will_CR_mvS0;
+	// neccessarly
+	c = not(N_will_CR_mvS0)  or N_will_C0R_mvS0      or N_will_C1R_mvS0      or N_will_C2R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(N_will_C0R_mvS0) or N_will_C1R_mvS0      or N_will_C2R_mvS0      or N_will_CR_mvS0;
+	m.addClause(c);
+	c = N_will_C0R_mvS0      or not(N_will_C1R_mvS0) or N_will_C2R_mvS0      or N_will_CR_mvS0;
+	m.addClause(c);
+	c = N_will_C0R_mvS0      or N_will_C1R_mvS0      or not(N_will_C2R_mvS0) or N_will_CR_mvS0;
+	m.addClause(c);
+	c = not(N_will_C0R_mvS0) or not(N_will_C1R_mvS0);
+	m.addClause(c);
+	c = not(N_will_C0R_mvS0) or not(N_will_C2R_mvS0);
+	m.addClause(c);
+	c = not(N_will_C1R_mvS0) or not(N_will_C2R_mvS0);
+	m.addClause(c);
 
 
+	CNF::Var W_will_nobodyhome= var( G.west(v),    t+1,    NdStat::nobodyhome);
+	CNF::Var W_will_R_ready   = var( G.west(v),    t+1,    NdStat::R_ready);
+	CNF::Var W_will_R_accE    = var( G.west(v),    t+1,    R_Move::accE);
+	CNF::Var W_will_R_mvE0    = var( G.west(v),    t+1,    R_Move::mvE0);
+	CNF::Var W_will_R_accW    = var( G.west(v),    t+1,    R_Move::accW);
+	CNF::Var W_will_R_mvW0    = var( G.west(v),    t+1,    R_Move::mvW0);
+	CNF::Var W_will_C0R_ready = var( G.west(v),    t+1,    NdStat::C0R_ready);
+	CNF::Var W_will_C0R_accE  = var( G.west(v),    t+1,    R_Move::w0_accE);
+	CNF::Var W_will_C0R_mvE1  = var( G.west(v),    t+1,    R_Move::w0_mvE1);
+	CNF::Var W_will_C0R_mvE0  = var( G.west(v),    t+1,    R_Move::w0_mvE0);
+	CNF::Var W_will_C0R_accW  = var( G.west(v),    t+1,    R_Move::w0_accW);
+	CNF::Var W_will_C0R_mvW1  = var( G.west(v),    t+1,    R_Move::w0_mvW1);
+	CNF::Var W_will_C0R_mvW0  = var( G.west(v),    t+1,    R_Move::w0_mvW0);
+	CNF::Var W_will_C1R_ready = var( G.west(v),    t+1,    NdStat::C1R_ready);
+	CNF::Var W_will_C1R_accE  = var( G.west(v),    t+1,    R_Move::w1_accE);
+	CNF::Var W_will_C1R_mvE1  = var( G.west(v),    t+1,    R_Move::w1_mvE1);
+	CNF::Var W_will_C1R_mvE0  = var( G.west(v),    t+1,    R_Move::w1_mvE0);
+	CNF::Var W_will_C1R_accW  = var( G.west(v),    t+1,    R_Move::w1_accW);
+	CNF::Var W_will_C1R_mvW1  = var( G.west(v),    t+1,    R_Move::w1_mvW1);
+	CNF::Var W_will_C1R_mvW0  = var( G.west(v),    t+1,    R_Move::w1_mvW0);
+	CNF::Var W_will_C2R_ready = var( G.west(v),    t+1,    NdStat::C2R_ready);
+	CNF::Var W_will_C2R_accE  = var( G.west(v),    t+1,    R_Move::w2_accE);
+	CNF::Var W_will_C2R_mvE1  = var( G.west(v),    t+1,    R_Move::w2_mvE1);
+	CNF::Var W_will_C2R_mvE0  = var( G.west(v),    t+1,    R_Move::w2_mvE0);
+	CNF::Var W_will_C2R_accW  = var( G.west(v),    t+1,    R_Move::w2_accW);
+	CNF::Var W_will_C2R_mvW1  = var( G.west(v),    t+1,    R_Move::w2_mvW1);
+	CNF::Var W_will_C2R_mvW0  = var( G.west(v),    t+1,    R_Move::w2_mvW0);
 
+        // Abbreviations
+	CNF::Var W_will_CR_accE;
+	// neccessarly
+	c = not(W_will_CR_accE)  or W_will_C0R_accE      or W_will_C1R_accE      or W_will_C2R_accE;
+	m.addClause(c);
+	// sufficient
+	c = not(W_will_C0R_accE) or W_will_C1R_accE      or W_will_C2R_accE      or W_will_CR_accE;
+	m.addClause(c);
+	c = W_will_C0R_accE      or not(W_will_C1R_accE) or W_will_C2R_accE      or W_will_CR_accE;
+	m.addClause(c);
+	c = W_will_C0R_accE      or W_will_C1R_accE      or not(W_will_C2R_accE) or W_will_CR_accE;
+	m.addClause(c);
+	c = not(W_will_C0R_accE) or not(W_will_C1R_accE);
+	m.addClause(c);
+	c = not(W_will_C0R_accE) or not(W_will_C2R_accE);
+	m.addClause(c);
+	c = not(W_will_C1R_accE) or not(W_will_C2R_accE);
+	m.addClause(c);
+	CNF::Var W_will_CR_mvE1;
+	// neccessarly
+	c = not(W_will_CR_mvE1)  or W_will_C0R_mvE1      or W_will_C1R_mvE1      or W_will_C2R_mvE1;
+	m.addClause(c);
+	// sufficient
+	c = not(W_will_C0R_mvE1) or W_will_C1R_mvE1      or W_will_C2R_mvE1      or W_will_CR_mvE1;
+	m.addClause(c);
+	c = W_will_C0R_mvE1      or not(W_will_C1R_mvE1) or W_will_C2R_mvE1      or W_will_CR_mvE1;
+	m.addClause(c);
+	c = W_will_C0R_mvE1      or W_will_C1R_mvE1      or not(W_will_C2R_mvE1) or W_will_CR_mvE1;
+	m.addClause(c);
+	c = not(W_will_C0R_mvE1) or not(W_will_C1R_mvE1);
+	m.addClause(c);
+	c = not(W_will_C0R_mvE1) or not(W_will_C2R_mvE1);
+	m.addClause(c);
+	c = not(W_will_C1R_mvE1) or not(W_will_C2R_mvE1);
+	m.addClause(c);
+	CNF::Var W_will_CR_mvE0;
+	// neccessarly
+	c = not(W_will_CR_mvE0)  or W_will_C0R_mvE0      or W_will_C1R_mvE0      or W_will_C2R_mvE0;
+	m.addClause(c);
+	// sufficient
+	c = not(W_will_C0R_mvE0) or W_will_C1R_mvE0      or W_will_C2R_mvE0      or W_will_CR_mvE0;
+	m.addClause(c);
+	c = W_will_C0R_mvE0      or not(W_will_C1R_mvE0) or W_will_C2R_mvE0      or W_will_CR_mvE0;
+	m.addClause(c);
+	c = W_will_C0R_mvE0      or W_will_C1R_mvE0      or not(W_will_C2R_mvE0) or W_will_CR_mvE0;
+	m.addClause(c);
+	c = not(W_will_C0R_mvE0) or not(W_will_C1R_mvE0);
+	m.addClause(c);
+	c = not(W_will_C0R_mvE0) or not(W_will_C2R_mvE0);
+	m.addClause(c);
+	c = not(W_will_C1R_mvE0) or not(W_will_C2R_mvE0);
+	m.addClause(c);
+
+	CNF::Var W_will_CR_mvW1;
+	// neccessarly
+	c = not(W_will_CR_mvW1)  or W_will_C0R_mvW1      or W_will_C1R_mvW1      or W_will_C2R_mvW1;
+	m.addClause(c);
+	// sufficient
+	c = not(W_will_C0R_mvW1) or W_will_C1R_mvW1      or W_will_C2R_mvW1      or W_will_CR_mvW1;
+	m.addClause(c);
+	c = W_will_C0R_mvW1      or not(W_will_C1R_mvW1) or W_will_C2R_mvW1      or W_will_CR_mvW1;
+	m.addClause(c);
+	c = W_will_C0R_mvW1      or W_will_C1R_mvW1      or not(W_will_C2R_mvW1) or W_will_CR_mvW1;
+	m.addClause(c);
+	c = not(W_will_C0R_mvW1) or not(W_will_C1R_mvW1);
+	m.addClause(c);
+	c = not(W_will_C0R_mvW1) or not(W_will_C2R_mvW1);
+	m.addClause(c);
+	c = not(W_will_C1R_mvW1) or not(W_will_C2R_mvW1);
+	m.addClause(c);
+	CNF::Var W_will_CR_mvW0;
+	// neccessarly
+	c = not(W_will_CR_mvW0)  or W_will_C0R_mvW0      or W_will_C1R_mvW0      or W_will_C2R_mvW0;
+	m.addClause(c);
+	// sufficient
+	c = not(W_will_C0R_mvW0) or W_will_C1R_mvW0      or W_will_C2R_mvW0      or W_will_CR_mvW0;
+	m.addClause(c);
+	c = W_will_C0R_mvW0      or not(W_will_C1R_mvW0) or W_will_C2R_mvW0      or W_will_CR_mvW0;
+	m.addClause(c);
+	c = W_will_C0R_mvW0      or W_will_C1R_mvW0      or not(W_will_C2R_mvW0) or W_will_CR_mvW0;
+	m.addClause(c);
+	c = not(W_will_C0R_mvW0) or not(W_will_C1R_mvW0);
+	m.addClause(c);
+	c = not(W_will_C0R_mvW0) or not(W_will_C2R_mvW0);
+	m.addClause(c);
+	c = not(W_will_C1R_mvW0) or not(W_will_C2R_mvW0);
+	m.addClause(c);
+
+
+	CNF::Var S_will_nobodyhome= var( G.south(v),    t+1,    NdStat::nobodyhome);
+	CNF::Var S_will_R_ready   = var( G.south(v),    t+1,    NdStat::R_ready);
+	CNF::Var S_will_R_accN    = var( G.south(v),    t+1,    R_Move::accN);
+	CNF::Var S_will_R_mvN1    = var( G.south(v),    t+1,    R_Move::mvN1);
+	CNF::Var S_will_R_mvN0    = var( G.south(v),    t+1,    R_Move::mvN0);
+	CNF::Var S_will_R_accS    = var( G.south(v),    t+1,    R_Move::accS);
+	CNF::Var S_will_R_mvS1    = var( G.south(v),    t+1,    R_Move::mvS1);
+	CNF::Var S_will_R_mvS0    = var( G.south(v),    t+1,    R_Move::mvS0);
+	CNF::Var S_will_C0R_ready = var( G.south(v),    t+1,    NdStat::C0R_ready);
+	CNF::Var S_will_C0R_accN  = var( G.south(v),    t+1,    R_Move::w0_accN);
+	CNF::Var S_will_C0R_mvN1  = var( G.south(v),    t+1,    R_Move::w0_mvN1);
+	CNF::Var S_will_C0R_mvN2  = var( G.south(v),    t+1,    R_Move::w0_mvN2);
+	CNF::Var S_will_C0R_mvN3  = var( G.south(v),    t+1,    R_Move::w0_mvN3);
+	CNF::Var S_will_C0R_mvN0  = var( G.south(v),    t+1,    R_Move::w0_mvN0);
+	CNF::Var S_will_C0R_accS  = var( G.south(v),    t+1,    R_Move::w0_accS);
+	CNF::Var S_will_C0R_mvS1  = var( G.south(v),    t+1,    R_Move::w0_mvS1);
+	CNF::Var S_will_C0R_mvS2  = var( G.south(v),    t+1,    R_Move::w0_mvS2);
+	CNF::Var S_will_C0R_mvS3  = var( G.south(v),    t+1,    R_Move::w0_mvS3);
+	CNF::Var S_will_C0R_mvS0  = var( G.south(v),    t+1,    R_Move::w0_mvS0);
+	CNF::Var S_will_C1R_ready = var( G.south(v),    t+1,    NdStat::C1R_ready);
+	CNF::Var S_will_C1R_accN  = var( G.south(v),    t+1,    R_Move::w1_accN);
+	CNF::Var S_will_C1R_mvN1  = var( G.south(v),    t+1,    R_Move::w1_mvN1);
+	CNF::Var S_will_C1R_mvN2  = var( G.south(v),    t+1,    R_Move::w1_mvN2);
+	CNF::Var S_will_C1R_mvN3  = var( G.south(v),    t+1,    R_Move::w1_mvN3);
+	CNF::Var S_will_C1R_mvN0  = var( G.south(v),    t+1,    R_Move::w1_mvN0);
+	CNF::Var S_will_C1R_accS  = var( G.south(v),    t+1,    R_Move::w1_accS);
+	CNF::Var S_will_C1R_mvS1  = var( G.south(v),    t+1,    R_Move::w1_mvS1);
+	CNF::Var S_will_C1R_mvS2  = var( G.south(v),    t+1,    R_Move::w1_mvS2);
+	CNF::Var S_will_C1R_mvS3  = var( G.south(v),    t+1,    R_Move::w1_mvS3);
+	CNF::Var S_will_C1R_mvS0  = var( G.south(v),    t+1,    R_Move::w1_mvS0);
+	CNF::Var S_will_C2R_ready = var( G.south(v),    t+1,    NdStat::C2R_ready);
+	CNF::Var S_will_C2R_accN  = var( G.south(v),    t+1,    R_Move::w2_accN);
+	CNF::Var S_will_C2R_mvN1  = var( G.south(v),    t+1,    R_Move::w2_mvN1);
+	CNF::Var S_will_C2R_mvN2  = var( G.south(v),    t+1,    R_Move::w2_mvN2);
+	CNF::Var S_will_C2R_mvN3  = var( G.south(v),    t+1,    R_Move::w2_mvN3);
+	CNF::Var S_will_C2R_mvN0  = var( G.south(v),    t+1,    R_Move::w2_mvN0);
+	CNF::Var S_will_C2R_accS  = var( G.south(v),    t+1,    R_Move::w2_accS);
+	CNF::Var S_will_C2R_mvS1  = var( G.south(v),    t+1,    R_Move::w2_mvS1);
+	CNF::Var S_will_C2R_mvS2  = var( G.south(v),    t+1,    R_Move::w2_mvS2);
+	CNF::Var S_will_C2R_mvS3  = var( G.south(v),    t+1,    R_Move::w2_mvS3);
+	CNF::Var S_will_C2R_mvS0  = var( G.south(v),    t+1,    R_Move::w2_mvS0);
+
+        // Abbreviations
+	CNF::Var S_will_CR_accN;
+	// neccessarly
+	c = not(S_will_CR_accN)   or S_will_C0R_accN          or S_will_C1R_accN      or S_will_C2R_accN;
+	m.addClause(c);
+	// sufficient
+	c = not(S_will_C0R_accN)  or S_will_C1R_accN          or S_will_C2R_accN      or S_will_CR_accN;
+	m.addClause(c);
+	c = S_will_C0R_accN       or not(S_will_C1R_accN)     or S_will_C2R_accN      or S_will_CR_accN;
+	m.addClause(c);
+	c = S_will_C0R_accN       or S_will_C1R_accN          or not(S_will_C2R_accN) or S_will_CR_accN;
+	m.addClause(c);
+	c = not(S_will_C0R_accN)  or not(S_will_C1R_accN);
+	m.addClause(c);
+	c = not(S_will_C0R_accN)  or not(S_will_C2R_accN);
+	m.addClause(c);
+	c = not(S_will_C1R_accN)  or not(S_will_C2R_accN);
+	m.addClause(c);
+	CNF::Var S_will_CR_mvN1;
+	// neccessarly
+	c = not(S_will_CR_mvN1)   or S_will_C0R_mvN1          or S_will_C1R_mvN1      or S_will_C2R_mvN1;
+	m.addClause(c);
+	// sufficient
+	c = not(S_will_C0R_mvN1)  or S_will_C1R_mvN1          or S_will_C2R_mvN1      or S_will_CR_mvN1;
+	m.addClause(c);
+	c = S_will_C0R_mvN1       or not(S_will_C1R_mvN1)     or S_will_C2R_mvN1      or S_will_CR_mvN1;
+	m.addClause(c);
+	c = S_will_C0R_mvN1       or S_will_C1R_mvN1          or not(S_will_C2R_mvN1) or S_will_CR_mvN1;
+	m.addClause(c);
+	c = not(S_will_C0R_mvN1)  or not(S_will_C1R_mvN1);
+	m.addClause(c);
+	c = not(S_will_C0R_mvN1)  or not(S_will_C2R_mvN1);
+	m.addClause(c);
+	c = not(S_will_C1R_mvN1)  or not(S_will_C2R_mvN1);
+	m.addClause(c);
+	CNF::Var S_will_CR_mvN2;
+	// neccessarly
+	c = not(S_will_CR_mvN2)   or S_will_C0R_mvN2          or S_will_C1R_mvN2      or S_will_C2R_mvN2;
+	m.addClause(c);
+	// sufficient
+	c = not(S_will_C0R_mvN2)  or S_will_C1R_mvN2          or S_will_C2R_mvN2      or S_will_CR_mvN2;
+	m.addClause(c);
+	c = S_will_C0R_mvN2       or not(S_will_C1R_mvN2)     or S_will_C2R_mvN2      or S_will_CR_mvN2;
+	m.addClause(c);
+	c = S_will_C0R_mvN2       or S_will_C1R_mvN2          or not(S_will_C2R_mvN2) or S_will_CR_mvN2;
+	m.addClause(c);
+	c = not(S_will_C0R_mvN2)  or not(S_will_C1R_mvN2);
+	m.addClause(c);
+	c = not(S_will_C0R_mvN2)  or not(S_will_C2R_mvN2);
+	m.addClause(c);
+	c = not(S_will_C1R_mvN2)  or not(S_will_C2R_mvN2);
+	m.addClause(c);
+	CNF::Var S_will_CR_mvN3;
+	// neccessarly
+	c = not(S_will_CR_mvN3)   or S_will_C0R_mvN3          or S_will_C1R_mvN3      or S_will_C2R_mvN3;
+	m.addClause(c);
+	// sufficient
+	c = not(S_will_C0R_mvN3)  or S_will_C1R_mvN3          or S_will_C2R_mvN3      or S_will_CR_mvN3;
+	m.addClause(c);
+	c = S_will_C0R_mvN3       or not(S_will_C1R_mvN3)     or S_will_C2R_mvN3      or S_will_CR_mvN3;
+	m.addClause(c);
+	c = S_will_C0R_mvN3       or S_will_C1R_mvN3          or not(S_will_C2R_mvN3) or S_will_CR_mvN3;
+	m.addClause(c);
+	c = not(S_will_C0R_mvN3)  or not(S_will_C1R_mvN3);
+	m.addClause(c);
+	c = not(S_will_C0R_mvN3)  or not(S_will_C2R_mvN3);
+	m.addClause(c);
+	c = not(S_will_C1R_mvN3)  or not(S_will_C2R_mvN3);
+	m.addClause(c);
+	CNF::Var S_will_CR_mvN0;
+	// neccessarly
+	c = not(S_will_CR_mvN0)   or S_will_C0R_mvN0          or S_will_C1R_mvN0      or S_will_C2R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(S_will_C0R_mvN0)  or S_will_C1R_mvN0          or S_will_C2R_mvN0      or S_will_CR_mvN0;
+	m.addClause(c);
+	c = S_will_C0R_mvN0       or not(S_will_C1R_mvN0)     or S_will_C2R_mvN0      or S_will_CR_mvN0;
+	m.addClause(c);
+	c = S_will_C0R_mvN0       or S_will_C1R_mvN0          or not(S_will_C2R_mvN0) or S_will_CR_mvN0;
+	m.addClause(c);
+	c = not(S_will_C0R_mvN0)  or not(S_will_C1R_mvN0);
+	m.addClause(c);
+	c = not(S_will_C0R_mvN0)  or not(S_will_C2R_mvN0);
+	m.addClause(c);
+	c = not(S_will_C1R_mvN0)  or not(S_will_C2R_mvN0);
+	m.addClause(c);
+
+	CNF::Var S_will_CR_mvS1;
+	// neccessarly
+	c = not(S_will_CR_mvS1)   or S_will_C0R_mvS1           or S_will_C1R_mvS1      or S_will_C2R_mvS1;
+	m.addClause(c);
+	// sufficient
+	c = not(S_will_C0R_mvS1)  or S_will_C1R_mvS1           or S_will_C2R_mvS1      or S_will_CR_mvS1;
+	m.addClause(c);
+	c = S_will_C0R_mvS1       or not(S_will_C1R_mvS1)      or S_will_C2R_mvS1      or S_will_CR_mvS1;
+	m.addClause(c);
+	c = S_will_C0R_mvS1       or S_will_C1R_mvS1           or not(S_will_C2R_mvS1) or S_will_CR_mvS1;
+	m.addClause(c);
+	c = not(S_will_C0R_mvS1)  or not(S_will_C1R_mvS1);
+	m.addClause(c);
+	c = not(S_will_C0R_mvS1)  or not(S_will_C2R_mvS1);
+	m.addClause(c);
+	c = not(S_will_C1R_mvS1)  or not(S_will_C2R_mvS1);
+	m.addClause(c);
+	CNF::Var S_will_CR_mvS2;
+	// neccessarly
+	c = not(S_will_CR_mvS2)   or S_will_C0R_mvS2           or S_will_C1R_mvS2      or S_will_C2R_mvS2;
+	m.addClause(c);
+	// sufficient
+	c = not(S_will_C0R_mvS2)  or S_will_C1R_mvS2           or S_will_C2R_mvS2      or S_will_CR_mvS2;
+	m.addClause(c);
+	c = S_will_C0R_mvS2       or not(S_will_C1R_mvS2)      or S_will_C2R_mvS2      or S_will_CR_mvS2;
+	m.addClause(c);
+	c = S_will_C0R_mvS2       or S_will_C1R_mvS2           or not(S_will_C2R_mvS2) or S_will_CR_mvS2;
+	m.addClause(c);
+	c = not(S_will_C0R_mvS2)  or not(S_will_C1R_mvS2);
+	m.addClause(c);
+	c = not(S_will_C0R_mvS2)  or not(S_will_C2R_mvS2);
+	m.addClause(c);
+	c = not(S_will_C1R_mvS2)  or not(S_will_C2R_mvS2);
+	m.addClause(c);
+	CNF::Var S_will_CR_mvS3;
+	// neccessarly
+	c = not(S_will_CR_mvS3)   or S_will_C0R_mvS3           or S_will_C1R_mvS3      or S_will_C2R_mvS3;
+	m.addClause(c);
+	// sufficient
+	c = not(S_will_C0R_mvS3)  or S_will_C1R_mvS3           or S_will_C2R_mvS3      or S_will_CR_mvS3;
+	m.addClause(c);
+	c = S_will_C0R_mvS3       or not(S_will_C1R_mvS3)      or S_will_C2R_mvS3      or S_will_CR_mvS3;
+	m.addClause(c);
+	c = S_will_C0R_mvS3       or S_will_C1R_mvS3           or not(S_will_C2R_mvS3) or S_will_CR_mvS3;
+	m.addClause(c);
+	c = not(S_will_C0R_mvS3)  or not(S_will_C1R_mvS3);
+	m.addClause(c);
+	c = not(S_will_C0R_mvS3)  or not(S_will_C2R_mvS3);
+	m.addClause(c);
+	c = not(S_will_C1R_mvS3)  or not(S_will_C2R_mvS3);
+	m.addClause(c);
+	CNF::Var S_will_CR_mvS0;
+	// neccessarly
+	c = not(S_will_CR_mvS0)   or S_will_C0R_mvS0           or S_will_C1R_mvS0      or S_will_C2R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(S_will_C0R_mvS0)  or S_will_C1R_mvS0           or S_will_C2R_mvS0      or S_will_CR_mvS0;
+	m.addClause(c);
+	c = S_will_C0R_mvS0       or not(S_will_C1R_mvS0)      or S_will_C2R_mvS0      or S_will_CR_mvS0;
+	m.addClause(c);
+	c = S_will_C0R_mvS0       or S_will_C1R_mvS0           or not(S_will_C2R_mvS0) or S_will_CR_mvS0;
+	m.addClause(c);
+	c = not(S_will_C0R_mvS0)  or not(S_will_C1R_mvS0);
+	m.addClause(c);
+	c = not(S_will_C0R_mvS0)  or not(S_will_C2R_mvS0);
+	m.addClause(c);
+	c = not(S_will_C1R_mvS0)  or not(S_will_C2R_mvS0);
+	m.addClause(c);
+
+
+	
 
         // Robot alone
-        model.addConstr(    ( Here_will_R_accE                             ) REQUIRES ( Here_now_R_ready  )                                     );
-        model.addConstr(    ( Here_will_R_mvE0                             ) REQUIRES ( W_now_R_accE  OR  W_now_R_mvE0 )                        );
-        model.addConstr(    ( Here_now_R_mvE0    OR    Here_now_R_accE     ) REQUIRES ( E_will_R_ready  OR  E_will_R_mvE0 )                     );
-        model.addConstr(    ( Here_now_R_accE                              ) REQUIRES ( Here_will_nobodyhome  OR  Here_will_R_mvE0 )            );
-        model.addConstr(    ( Here_will_R_accE                             ) REQUIRES ( E_now_nobodyhome  OR  E_now_R_accE  OR  E_now_CR_mvE1 ) );
-        model.addConstr(    ( NOT E_will_R_ready                           ) IMPLIES  ( (NOT Here_now_R_accE) OR (NOT E_now_CR_mvE1) )          );  // Crobot ahead.  Hint: contrapositive
-        model.addConstr(    ( NOT E_will_R_ready                           ) IMPLIES  ( (NOT Here_now_R_mvE0) OR (NOT E_now_CR_mvE1) )          );  // Crobot ahead.  Hint: contrapositive
+        c = not(Here_will_R_accE) or Here_now_R_ready;
+	m.addClause(c);//
+	c = not(Here_will_R_mvE0) or W_now_R_accE              or W_now_R_mvE0;
+	m.addClause(c);//
+	c = not(Here_now_R_mvE0)  or Here_now_R_accE           or E_will_R_ready       or E_will_R_mvE0;
+	m.addClause(c);
+	c = Here_now_R_mvE0       or not(Here_now_R_accE)      or E_will_R_ready       or E_will_R_mvE0;
+	m.addClause(c);
+	c = not(Here_now_R_mvE0)  or not(Here_now_R_accE);
+	m.addClause(c);//
+	c = not(Here_now_R_accE)  or Here_will_nobodyhome      or Here_will_R_mvE0;
+	m.addClause(c);//
+	c = not(Here_will_R_accE) or E_now_nobodyhome          or E_now_R_accE         or E_now_CR_mvE1;
+	m.addClause(c);//
+	c = E_will_R_ready        or not(Here_now_R_accE)      or not(E_now_CR_mvE1);
+	m.addClause(c);// Crobot ahead.  Hint: contrapositive
+	c = E_will_R_ready        or not(Here_now_R_mvE0)      or not(E_now_CR_mvE1);
+	m.addClause(c);// Crobot ahead.  Hint: contrapositive
 
-        model.addConstr(    ( Here_will_R_accW                             ) REQUIRES ( Here_now_R_ready  )                                     );
-        model.addConstr(    ( Here_will_R_mvW0                             ) REQUIRES ( E_now_R_accW  OR  E_now_R_mvW0 )                        );
-        model.addConstr(    ( Here_now_R_mvW0    OR    Here_now_R_accW     ) REQUIRES ( W_will_R_ready  OR  W_will_R_mvW0 )                     );
-        model.addConstr(    ( Here_now_R_accW                              ) REQUIRES ( Here_will_nobodyhome  OR  Here_will_R_mvW0 )            );
-        model.addConstr(    ( Here_will_R_accW                             ) REQUIRES ( W_now_nobodyhome  OR  W_now_R_accW  OR  W_now_CR_mvW1 ) );
-        model.addConstr(    ( NOT W_will_R_ready                           ) IMPLIES  ( (NOT Here_now_R_accW) OR (NOT W_now_CR_mvW1) )          );  // Crobot ahead.  Hint: contrapositive
-        model.addConstr(    ( NOT W_will_R_ready                           ) IMPLIES  ( (NOT Here_now_R_mvW0) OR (NOT W_now_CR_mvW1) )          );  // Crobot ahead.  Hint: contrapositive
+	
+	c = not(Here_will_R_accW) or Here_now_R_ready;
+	m.addClause(c);//
+	c = not(Here_will_R_mvW0) or E_now_R_accW              or E_now_R_mvW0;
+	m.addClause(c);//
+	c = not(Here_now_R_mvW0)  or Here_now_R_accW           or W_will_R_ready       or W_will_R_mvE0;
+	m.addClause(c);
+	c = Here_now_R_mvW0       or not(Here_now_R_accW)      or W_will_R_ready       or W_will_R_mvW0;
+	m.addClause(c);
+	c = not(Here_now_R_mvW0)  or not(Here_now_R_accW);
+	m.addClause(c);//
+	c = not(Here_now_R_accW)  or Here_will_nobodyhome      or Here_will_R_mvW0;
+	m.addClause(c);//
+	c = not(Here_will_R_accW) or W_now_nobodyhome          or W_now_R_accW         or W_now_CR_mvW1;
+	m.addClause(c);//
+	c = W_will_R_ready        or not(Here_now_R_accW)      or not(W_now_CR_mvW1);
+	m.addClause(c);// Crobot ahead.  Hint: contrapositive
+	c = W_will_R_ready        or not(Here_now_R_mvW0)      or not(W_now_CR_mvW1);
+	m.addClause(c);// Crobot ahead.  Hint: contrapositive
 
 
-        model.addConstr(    ( Here_will_R_accN                         ) REQUIRES      ( Here_now_R_ready )                              );
-        model.addConstr(    ( Here_will_R_mvN1                         ) EQUIVALENT_TO ( Here_now_R_accN  OR  Here_now_R_mvN0 )          );
-        model.addConstr(    ( Here_will_R_mvN0                         ) REQUIRES      ( S_now_R_mvN1 )                                  );
-        model.addConstr(    ( Here_now_R_mvN0    OR    Here_now_R_accN ) REQUIRES      ( Here_will_R_mvN1 )                              );
-        model.addConstr(    ( Here_now_R_mvN1                          ) REQUIRES      ( N_will_R_mvN0  OR  N_will_R_ready )             );
-        model.addConstr(    ( Here_now_R_mvN1                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvN0 )    );
-        model.addConstr(    ( NOT N_will_R_ready                       ) IMPLIES       ( (NOT Here_now_R_mvN1)  OR (NOT N_now_CR_mvN3) ) );  // Crobot ahead. Hint: contrapositive
+	
+	c = not(Here_will_R_accN) or Here_now_R_ready;
+	m.addClause(c);//
+	// neccessarly
+	c = not(Here_will_R_mvN1) or Here_now_R_accN           or Here_now_R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_R_accN)  or Here_now_R_mvN0           or Here_will_R_mvN1;
+	m.addClause(c);
+	c = Here_now_R_accN       or not(Here_now_R_mvN0)      or Here_will_R_mvN1;
+	m.addClause(c);
+	c = not(Here_now_R_accN)  or not(Here_now_R_mvN0);
+	m.addClause(c);//	
+	c = not(Here_will_R_mvN0) or S_now_R_mvN1;
+	m.addClause(c);//
+	c = not(Here_now_R_mvN0)  or Here_now_R_accN           or Here_will_R_mvN1;
+	m.addClause(c);
+	c = Here_now_R_mvN0       or not(Here_now_R_accN)      or Here_will_R_mvN1;
+	m.addClause(c);
+	c = not(Here_now_R_mvN0)  or not(Here_now_R_accN);
+	m.addClause(c);//
+	c = not(Here_now_R_mvN1)  or N_will_R_mvN0             or N_will_R_ready;
+	m.addClause(c);//
+	c = not(Here_now_R_mvN1)  or Here_will_nobodyhome      or Here_will_R_mvN0;
+	m.addClause(c);//
+	c = N_will_R_ready        or not(Here_now_R_mvN1)      or not(N_now_CR_mvN3);
+	m.addClause(c);// Crobot ahead.  Hint: contrapositive
 
-        model.addConstr(    ( Here_will_R_accS                         ) REQUIRES      ( Here_now_R_ready )                              );
-        model.addConstr(    ( Here_will_R_mvS1                         ) EQUIVALENT_TO ( Here_now_R_accS  OR  Here_now_R_mvS0 )          ); // !!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_R_mvS0                         ) REQUIRES      ( N_now_R_mvS1 )                                  );
-        model.addConstr(    ( Here_now_R_mvS0    OR    Here_now_R_accS ) REQUIRES      ( Here_will_R_mvS1 )                              );
-        model.addConstr(    ( Here_now_R_mvS1                          ) REQUIRES      ( S_will_R_mvS0  OR  S_will_R_ready )             );
-        model.addConstr(    ( Here_now_R_mvS1                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvS0 )    );
-        model.addConstr(    ( NOT S_will_R_ready                       ) IMPLIES       ( (NOT Here_now_R_mvS1)  OR (NOT S_now_CR_mvS3) ) );  // Crobot ahead. Hint: contrapositive
-
+	
+	c = not(Here_will_R_accS) or Here_now_R_ready;
+	m.addClause(c);//
+	// neccessarly
+	c = not(Here_will_R_mvS1) or Here_now_R_accS           or Here_now_R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_R_accS)  or Here_now_R_mvS0           or Here_will_R_mvS1;
+	m.addClause(c);
+	c = Here_now_R_accS       or not(Here_now_R_mvS0)      or Here_will_R_mvS1;
+	m.addClause(c);
+	c = not(Here_now_R_accS)  or not(Here_now_R_mvS0);
+	m.addClause(c);//!!!!!!!!!!!!!!
+	c = not(Here_will_R_mvS0) or N_now_R_mvS1;
+	m.addClause(c);//
+	c = not(Here_now_R_mvS0)  or Here_now_R_accS           or Here_will_R_mvS1;
+	m.addClause(c);
+	c = Here_now_R_mvS0       or not(Here_now_R_accS)      or Here_will_R_mvS1;
+	m.addClause(c);
+	c = not(Here_now_R_mvS0)  or not(Here_now_R_accS);
+	m.addClause(c);//
+	c = not(Here_now_R_mvS1)  or S_will_R_mvS0             or S_will_R_ready;
+	m.addClause(c);//
+	c = not(Here_now_R_mvS1)  or Here_will_nobodyhome      or Here_will_R_mvS0;
+	m.addClause(c);//
+	c = S_will_R_ready        or not(Here_now_R_mvS1)      or not(S_now_CR_mvS3);
+	m.addClause(c);// Crobot ahead.  Hint: contrapositive
 
         // C r o b o t  0
-        model.addConstr(    ( Here_will_C0R_accN                         ) REQUIRES      ( Here_now_C0R_ready )                             );
-        model.addConstr(    ( Here_will_C0R_mvN1                         ) EQUIVALENT_TO ( Here_now_C0R_accN  OR  Here_now_C0R_mvN0 )       ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_C0R_mvN2                         ) EQUIVALENT_TO ( Here_now_C0R_mvN1 )                              );
-        model.addConstr(    ( Here_will_C0R_mvN3                         ) EQUIVALENT_TO ( Here_now_C0R_mvN2 )                              );
-        model.addConstr(    ( Here_will_C0R_mvN0                         ) REQUIRES      ( S_now_C0R_mvN3    )                              );
-        model.addConstr(    ( Here_now_C0R_accN   OR   Here_now_C0R_mvN0 ) REQUIRES      ( Here_will_C0R_mvN1 )                             );
-        model.addConstr(    ( Here_now_C0R_mvN3                          ) REQUIRES      ( N_will_C0R_ready  OR  N_will_C0R_mvN0 )          );
-        model.addConstr(    ( Here_now_C0R_mvN3                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvN0 )     );
+	c = not(Here_will_C0R_accN) or Here_now_C0R_ready;
+	m.addClause(c); //
+	// neccesarly
+	c = not(Here_will_C0R_mvN1) or Here_now_C0R_accN       or Here_now_C0R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_accN)  or Here_now_C0R_mvN0       or Here_will_C0R_mvN1;
+	m.addClause(c);
+	c = Here_now_C0R_accN       or not(Here_now_C0R_mvN0)  or Here_will_C0R_mvN1;
+	m.addClause(c);
+	c = not(Here_now_C0R_accN)  or not(Here_now_C0R_mvN0);
+	m.addClause(c); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	c = not(Here_will_C0R_mvN2) or Here_now_C0R_mvN1;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN1)  or Here_will_C0R_mvN2;
+	m.addClause(c); //
+	c = not(Here_will_C0R_mvN3) or Here_now_C0R_mvN2;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvN2)  or Here_will_C0R_mvN3;
+	m.addClause(c); //
+	c = not(Here_will_C0R_mvN0) or S_now_C0R_mvN3;
+	m.addClause(c); //
+	c = not(Here_now_C0R_accN)  or Here_now_C0R_mvN0       or Here_will_C0R_mvN1;
+	m.addClause(c);
+	c = Here_now_C0R_accN       or not(Here_now_C0R_mvN0)  or Here_will_C0R_mvN1;
+	m.addClause(c);
+	c = not(Here_now_C0R_accN)  or not(Here_now_C0R_mvN0);
+	m.addClause(c); //
+	c = not(Here_now_C0R_mvN3)  or N_will_C0R_ready        or N_will_C0R_mvN0;
+	m.addClause(c); //
+	c = not(Here_now_C0R_mvN3)  or Here_will_nobodyhome    or Here_will_R_mvN0;
+	m.addClause(c); //
 
-        model.addConstr(    ( Here_will_C0R_accS                         ) REQUIRES      ( Here_now_C0R_ready )                             );
-        model.addConstr(    ( Here_will_C0R_mvS1                         ) EQUIVALENT_TO ( Here_now_C0R_accS  OR  Here_now_C0R_mvS0 )       ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_C0R_mvS2                         ) EQUIVALENT_TO ( Here_now_C0R_mvS1 )                              );
-        model.addConstr(    ( Here_will_C0R_mvS3                         ) EQUIVALENT_TO ( Here_now_C0R_mvS2 )                              );
-        model.addConstr(    ( Here_will_C0R_mvS0                         ) REQUIRES      ( N_now_C0R_mvS3    )                              );
-        model.addConstr(    ( Here_now_C0R_accS   OR   Here_now_C0R_mvS0 ) REQUIRES      ( Here_will_C0R_mvS1 )                             );
-        model.addConstr(    ( Here_now_C0R_mvS3                          ) REQUIRES      ( S_will_C0R_ready  OR  S_will_C0R_mvS0 )          );
-        model.addConstr(    ( Here_now_C0R_mvS3                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvS0 )     );
+	
+	c = not(Here_will_C0R_accS) or Here_now_C0R_ready;
+	m.addClause(c); //
+	// neccessarly
+	c = not(Here_will_C0R_mvS1) or Here_now_C0R_accS       or Here_now_C0R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_accS)  or  Here_now_C0R_mvS0      or Here_will_C0R_mvS1;
+	m.addClause(c);
+	c = Here_now_C0R_accS       or not(Here_now_C0R_mvS0)  or Here_will_C0R_mvS1;
+	m.addClause(c);
+	c = not(Here_now_C0R_accS)  or not(Here_now_C0R_mvS0);
+	m.addClause(c); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	c = not(Here_will_C0R_mvS2) or Here_now_C0R_mvS1;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS1)  or Here_will_C0R_mvS2;
+	m.addClause(c); //
+	c = not(Here_will_C0R_mvS3) or Here_now_C0R_mvS2;
+	m.addClause(c);
+	c = not(Here_now_C0R_mvS2)  or Here_will_C0R_mvS3;
+	m.addClause(c); //
+	c = not(Here_will_C0R_mvS0) or N_now_C0R_mvS3;
+	m.addClause(c); //
+	c = not(Here_now_C0R_accS)  or Here_now_C0R_mvS0       or Here_will_C0R_mvS1;
+	m.addClause(c);
+	c = Here_now_C0R_accS       or not(Here_now_C0R_mvS0)  or Here_will_C0R_mvS1;
+	m.addClause(c);
+	c = not(Here_now_C0R_accS)  or not(Here_now_C0R_mvS0);
+	m.addClause(c); //
+	c = not(Here_now_C0R_mvS3)  or S_will_C0R_ready        or S_will_C0R_mvS0;
+	m.addClause(c); //
+	c = not(Here_now_C0R_mvS3)  or Here_will_nobodyhome    or Here_will_R_mvS0;
+	m.addClause(c); //
 
-        model.addConstr(    ( Here_will_C0R_accE                         ) REQUIRES      ( Here_now_C0R_ready )                             );
-        model.addConstr(    ( Here_will_C0R_mvE1                         ) EQUIVALENT_TO ( Here_now_C0R_accE  OR  Here_now_C0R_mvE0 )       ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_C0R_mvE0                         ) REQUIRES      ( W_now_C0R_mvE1    )                              );
-        model.addConstr(    ( Here_now_C0R_accE   OR   Here_now_C0R_mvE0 ) REQUIRES      ( Here_will_C0R_mvE1 )                             );
-        model.addConstr(    ( Here_now_C0R_mvE1                          ) REQUIRES      ( E_will_C0R_ready  OR  E_will_C0R_mvE0 )          );
-        model.addConstr(    ( Here_now_C0R_mvE1                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvE0 )     );
 
-        model.addConstr(    ( Here_will_C0R_accW                         ) REQUIRES      ( Here_now_C0R_ready )                             );
-        model.addConstr(    ( Here_will_C0R_mvW1                         ) EQUIVALENT_TO ( Here_now_C0R_accW  OR  Here_now_C0R_mvW0 )       ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_C0R_mvW0                         ) REQUIRES      ( E_now_C0R_mvW1    )                              );
-        model.addConstr(    ( Here_now_C0R_accW   OR   Here_now_C0R_mvW0 ) REQUIRES      ( Here_will_C0R_mvW1 )                             );
-        model.addConstr(    ( Here_now_C0R_mvW1                          ) REQUIRES      ( W_will_C0R_ready  OR  W_will_C0R_mvW0 )          );
-        model.addConstr(    ( Here_now_C0R_mvW1                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvW0 )     );
+	
+	c = not(Here_will_C0R_accE) or Here_now_C0R_ready;
+	m.addClause(c); //
+	// neccessarly
+	c = not(Here_will_C0R_mvE1) or Here_now_C0R_accE       or Here_now_C0R_mvE0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_accE)  or Here_now_C0R_mvE0       or Here_will_C0R_mvE1;
+	m.addClause(c);
+	c = Here_now_C0R_accE       or not(Here_now_C0R_mvE0)  or Here_will_C0R_mvE1;
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)  or not(Here_now_C0R_mvE0);
+	m.addClause(c); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	c = not(Here_will_C0R_mvE0) or W_now_C0R_mvE1;
+	m.addClause(c); //
+	c = not(Here_now_C0R_accE)  or Here_now_C0R_mvE0       or Here_will_C0R_mvE1;
+	m.addClause(c);
+	c = Here_now_C0R_accE       or not(Here_now_C0R_mvE0)  or Here_will_C0R_mvE1;
+	m.addClause(c);
+	c = not(Here_now_C0R_accE)  or not(Here_now_C0R_mvE0);
+	m.addClause(c); //
+	c = not(Here_now_C0R_mvE1)  or E_will_C0R_ready        or E_will_C0R_mvE0;
+	m.addClause(c); //
+	c = not(Here_now_C0R_mvE1)  or Here_will_nobodyhome    or Here_will_R_mvE0;
+	m.addClause(c); //
 
+
+	
+	c = not(Here_will_C0R_accW) or Here_now_C0R_ready;
+	m.addClause(c); //
+	// neccessarly
+	c = not(Here_will_C0R_mvW1) or Here_now_C0R_accW       or Here_now_C0R_mvW0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C0R_accW)  or Here_now_C0R_mvW0       or Here_will_C0R_mvW1;
+	m.addClause(c);
+	c = Here_now_C0R_accW       or not(Here_now_C0R_mvW0)  or Here_will_C0R_mvW1;
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)  or not(Here_now_C0R_mvW0);
+	m.addClause(c); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	c = not(Here_will_C0R_mvW0) or E_now_C0R_mvW1;
+	m.addClause(c); //
+	c = not(Here_now_C0R_accW)  or Here_now_C0R_mvW0       or Here_will_C0R_mvW1;
+	m.addClause(c);
+	c = Here_now_C0R_accW       or not(Here_now_C0R_mvW0)  or Here_will_C0R_mvW1;
+	m.addClause(c);
+	c = not(Here_now_C0R_accW)  or not(Here_now_C0R_mvW0);
+	m.addClause(c); //
+	c = not(Here_now_C0R_mvW1)  or W_will_C0R_ready        or W_will_C0R_mvW0;
+	m.addClause(c); //
+	c = not(Here_now_C0R_mvW1)  or Here_will_nobodyhome    or Here_will_R_mvW0;
+	m.addClause(c); //
+
+
+	
         // C r o b o t  1
-        model.addConstr(    ( Here_will_C1R_accN                         ) REQUIRES      ( Here_now_C1R_ready )                             );
-        model.addConstr(    ( Here_will_C1R_mvN1                         ) EQUIVALENT_TO ( Here_now_C1R_accN  OR  Here_now_C1R_mvN0 )       ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_C1R_mvN2                         ) EQUIVALENT_TO ( Here_now_C1R_mvN1 )                              );
-        model.addConstr(    ( Here_will_C1R_mvN3                         ) EQUIVALENT_TO ( Here_now_C1R_mvN2 )                              );
-        model.addConstr(    ( Here_will_C1R_mvN0                         ) REQUIRES      ( S_now_C1R_mvN3    )                              );
-        model.addConstr(    ( Here_now_C1R_accN   OR   Here_now_C1R_mvN0 ) REQUIRES      ( Here_will_C1R_mvN1 )                             );
-        model.addConstr(    ( Here_now_C1R_mvN3                          ) REQUIRES      ( N_will_C1R_ready  OR  N_will_C1R_mvN0 )          );
-        model.addConstr(    ( Here_now_C1R_mvN3                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvN0 )     );
+	c = not(Here_will_C1R_accN) or Here_now_C1R_ready;
+	m.addClause(c); //
+	// neccesarly
+	c = not(Here_will_C1R_mvN1) or Here_now_C1R_accN       or Here_now_C1R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C1R_accN)  or Here_now_C1R_mvN0       or Here_will_C1R_mvN1;
+	m.addClause(c);
+	c = Here_now_C1R_accN       or not(Here_now_C1R_mvN0)  or Here_will_C1R_mvN1;
+	m.addClause(c);
+	c = not(Here_now_C1R_accN)  or not(Here_now_C1R_mvN0);
+	m.addClause(c); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	c = not(Here_will_C1R_mvN2) or Here_now_C1R_mvN1;
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN1)  or Here_will_C1R_mvN2;
+	m.addClause(c); //
+	c = not(Here_will_C1R_mvN3) or Here_now_C1R_mvN2;
+	m.addClause(c);
+	c = not(Here_now_C1R_mvN2)  or Here_will_C1R_mvN3;
+	m.addClause(c); //
+	c = not(Here_will_C1R_mvN0) or S_now_C1R_mvN3;
+	m.addClause(c); //
+	c = not(Here_now_C1R_accN)  or Here_now_C1R_mvN0       or Here_will_C1R_mvN1;
+	m.addClause(c);
+	c = Here_now_C1R_accN       or not(Here_now_C1R_mvN0)  or Here_will_C1R_mvN1;
+	m.addClause(c);
+	c = not(Here_now_C1R_accN)  or not(Here_now_C1R_mvN0);
+	m.addClause(c); //
+	c = not(Here_now_C1R_mvN3)  or N_will_C1R_ready        or N_will_C1R_mvN0;
+	m.addClause(c); //
+	c = not(Here_now_C1R_mvN3)  or Here_will_nobodyhome    or Here_will_R_mvN0;
+	m.addClause(c); //
 
-        model.addConstr(    ( Here_will_C1R_accS                         ) REQUIRES      ( Here_now_C1R_ready )                             );
-        model.addConstr(    ( Here_will_C1R_mvS1                         ) EQUIVALENT_TO ( Here_now_C1R_accS  OR  Here_now_C1R_mvS0 )       ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_C1R_mvS2                         ) EQUIVALENT_TO ( Here_now_C1R_mvS1 )                              );
-        model.addConstr(    ( Here_will_C1R_mvS3                         ) EQUIVALENT_TO ( Here_now_C1R_mvS2 )                              );
-        model.addConstr(    ( Here_will_C1R_mvS0                         ) REQUIRES      ( N_now_C1R_mvS3    )                              );
-        model.addConstr(    ( Here_now_C1R_accS   OR   Here_now_C1R_mvS0 ) REQUIRES      ( Here_will_C1R_mvS1 )                             );
-        model.addConstr(    ( Here_now_C1R_mvS3                          ) REQUIRES      ( S_will_C1R_ready  OR  S_will_C1R_mvS0 )          );
-        model.addConstr(    ( Here_now_C1R_mvS3                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvS0 )     );
+	
+	c = not(Here_will_C1R_accS) or Here_now_C1R_ready;
+	m.addClause(c); //
+	// neccessarly
+	c = not(Here_will_C1R_mvS1) or Here_now_C1R_accS       or Here_now_C1R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C1R_accS)  or  Here_now_C1R_mvS0      or Here_will_C1R_mvS1;
+	m.addClause(c);
+	c = Here_now_C1R_accS       or not(Here_now_C1R_mvS0)  or Here_will_C1R_mvS1;
+	m.addClause(c);
+	c = not(Here_now_C1R_accS)  or not(Here_now_C1R_mvS0);
+	m.addClause(c); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	c = not(Here_will_C1R_mvS2) or Here_now_C1R_mvS1;
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS1)  or Here_will_C1R_mvS2;
+	m.addClause(c); //
+	c = not(Here_will_C1R_mvS3) or Here_now_C1R_mvS2;
+	m.addClause(c);
+	c = not(Here_now_C1R_mvS2)  or Here_will_C1R_mvS3;
+	m.addClause(c); //
+	c = not(Here_will_C1R_mvS0) or N_now_C1R_mvS3;
+	m.addClause(c); //
+	c = not(Here_now_C1R_accS)  or Here_now_C1R_mvS0       or Here_will_C1R_mvS1;
+	m.addClause(c);
+	c = Here_now_C1R_accS       or not(Here_now_C1R_mvS0)  or Here_will_C1R_mvS1;
+	m.addClause(c);
+	c = not(Here_now_C1R_accS)  or not(Here_now_C1R_mvS0);
+	m.addClause(c); //
+	c = not(Here_now_C1R_mvS3)  or S_will_C1R_ready        or S_will_C1R_mvS0;
+	m.addClause(c); //
+	c = not(Here_now_C1R_mvS3)  or Here_will_nobodyhome    or Here_will_R_mvS0;
+	m.addClause(c); //
 
-        model.addConstr(    ( Here_will_C1R_accE                         ) REQUIRES      ( Here_now_C1R_ready )                             );
-        model.addConstr(    ( Here_will_C1R_mvE1                         ) EQUIVALENT_TO ( Here_now_C1R_accE  OR  Here_now_C1R_mvE0 )       ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_C1R_mvE0                         ) REQUIRES      ( W_now_C1R_mvE1    )                              );
-        model.addConstr(    ( Here_now_C1R_accE   OR   Here_now_C1R_mvE0 ) REQUIRES      ( Here_will_C1R_mvE1 )                             );
-        model.addConstr(    ( Here_now_C1R_mvE1                          ) REQUIRES      ( E_will_C1R_ready  OR  E_will_C1R_mvE0 )          );
-        model.addConstr(    ( Here_now_C1R_mvE1                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvE0 )     );
 
-        model.addConstr(    ( Here_will_C1R_accW                         ) REQUIRES      ( Here_now_C1R_ready )                             );
-        model.addConstr(    ( Here_will_C1R_mvW1                         ) EQUIVALENT_TO ( Here_now_C1R_accW  OR  Here_now_C1R_mvW0 )       ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_C1R_mvW0                         ) REQUIRES      ( E_now_C1R_mvW1    )                              );
-        model.addConstr(    ( Here_now_C1R_accW   OR   Here_now_C1R_mvW0 ) REQUIRES      ( Here_will_C1R_mvW1 )                             );
-        model.addConstr(    ( Here_now_C1R_mvW1                          ) REQUIRES      ( W_will_C1R_ready  OR  W_will_C1R_mvW0 )          );
-        model.addConstr(    ( Here_now_C1R_mvW1                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvW0 )     );
+	
+	c = not(Here_will_C1R_accE) or Here_now_C1R_ready;
+	m.addClause(c); //
+	// neccessarly
+	c = not(Here_will_C1R_mvE1) or Here_now_C1R_accE       or Here_now_C1R_mvE0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C1R_accE)  or Here_now_C1R_mvE0       or Here_will_C1R_mvE1;
+	m.addClause(c);
+	c = Here_now_C1R_accE       or not(Here_now_C1R_mvE0)  or Here_will_C1R_mvE1;
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)  or not(Here_now_C1R_mvE0);
+	m.addClause(c); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	c = not(Here_will_C1R_mvE0) or W_now_C1R_mvE1;
+	m.addClause(c); //
+	c = not(Here_now_C1R_accE)  or Here_now_C1R_mvE0       or Here_will_C1R_mvE1;
+	m.addClause(c);
+	c = Here_now_C1R_accE       or not(Here_now_C1R_mvE0)  or Here_will_C1R_mvE1;
+	m.addClause(c);
+	c = not(Here_now_C1R_accE)  or not(Here_now_C1R_mvE0);
+	m.addClause(c); //
+	c = not(Here_now_C1R_mvE1)  or E_will_C1R_ready        or E_will_C1R_mvE0;
+	m.addClause(c); //
+	c = not(Here_now_C1R_mvE1)  or Here_will_nobodyhome    or Here_will_R_mvE0;
+	m.addClause(c); //
+
+
+	
+	c = not(Here_will_C1R_accW) or Here_now_C1R_ready;
+	m.addClause(c); //
+	// neccessarly
+	c = not(Here_will_C1R_mvW1) or Here_now_C1R_accW       or Here_now_C1R_mvW0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C1R_accW)  or Here_now_C1R_mvW0       or Here_will_C1R_mvW1;
+	m.addClause(c);
+	c = Here_now_C1R_accW       or not(Here_now_C1R_mvW0)  or Here_will_C1R_mvW1;
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)  or not(Here_now_C1R_mvW0);
+	m.addClause(c); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	c = not(Here_will_C1R_mvW0) or E_now_C1R_mvW1;
+	m.addClause(c); //
+	c = not(Here_now_C1R_accW)  or Here_now_C1R_mvW0       or Here_will_C1R_mvW1;
+	m.addClause(c);
+	c = Here_now_C1R_accW       or not(Here_now_C1R_mvW0)  or Here_will_C1R_mvW1;
+	m.addClause(c);
+	c = not(Here_now_C1R_accW)  or not(Here_now_C1R_mvW0);
+	m.addClause(c); //
+	c = not(Here_now_C1R_mvW1)  or W_will_C1R_ready        or W_will_C1R_mvW0;
+	m.addClause(c); //
+	c = not(Here_now_C1R_mvW1)  or Here_will_nobodyhome    or Here_will_R_mvW0;
+	m.addClause(c); //
+
+
+
 
         // C r o b o t  2
-        model.addConstr(    ( Here_will_C2R_accN                         ) REQUIRES      ( Here_now_C2R_ready )                             );
-        model.addConstr(    ( Here_will_C2R_mvN1                         ) EQUIVALENT_TO ( Here_now_C2R_accN  OR  Here_now_C2R_mvN0 )       ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_C2R_mvN2                         ) EQUIVALENT_TO ( Here_now_C2R_mvN1 )                              );
-        model.addConstr(    ( Here_will_C2R_mvN3                         ) EQUIVALENT_TO ( Here_now_C2R_mvN2 )                              );
-        model.addConstr(    ( Here_will_C2R_mvN0                         ) REQUIRES      ( S_now_C2R_mvN3    )                              );
-        model.addConstr(    ( Here_now_C2R_accN   OR   Here_now_C2R_mvN0 ) REQUIRES      ( Here_will_C2R_mvN1 )                             );
-        model.addConstr(    ( Here_now_C2R_mvN3                          ) REQUIRES      ( N_will_C2R_ready  OR  N_will_C2R_mvN0 )          );
-        model.addConstr(    ( Here_now_C2R_mvN3                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvN0 )     );
+	c = not(Here_will_C2R_accN) or Here_now_C2R_ready;
+	m.addClause(c); //
+	// neccesarly
+	c = not(Here_will_C2R_mvN1) or Here_now_C2R_accN       or Here_now_C2R_mvN0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C2R_accN)  or Here_now_C2R_mvN0       or Here_will_C2R_mvN1;
+	m.addClause(c);
+	c = Here_now_C2R_accN       or not(Here_now_C2R_mvN0)  or Here_will_C2R_mvN1;
+	m.addClause(c);
+	c = not(Here_now_C2R_accN)  or not(Here_now_C2R_mvN0);
+	m.addClause(c); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	c = not(Here_will_C2R_mvN2) or Here_now_C2R_mvN1;
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN1)  or Here_will_C2R_mvN2;
+	m.addClause(c); //
+	c = not(Here_will_C2R_mvN3) or Here_now_C2R_mvN2;
+	m.addClause(c);
+	c = not(Here_now_C2R_mvN2)  or Here_will_C2R_mvN3;
+	m.addClause(c); //
+	c = not(Here_will_C2R_mvN0) or S_now_C2R_mvN3;
+	m.addClause(c); //
+	c = not(Here_now_C2R_accN)  or Here_now_C2R_mvN0       or Here_will_C2R_mvN1;
+	m.addClause(c);
+	c = Here_now_C2R_accN       or not(Here_now_C2R_mvN0)  or Here_will_C2R_mvN1;
+	m.addClause(c);
+	c = not(Here_now_C2R_accN)  or not(Here_now_C2R_mvN0);
+	m.addClause(c); //
+	c = not(Here_now_C2R_mvN3)  or N_will_C2R_ready        or N_will_C2R_mvN0;
+	m.addClause(c); //
+	c = not(Here_now_C2R_mvN3)  or Here_will_nobodyhome    or Here_will_R_mvN0;
+	m.addClause(c); //
 
-        model.addConstr(    ( Here_will_C2R_accS                         ) REQUIRES      ( Here_now_C2R_ready )                             );
-        model.addConstr(    ( Here_will_C2R_mvS1                         ) EQUIVALENT_TO ( Here_now_C2R_accS  OR  Here_now_C2R_mvS0 )       ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_C2R_mvS2                         ) EQUIVALENT_TO ( Here_now_C2R_mvS1 )                              );
-        model.addConstr(    ( Here_will_C2R_mvS3                         ) EQUIVALENT_TO ( Here_now_C2R_mvS2 )                              );
-        model.addConstr(    ( Here_will_C2R_mvS0                         ) REQUIRES      ( N_now_C2R_mvS3    )                              );
-        model.addConstr(    ( Here_now_C2R_accS   OR   Here_now_C2R_mvS0 ) REQUIRES      ( Here_will_C2R_mvS1 )                             );
-        model.addConstr(    ( Here_now_C2R_mvS3                          ) REQUIRES      ( S_will_C2R_ready  OR  S_will_C2R_mvS0 )          );
-        model.addConstr(    ( Here_now_C2R_mvS3                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvS0 )     );
+	
+	c = not(Here_will_C2R_accS) or Here_now_C2R_ready;
+	m.addClause(c); //
+	// neccessarly
+	c = not(Here_will_C2R_mvS1) or Here_now_C2R_accS       or Here_now_C2R_mvS0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C2R_accS)  or  Here_now_C2R_mvS0      or Here_will_C2R_mvS1;
+	m.addClause(c);
+	c = Here_now_C2R_accS       or not(Here_now_C2R_mvS0)  or Here_will_C2R_mvS1;
+	m.addClause(c);
+	c = not(Here_now_C2R_accS)  or not(Here_now_C2R_mvS0);
+	m.addClause(c); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	c = not(Here_will_C2R_mvS2) or Here_now_C2R_mvS1;
+	m.addClause(c);
+	c = not(Here_now_C2R_mvS1)  or Here_will_C2R_mvS2;
+	m.addClause(c); //
+	c = not(Here_will_C2R_mvS3) or Here_now_C2R_mvS2;
+	m.addClause(c);
+	c = not(Here_now_C2R_mvS2)  or Here_will_C2R_mvS3;
+	m.addClause(c); //
+	c = not(Here_will_C2R_mvS0) or N_now_C2R_mvS3;
+	m.addClause(c); //
+	c = not(Here_now_C2R_accS)  or Here_now_C2R_mvS0       or Here_will_C2R_mvS1;
+	m.addClause(c);
+	c = Here_now_C2R_accS       or not(Here_now_C2R_mvS0)  or Here_will_C2R_mvS1;
+	m.addClause(c);
+	c = not(Here_now_C2R_accS)  or not(Here_now_C2R_mvS0);
+	m.addClause(c); //
+	c = not(Here_now_C2R_mvS3)  or S_will_C2R_ready        or S_will_C2R_mvS0;
+	m.addClause(c); //
+	c = not(Here_now_C2R_mvS3)  or Here_will_nobodyhome    or Here_will_R_mvS0;
+	m.addClause(c); //
 
-        model.addConstr(    ( Here_will_C2R_accE                         ) REQUIRES      ( Here_now_C2R_ready )                             );
-        model.addConstr(    ( Here_will_C2R_mvE1                         ) EQUIVALENT_TO ( Here_now_C2R_accE  OR  Here_now_C2R_mvE0 )       ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_C2R_mvE0                         ) REQUIRES      ( W_now_C2R_mvE1    )                              );
-        model.addConstr(    ( Here_now_C2R_accE   OR   Here_now_C2R_mvE0 ) REQUIRES      ( Here_will_C2R_mvE1 )                             );
-        model.addConstr(    ( Here_now_C2R_mvE1                          ) REQUIRES      ( E_will_C2R_ready  OR  E_will_C2R_mvE0 )          );
-        model.addConstr(    ( Here_now_C2R_mvE1                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvE0 )     );
 
-        model.addConstr(    ( Here_will_C2R_accW                         ) REQUIRES      ( Here_now_C2R_ready )                             );
-        model.addConstr(    ( Here_will_C2R_mvW1                         ) EQUIVALENT_TO ( Here_now_C2R_accW  OR  Here_now_C2R_mvW0 )       ); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        model.addConstr(    ( Here_will_C2R_mvW0                         ) REQUIRES      ( E_now_C2R_mvW1    )                              );
-        model.addConstr(    ( Here_now_C2R_accW   OR   Here_now_C2R_mvW0 ) REQUIRES      ( Here_will_C2R_mvW1 )                             );
-        model.addConstr(    ( Here_now_C2R_mvW1                          ) REQUIRES      ( W_will_C2R_ready  OR  W_will_C2R_mvW0 )          );
-        model.addConstr(    ( Here_now_C2R_mvW1                          ) REQUIRES      ( Here_will_nobodyhome  OR  Here_will_R_mvW0 )     );
+	
+	c = not(Here_will_C2R_accE) or Here_now_C2R_ready;
+	m.addClause(c); //
+	// neccessarly
+	c = not(Here_will_C2R_mvE1) or Here_now_C2R_accE       or Here_now_C2R_mvE0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C2R_accE)  or Here_now_C2R_mvE0       or Here_will_C2R_mvE1;
+	m.addClause(c);
+	c = Here_now_C2R_accE       or not(Here_now_C2R_mvE0)  or Here_will_C2R_mvE1;
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)  or not(Here_now_C2R_mvE0);
+	m.addClause(c); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	c = not(Here_will_C2R_mvE0) or W_now_C2R_mvE1;
+	m.addClause(c); //
+	c = not(Here_now_C2R_accE)  or Here_now_C2R_mvE0       or Here_will_C2R_mvE1;
+	m.addClause(c);
+	c = Here_now_C2R_accE       or not(Here_now_C2R_mvE0)  or Here_will_C2R_mvE1;
+	m.addClause(c);
+	c = not(Here_now_C2R_accE)  or not(Here_now_C2R_mvE0);
+	m.addClause(c); //
+	c = not(Here_now_C2R_mvE1)  or E_will_C2R_ready        or E_will_C2R_mvE0;
+	m.addClause(c); //
+	c = not(Here_now_C2R_mvE1)  or Here_will_nobodyhome    or Here_will_R_mvE0;
+	m.addClause(c); //
+
+
+	
+	c = not(Here_will_C2R_accW) or Here_now_C2R_ready;
+	m.addClause(c); //
+	// neccessarly
+	c = not(Here_will_C2R_mvW1) or Here_now_C2R_accW       or Here_now_C2R_mvW0;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_now_C2R_accW)  or Here_now_C2R_mvW0       or Here_will_C2R_mvW1;
+	m.addClause(c);
+	c = Here_now_C2R_accW       or not(Here_now_C2R_mvW0)  or Here_will_C2R_mvW1;
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)  or not(Here_now_C2R_mvW0);
+	m.addClause(c); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	c = not(Here_will_C2R_mvW0) or E_now_C2R_mvW1;
+	m.addClause(c); //
+	c = not(Here_now_C2R_accW)  or Here_now_C2R_mvW0       or Here_will_C2R_mvW1;
+	m.addClause(c);
+	c = Here_now_C2R_accW       or not(Here_now_C2R_mvW0)  or Here_will_C2R_mvW1;
+	m.addClause(c);
+	c = not(Here_now_C2R_accW)  or not(Here_now_C2R_mvW0);
+	m.addClause(c); //
+	c = not(Here_now_C2R_mvW1)  or W_will_C2R_ready        or W_will_C2R_mvW0;
+	m.addClause(c); //
+	c = not(Here_now_C2R_mvW1)  or Here_will_nobodyhome    or Here_will_R_mvW0;
+	m.addClause(c); //
     }
 
 
     // L I F T I N G + D R O P P I N G
     { // Lifting process
-        const GRBLinExpr Here_now_empty            = var(v,       t,    On_Node::empty);
-        const GRBLinExpr Here_now_C0               = var(v,       t,    On_Node::Car0);
-        const GRBLinExpr Here_now_C1               = var(v,       t,    On_Node::Car1);
-        const GRBLinExpr Here_now_C2               = var(v,       t,    On_Node::Car2);
+        CNF::Model m;
+	CNF::Clause c;
+        CNF::Var Here_now_empty            = var(v,       t,    On_Node::empty);
+	CNF::Var Here_now_C0               = var(v,       t,    On_Node::Car0);
+	CNF::Var Here_now_C1               = var(v,       t,    On_Node::Car1);
+	CNF::Var Here_now_C2               = var(v,       t,    On_Node::Car2);
 
-        const GRBLinExpr Here_now_R_ready          = var(v,       t,    NdStat::R_ready);
-        const GRBLinExpr Here_now_R_lift           = var(v,       t,    R_Vertical::lift);
-        const GRBLinExpr Here_now_R_lifting1       = var(v,       t,    R_Vertical::l1);
-        const GRBLinExpr Here_now_R_lifting2       = var(v,       t,    R_Vertical::l2);
-        const GRBLinExpr Here_now_R_lifting3       = var(v,       t,    R_Vertical::l3);
-        const GRBLinExpr Here_now_R_lifting4       = var(v,       t,    R_Vertical::l4);
+	CNF::Var Here_now_R_ready          = var(v,       t,    NdStat::R_ready);
+	CNF::Var Here_now_R_lift           = var(v,       t,    R_Vertical::lift);
+	CNF::Var Here_now_R_lifting1       = var(v,       t,    R_Vertical::l1);
+	CNF::Var Here_now_R_lifting2       = var(v,       t,    R_Vertical::l2);
+	CNF::Var Here_now_R_lifting3       = var(v,       t,    R_Vertical::l3);
+	CNF::Var Here_now_R_lifting4       = var(v,       t,    R_Vertical::l4);
 
-        const GRBLinExpr Here_will_R_lift          = var(v,       t+1,  R_Vertical::lift);
-        const GRBLinExpr Here_will_R_lifting1      = var(v,       t+1,  R_Vertical::l1);
-        const GRBLinExpr Here_will_R_lifting2      = var(v,       t+1,  R_Vertical::l2);
-        const GRBLinExpr Here_will_R_lifting3      = var(v,       t+1,  R_Vertical::l3);
-        const GRBLinExpr Here_will_R_lifting4      = var(v,       t+1,  R_Vertical::l4);
+	CNF::Var Here_will_R_lift          = var(v,       t+1,  R_Vertical::lift);
+	CNF::Var Here_will_R_lifting1      = var(v,       t+1,  R_Vertical::l1);
+	CNF::Var Here_will_R_lifting2      = var(v,       t+1,  R_Vertical::l2);
+	CNF::Var Here_will_R_lifting3      = var(v,       t+1,  R_Vertical::l3);
+	CNF::Var Here_will_R_lifting4      = var(v,       t+1,  R_Vertical::l4);
 
-        const GRBLinExpr Here_will_C0R_ready       = var(v,       t+1,  NdStat::C0R_ready);
-        const GRBLinExpr Here_will_C1R_ready       = var(v,       t+1,  NdStat::C1R_ready);
-        const GRBLinExpr Here_will_C2R_ready       = var(v,       t+1,  NdStat::C2R_ready);
+	CNF::Var Here_will_C0R_ready       = var(v,       t+1,  NdStat::C0R_ready);
+	CNF::Var Here_will_C1R_ready       = var(v,       t+1,  NdStat::C1R_ready);
+	CNF::Var Here_will_C2R_ready       = var(v,       t+1,  NdStat::C2R_ready);
         // Abbreviation:
-        const GRBLinExpr Here_will_CR_ready = Here_will_C0R_ready + Here_will_C1R_ready + Here_will_C2R_ready;
+	CNF::Var Here_will_CR_ready;
+	// neccessarly
+	c = not(Here_will_CR_ready)  or Here_will_C0R_ready        or Here_will_C1R_ready      or Here_will_C2R_ready;
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_C0R_ready) or Here_will_C1R_ready        or Here_will_C2R_ready      or Here_will_CR_ready;
+	m.addClause(c);
+	c = Here_will_C0R_ready      or not(Here_will_C1R_ready)   or Here_will_C2R_ready      or Here_will_CR_ready;
+	m.addClause(c);
+	c = Here_will_C0R_ready      or Here_will_C1R_ready        or not(Here_will_C2R_ready) or Here_will_CR_ready;
+	m.addClause(c);
+	c = not(Here_will_C0R_ready) or not(Here_will_C1R_ready);
+	m.addClause(c);
+	c = not(Here_will_C0R_ready) or not(Here_will_C2R_ready);
+	m.addClause(c);
+	c = not(Here_will_C1R_ready) or not(Here_will_C2R_ready);
+	m.addClause(c);
 
 
-        model.addConstr( Here_now_R_ready     FOLLOWS_FROM   Here_will_R_lift        );
+	c = not(Here_will_R_lift)    or Here_now_R_ready;
+	m.addClause(c); //
 
-        model.addConstr( Here_now_R_lift      EQUIVALENT_TO  Here_will_R_lifting1    );
-        model.addConstr( Here_now_R_lifting1  EQUIVALENT_TO  Here_will_R_lifting2    );
-        model.addConstr( Here_now_R_lifting2  EQUIVALENT_TO  Here_will_R_lifting3    );
-        model.addConstr( Here_now_R_lifting3  EQUIVALENT_TO  Here_will_R_lifting4    );
+	c = not(Here_now_R_lift)     or Here_will_R_lifting1;
+	m.addClause(c);
+	c = Here_now_R_lift          or not(Here_will_R_lifting1);
+	m.addClause(c); //
+	c = not(Here_now_R_lifting1) or Here_will_R_lifting2;
+	m.addClause(c);
+	c = Here_now_R_lifting1      or not(Here_will_R_lifting2);
+	m.addClause(c); //
+	c = not(Here_now_R_lifting2) or Here_will_R_lifting3;
+	m.addClause(c);
+	c = Here_now_R_lifting2      or not(Here_will_R_lifting3);
+	m.addClause(c); //
+	c = not(Here_now_R_lifting3) or Here_will_R_lifting4;
+	m.addClause(c);
+	c = Here_now_R_lifting3      or not(Here_will_R_lifting4);
+	m.addClause(c); //
+	
+	c = not(Here_will_CR_ready)  or Here_now_empty             or Here_now_R_lifting4;
+	m.addClause(c); //
 
-        model.addConstr( Here_will_CR_ready   IMPLIES   Here_now_empty OR Here_now_R_lifting4 );
-
-        model.addConstr( Here_now_R_lifting4   IMPLIES   Here_will_C0R_ready OR Here_now_C1         OR Here_now_C2     );  // maybe make these lazy?!?
-        model.addConstr( Here_now_R_lifting4   IMPLIES   Here_now_C0         OR Here_now_C1         OR Here_will_C2R_ready );
-        model.addConstr( Here_now_R_lifting4   IMPLIES   Here_will_C0R_ready OR Here_now_C1         OR Here_will_C2R_ready );
-        model.addConstr( Here_now_R_lifting4   IMPLIES   Here_will_C0R_ready OR Here_will_C1R_ready OR Here_now_C2     );
-        model.addConstr( Here_now_R_lifting4   IMPLIES   Here_now_C0         OR Here_will_C1R_ready OR Here_now_C2     );
-        model.addConstr( Here_now_R_lifting4   IMPLIES   Here_now_C0         OR Here_will_C1R_ready OR Here_will_C2R_ready );
-        model.addConstr( Here_now_R_lifting4   IMPLIES   Here_will_C0R_ready OR Here_will_C1R_ready OR Here_will_C2R_ready );
+	c = not(Here_now_R_lifting4) or Here_will_C0R_ready        or Here_now_C1         or Here_now_C2;
+	m.addClause(c);  // maybe make these lazy?!?  
+	c = not(Here_now_R_lifting4) or Here_now_C0                or Here_now_C1         or Here_will_C2R_ready;
+	m.addClause(c); //
+	c = not(Here_now_R_lifting4) or Here_will_C0R_ready        or Here_now_C1         or Here_will_C2R_ready;
+	m.addClause(c); //
+	c = not(Here_now_R_lifting4) or Here_will_C0R_ready        or Here_will_C1R_ready or Here_now_C2;
+	m.addClause(c); //
+	c = not(Here_now_R_lifting4) or Here_now_C0                or Here_will_C1R_ready or Here_now_C2;
+	m.addClause(c); //
+	c = not(Here_now_R_lifting4) or Here_now_C0                or Here_will_C1R_ready or Here_will_C2R_ready;
+	m.addClause(c); //
+	c = not(Here_now_R_lifting4) or Here_will_C0R_ready        or Here_will_C1R_ready or Here_will_C2R_ready;
+	m.addClause(c); //
     }
     { // Dropping process
-        const GRBLinExpr Here_now_C0R_ready        = var(v,       t,    NdStat::C0R_ready);
-        const GRBLinExpr Here_now_C1R_ready        = var(v,       t,    NdStat::C1R_ready);
-        const GRBLinExpr Here_now_C2R_ready        = var(v,       t,    NdStat::C2R_ready);
-        const GRBLinExpr Here_now_R_drop           = var(v,       t,    R_Vertical::drop);
+        CNF::Model m;
+	CNF::Clause c;
+        CNF::Var Here_now_C0R_ready        = var(v,       t,    NdStat::C0R_ready);
+	CNF::Var Here_now_C1R_ready        = var(v,       t,    NdStat::C1R_ready);
+	CNF::Var Here_now_C2R_ready        = var(v,       t,    NdStat::C2R_ready);
+	CNF::Var Here_now_R_drop           = var(v,       t,    R_Vertical::drop);
 
-        const GRBLinExpr Here_will_R_drop          = var(v,       t+1,  R_Vertical::drop);
-        const GRBLinExpr Here_will_R_ready         = var(v,       t+1,  NdStat::R_ready);
+	CNF::Var Here_will_R_drop          = var(v,       t+1,  R_Vertical::drop);
+	CNF::Var Here_will_R_ready         = var(v,       t+1,  NdStat::R_ready);
 
-        const GRBLinExpr Here_will_empty           = var(v,       t+1,  On_Node::empty);
-        const GRBLinExpr Here_will_C0              = var(v,       t+1,  On_Node::Car0);
-        const GRBLinExpr Here_will_C1              = var(v,       t+1,  On_Node::Car1);
-        const GRBLinExpr Here_will_C2              = var(v,       t+1,  On_Node::Car2);
+	CNF::Var Here_will_empty           = var(v,       t+1,  On_Node::empty);
+	CNF::Var Here_will_C0              = var(v,       t+1,  On_Node::Car0);
+	CNF::Var Here_will_C1              = var(v,       t+1,  On_Node::Car1);
+	CNF::Var Here_will_C2              = var(v,       t+1,  On_Node::Car2);
 
 
-        model.addConstr( Here_now_R_drop IMPLIES Here_will_R_ready );
-        model.addConstr( Here_now_C0R_ready OR Here_now_C1R_ready OR Here_now_C2R_ready   IMPLIES   Here_will_empty OR Here_will_R_drop );
 
-        model.addConstr( Here_will_R_drop   IMPLIES   Here_will_C0        OR Here_will_C1        OR Here_will_C2   );  // maybe make these lazy?!?
-        model.addConstr( Here_will_R_drop   IMPLIES   Here_now_C0R_ready  OR Here_will_C1        OR Here_will_C2   );
-        model.addConstr( Here_will_R_drop   IMPLIES   Here_will_C0        OR Here_will_C1        OR Here_now_C2R_ready  );
-        model.addConstr( Here_will_R_drop   IMPLIES   Here_now_C0R_ready  OR Here_will_C1        OR Here_now_C2R_ready  );
-        model.addConstr( Here_will_R_drop   IMPLIES   Here_now_C0R_ready  OR Here_now_C1R_ready  OR Here_will_C2   );
-        model.addConstr( Here_will_R_drop   IMPLIES   Here_will_C0        OR Here_now_C1R_ready  OR Here_will_C2   );
-        model.addConstr( Here_will_R_drop   IMPLIES   Here_will_C0        OR Here_now_C1R_ready  OR Here_now_C2R_ready  );
-        model.addConstr( Here_will_R_drop   IMPLIES   Here_now_C0R_ready  OR Here_now_C1R_ready  OR Here_now_C2R_ready  );
+	c = not(Here_now_R_drop)     or Here_will_R_ready;
+	m.addClause(c); //
+	c = not(Here_now_C0R_ready) or Here_now_C1R_ready       or Here_now_C2R_ready      or Here_will_empty                   or Here_will_R_drop;
+	m.addClause(c);
+	c = Here_now_C0R_ready      or not(Here_now_C1R_ready)  or Here_now_C2R_ready      or Here_will_empty                   or Here_will_R_drop;
+	m.addClause(c);
+	c = Here_now_C0R_ready      or Here_now_C1R_ready       or not(Here_now_C2R_ready) or Here_will_empty                   or Here_will_R_drop;
+	m.addClause(c);
+	c = not(Here_will_C0R_ready) or not(Here_will_C1R_ready);
+	m.addClause(c);
+	c = not(Here_will_C0R_ready) or not(Here_will_C2R_ready);
+	m.addClause(c);
+        c = not(Here_will_C1R_ready) or not(Here_will_C2R_ready);
+	m.addClause(c); //
+	
+
+	c = not(Here_now_R_drop)     or Here_will_C0              or Here_will_C1             or Here_will_C2;
+	m.addClause(c); // maybe make these lazy?!?
+	c = not(Here_now_R_drop)     or Here_now_C0R_ready        or Here_will_C1             or Here_will_C2;
+	m.addClause(c); //
+	c = not(Here_now_R_drop)     or Here_will_C0              or Here_will_C1             or Here_now_C2R_ready;
+	m.addClause(c); //
+	c = not(Here_now_R_drop)     or Here_now_C0R_ready        or Here_will_C1             or Here_now_C2R_ready;
+	m.addClause(c); //
+	c = not(Here_now_R_drop)     or Here_now_C0R_ready        or Here_now_C1R_ready       or Here_will_C2;
+	m.addClause(c); //
+	c = not(Here_now_R_drop)     or Here_will_C0              or Here_now_C1R_ready       or Here_will_C2;
+	m.addClause(c); //
+	c = not(Here_now_R_drop)     or Here_will_C0              or Here_now_C1R_ready       or Here_now_C2R_ready;
+	m.addClause(c); //
+	c = not(Here_now_R_drop)     or Here_now_C0R_ready        or Here_now_C1R_ready       or Here_now_C2R_ready;
+	m.addClause(c); //
     }
     {// Lift/drop and  PARKED cars
-        const GRBLinExpr Here_now_R_lifting4  = var(v,       t,      R_Vertical::l4);
-        const GRBLinExpr Here_now_R_drop      = var(v,       t,      R_Vertical::drop);
-        const GRBLinExpr Here_now_empty       = var(v,       t,      On_Node::empty);
-        const GRBLinExpr Here_now_C0          = var(v,       t,      On_Node::Car0);
-        const GRBLinExpr Here_now_C1          = var(v,       t,      On_Node::Car1);
-        const GRBLinExpr Here_now_C2          = var(v,       t,      On_Node::Car2);
+        CNF::Model m;
+	CNF::Clause c;
+        CNF::Var Here_now_R_lifting4  = var(v,       t,      R_Vertical::l4);
+	CNF::Var Here_now_R_drop      = var(v,       t,      R_Vertical::drop);
+	CNF::Var Here_now_empty       = var(v,       t,      On_Node::empty);
+	CNF::Var Here_now_C0          = var(v,       t,      On_Node::Car0);
+	CNF::Var Here_now_C1          = var(v,       t,      On_Node::Car1);
+	CNF::Var Here_now_C2          = var(v,       t,      On_Node::Car2);
 
-        const GRBLinExpr Here_will_R_lifting4 = var(v,       t+1,    R_Vertical::l4);
-        const GRBLinExpr Here_will_R_drop     = var(v,       t+1,    R_Vertical::drop);
-        const GRBLinExpr Here_will_empty      = var(v,       t+1,    On_Node::empty);
-        const GRBLinExpr Here_will_C0         = var(v,       t+1,    On_Node::Car0);
-        const GRBLinExpr Here_will_C1         = var(v,       t+1,    On_Node::Car1);
-        const GRBLinExpr Here_will_C2         = var(v,       t+1,    On_Node::Car2);
-
-        model.addConstr( Here_now_R_lifting4 + Here_now_empty ==   Here_will_R_drop  + Here_will_empty );
-
-        model.addConstr( ( Here_now_R_drop      OR Here_will_R_drop    ) IMPLIES   NOT Here_will_empty );
-        model.addConstr( ( Here_will_R_lifting4 OR Here_now_R_lifting4 ) IMPLIES   NOT Here_now_empty  );
-
-        model.addConstr( Here_will_R_drop    IMPLIES   Here_now_empty );
-        model.addConstr( Here_now_R_lifting4 IMPLIES   Here_will_empty );
-
-        model.addConstr( Here_will_C0  OR  Here_will_C1    IMPLIES    Here_now_C0  OR  Here_now_C1  OR  Here_will_R_drop  );
-        model.addConstr( Here_will_C0  OR  Here_will_C2    IMPLIES    Here_now_C0  OR  Here_now_C2  OR  Here_will_R_drop  );
-        model.addConstr( Here_will_C1  OR  Here_will_C2    IMPLIES    Here_now_C1  OR  Here_now_C2  OR  Here_will_R_drop  );
-
-        model.addConstr( Here_now_C0   OR  Here_now_C1     IMPLIES    Here_will_C0  OR  Here_will_C1  OR  Here_now_R_lifting4 );
-        model.addConstr( Here_now_C0   OR  Here_now_C2     IMPLIES    Here_will_C0  OR  Here_will_C2  OR  Here_now_R_lifting4 );
-        model.addConstr( Here_now_C1   OR  Here_now_C2     IMPLIES    Here_will_C1  OR  Here_will_C2  OR  Here_now_R_lifting4 );
+	CNF::Var Here_will_R_lifting4 = var(v,       t+1,    R_Vertical::l4);
+	CNF::Var Here_will_R_drop     = var(v,       t+1,    R_Vertical::drop);
+	CNF::Var Here_will_empty      = var(v,       t+1,    On_Node::empty);
+	CNF::Var Here_will_C0         = var(v,       t+1,    On_Node::Car0);
+	CNF::Var Here_will_C1         = var(v,       t+1,    On_Node::Car1);
+	CNF::Var Here_will_C2         = var(v,       t+1,    On_Node::Car2);
 
 
-        model.addConstr( NOT Here_now_empty  IMPLIES   NOT Here_will_empty  OR  Here_now_R_lifting4 );
+	// neccessarly
+	c = not(Here_now_R_lifting4) or Here_now_empty            or Here_will_R_drop         or Here_will_empty;
+	m.addClause(c);
+	c = Here_now_R_lifting4      or not(Here_now_empty)       or Here_will_R_drop         or Here_will_empty;
+	m.addClause(c);
+	c = not(Here_now_R_lifting4) or not(Here_now_empty);
+	m.addClause(c);
+	// sufficient
+	c = not(Here_will_R_drop)    or Here_will_empty           or Here_now_R_lifting4      or Here_now_empty;
+	m.addClause(c);
+	c = Here_will_R_drop         or not(Here_will_empty)      or Here_now_R_lifting4      or Here_now_empty;
+	m.addClause(c);
+	c = not(Here_will_R_drop)    or not(Here_will_empty);
+	m.addClause(c); //
+
+
+	
+	c = not(Here_now_R_drop)     or Here_will_R_drop          or not(Here_will_empty);
+	m.addClause(c);
+	c = Here_now_R_drop          or not(Here_will_R_drop)     or not(Here_will_empty);
+	m.addClause(c);
+	c = not(Here_now_R_drop)     or not(Here_will_R_drop);
+	m.addClause(c); //
+	c = not(Here_will_R_lifting4)or Here_now_R_lifting4       or not(Here_now_empty);
+	m.addClause(c);
+	c = Here_will_R_lifting4     or not(Here_now_R_lifting4)  or not(Here_now_empty);
+	m.addClause(c);
+	c = not(Here_will_R_lifting4)or not(Here_now_R_lifting4);
+	m.addClause(c); //
+
+
+	
+	c = not(Here_will_R_drop)    or Here_now_empty;
+	m.addClause(c); //
+	c = not( Here_now_R_lifting4)or Here_will_empty;
+	m.addClause(c); //
+
+
+	
+	c = not(Here_will_C0)        or Here_will_C1              or Here_now_C0              or Here_now_C1                       or Here_will_R_drop;
+	m.addClause(c);
+	c = Here_will_C0             or not(Here_will_C1)         or Here_now_C0              or Here_now_C1                       or Here_will_R_drop;
+	m.addClause(c);
+	c = not(Here_will_C0)        or not(Here_will_C1);
+	m.addClause(c); //
+	c = not(Here_will_C0)        or Here_will_C2              or Here_now_C0              or Here_now_C2                       or Here_will_R_drop;
+	m.addClause(c);
+	c = Here_will_C0             or not(Here_will_C2)         or Here_now_C0              or Here_now_C2                       or Here_will_R_drop;
+	m.addClause(c);
+	c = not(Here_will_C0)        or not(Here_will_C2);
+	m.addClause(c); //
+	c = not(Here_will_C1)        or Here_will_C2              or Here_now_C1              or Here_now_C2                       or Here_will_R_drop;
+	m.addClause(c);
+	c = Here_will_C1             or not(Here_will_C2)         or Here_now_C1              or Here_now_C2                       or Here_will_R_drop;
+	m.addClause(c);
+	c = not(Here_will_C1)        or not(Here_will_C2);
+	m.addClause(c); //
+
+
+	
+	c = not(Here_now_C0)         or Here_now_C1               or Here_will_C0             or Here_will_C1                      or Here_will_R_lifting4;
+	m.addClause(c);
+	c = Here_now_C0              or not(Here_now_C1)          or Here_will_C0             or Here_will_C1                      or Here_will_R_lifting4;
+	m.addClause(c);
+	c = not(Here_now_C0)         or not(Here_now_C1);
+	m.addClause(c); //
+	c = not(Here_now_C0)         or Here_now_C2               or Here_will_C0             or Here_will_C2                      or Here_will_R_lifting4;
+	m.addClause(c);
+	c = Here_now_C0              or not(Here_now_C2)          or Here_will_C0             or Here_will_C2                      or Here_will_R_lifting4;
+	m.addClause(c);
+	c = not(Here_now_C0)         or not(Here_now_C2);
+	m.addClause(c); //
+	c = not(Here_now_C1)         or Here_now_C2               or Here_will_C1             or Here_will_C2                      or Here_will_R_lifting4;
+	m.addClause(c);
+	c = Here_now_C1              or not(Here_now_C2)          or Here_will_C1             or Here_will_C2                      or Here_will_R_lifting4;
+	m.addClause(c);
+	c = not(Here_now_C1)         or not(Here_now_C2);
+	m.addClause(c); //
+
+
+	
+	c = Here_now_empty           or not(Here_will_empty)      or (Here_now_R_lifting4);
+	m.addClause(c); //
 
     }
 
@@ -1927,7 +6168,7 @@ void GridSpace::Grid_Gurobi::time_link_constraints(const XY v, const unsigned t)
 // * Callback function
 // ************************************************************************************************************************
 
-void GridSpace::Grid_Gurobi_Callback::callback() {
+void GridSpace::Grid_Sat_Callback::callback() {
     switch (where) {
     case 0:
         break;
@@ -2045,7 +6286,7 @@ void GridSpace::Grid_Gurobi_Callback::callback() {
 } //^ callback()
 
 
-bool GridSpace::Grid_Gurobi_Callback::terminal_status_matches()
+bool GridSpace::Grid_Sat_Callback::terminal_status_matches()
 {
     for (short y=0; y<my_daddy.G.NS_sz(); ++y) {
         for (short x=0; x<my_daddy.G.EW_sz(); ++x) {
@@ -2057,7 +6298,7 @@ bool GridSpace::Grid_Gurobi_Callback::terminal_status_matches()
                     for (    On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
                         const double RHS = (s.on_node==i ? 1 : 0 );
                         GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
-                        if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
+                        if (_x.size() != 1) throw std::runtime_error("Grid_Sat::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
                         GRBVar x = _x.getVar(0);
                         if ( std::fabs(getSolution(x) - RHS) > .1 )   return false;
                     } //^ for stat
@@ -2066,14 +6307,14 @@ bool GridSpace::Grid_Gurobi_Callback::terminal_status_matches()
                     for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
                         const double RHS = (s.ndstat==i ? 1 : 0 );
                         GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
-                        if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this NdStat variable (GRBLinExpr has !=1 terms).");
+                        if (_x.size() != 1) throw std::runtime_error("Grid_Sat::set_terminal_state(): There's something wrong with this NdStat variable (GRBLinExpr has !=1 terms).");
                         GRBVar x = _x.getVar(0);
                         if ( std::fabs(getSolution(x) - RHS) > .1 )   return false;
                     } //^ for
                     for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
                         const double RHS = (s.r_vert==i ? 1 : 0 );
                         GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
-                        if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this R_Vertical variable (GRBLinExpr has !=1 terms).");
+                        if (_x.size() != 1) throw std::runtime_error("Grid_Sat::set_terminal_state(): There's something wrong with this R_Vertical variable (GRBLinExpr has !=1 terms).");
                         GRBVar x = _x.getVar(0);
                         if ( std::fabs(getSolution(x) - RHS) > .1 )   return false;
                     } //^ for
@@ -2083,7 +6324,7 @@ bool GridSpace::Grid_Gurobi_Callback::terminal_status_matches()
                         const Direction d = get_direction(i);
                         if ( my_daddy.G.move(xy,d)!=nowhere ) {
                             GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
-                            if (_x.size() != 1) throw std::runtime_error("Grid_Gurobi::set_terminal_state(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
+                            if (_x.size() != 1) throw std::runtime_error("Grid_Sat::set_terminal_state(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
                             GRBVar x = _x.getVar(0);
                             val = getSolution(x);
                         }
