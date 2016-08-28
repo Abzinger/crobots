@@ -332,19 +332,19 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_car2        = var(v,       t,    On_Node::Car2);
 	
 	CNF::Clause c;
-	c = Here_now_empty             or Here_now_car0              or Here_now_car1       or Here_now_car2;
+	c = Here_now_empty      or Here_now_car0       or Here_now_car1  or Here_now_car2;
 	m.addClause(c);
-	c = not(Here_now_empty)        or not(Here_now_car0);
+	c = not(Here_now_empty) or not(Here_now_car0);
 	m.addClause(c);
-	c = not(Here_now_empty)        or not(Here_now_car1);
+	c = not(Here_now_empty) or not(Here_now_car1);
 	m.addClause(c);
-	c = not(Here_now_empty)        or not(Here_now_car2);
+	c = not(Here_now_empty) or not(Here_now_car2);
 	m.addClause(c);
-	c = not(ere_now_car0)          or not(Here_now_car1);
+	c = not(ere_now_car0)   or not(Here_now_car1);
 	m.addClause(c);
-	c = not(Here_now_car0)         or not(Here_now_car2);
+	c = not(Here_now_car0)  or not(Here_now_car2);
 	m.addClause(c);
-	c = not(Here_now_car1)         or not(Here_now_car2);
+	c = not(Here_now_car1)  or not(Here_now_car2);
 	m.addClause(c);
 	
 	CNF::Var Here_now_nobodyhome       = var(v,       t,    NdStat::nobodyhome  );
@@ -359,6 +359,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_R_vertical       = var(v,       t,    NdStat::R_vertical  );
 	
 	c = Here_now_nobodyhome                                                                                                    or Here_now_R_ready        or Here_now_C0R_ready         or Here_now_C1R_ready  or Here_now_C2R_ready                  or Here_now_R_moving       or Here_now_C0R_moving        or Here_now_C1R_moving or Here_now_C2R_moving                 or Here_now_R_vertical;
+
 	m.addClause(c);      
 	c = not(Here_now_nobodyhome) or not(Here_now_R_ready);
 	m.addClause(c);
@@ -564,6 +565,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	CNF::Var  Here_now_R_mvS1 = var(v,    t,     R_Move::mvS1);
 	CNF::Var  Here_now_R_mvS0 = var(v,    t,     R_Move::mvS0);
 	// necessarly
+<<<<<<< HEAD
 	c = not(Here_now_R_moving)                                                                                                 or Here_now_R_accE      or                         Here_now_R_mvE0                                                     or Here_now_R_accW      or                         Here_now_R_mvW0                                                     or Here_now_R_accN      or Here_now_R_mvN1      or Here_now_R_mvN0                                                     or Here_now_R_accS      or Here_now_R_mvS1      or Here_now_R_mvS0;
 	m.addClause(c);
 	// sufficient
@@ -700,6 +702,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_C0R_mvS0 = var(v,    t,     R_Move::w0_mvS0);
 
 	//necceraly
+<<<<<<< HEAD
 	c = not(Here_now_C0R_moving)               or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or Here_now_C0R_mvS0;
 	m.addClause(c);
 	// sufficient
@@ -1000,6 +1003,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_C1R_mvS0 = var(v,    t,     R_Move::w1_mvS0);
 
 	//necceraly
+<<<<<<< HEAD
 	c = not(Here_now_C1R_moving)               or                                                                                           Here_now_C1R_accE         or Here_now_C1R_mvE1      or Here_now_C1R_mvE0       or                                      Here_now_C1R_accW         or Here_now_C1R_mvW1      or Here_now_C1R_mvW0       or                                      Here_now_C1R_accN         or Here_now_C1R_mvN1      or Here_now_C1R_mvN2       or Here_now_C1R_mvN3                    or Here_now_C1R_mvN0      or                                                                                           Here_now_C1R_accS         or Here_now_C1R_mvS1      or Here_now_C1R_mvS2       or Here_now_C1R_mvS3                    or Here_now_C1R_mvS0;
 	m.addClause(c);
 	// sufficient
@@ -1297,6 +1301,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_C2R_mvS0 = var(v,    t,     R_Move::w2_mvS0);
 
 	//necceraly
+<<<<<<< HEAD
 	c = not(Here_now_C2R_moving)               or                                                                                           Here_now_C2R_accE         or Here_now_C2R_mvE1      or Here_now_C2R_mvE0      or                                       Here_now_C2R_accW         or Here_now_C2R_mvW1      or Here_now_C2R_mvW0      or                                       Here_now_C2R_accN         or Here_now_C2R_mvN1      or Here_now_C2R_mvN2      or Here_now_C2R_mvN3                     or Here_now_C2R_mvN0      or                                                                                           Here_now_C2R_accS         or Here_now_C2R_mvS1      or Here_now_C2R_mvS2      or Here_now_C2R_mvS3                     or Here_now_C2R_mvS0;
 	m.addClause(c);
 	// sufficient
@@ -2732,7 +2737,6 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	m.addClause(c);
 	c = not(E_now_R_mvW0) or not(S_now_CR_mvN3);
 	m.addClause(c);
-
 	c = not(W_now_R_accE) or not(W_now_R_mvE0);
 	m.addClause(c);
 	c = not(W_now_R_accE) or not(N_now_R_accS);
