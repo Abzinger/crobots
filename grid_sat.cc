@@ -189,8 +189,8 @@ char command[512];
 char input_CNF[512];
 void GridSpace::Grid_Sat::optimize()
 {
-  sprintf(input_CNF, "out");
-  sprintf(command,"cd ~//SAT_solver_oriented_coloring/cryptominisat-master/build; nohup ./cryptominisat5_simple %s&>Output_file &", input_CNF);
+  std::ofstream out("input_crobots")
+  sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build; nohup ./cryptominisat5_simple input_crobots&>Output_file &");
   system(command);
 } //^ optimize()
 
