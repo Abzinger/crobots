@@ -4,6 +4,7 @@
 #include "grid_sat.hh"
 #include <stdexcept>
 #include <cstdio>
+#include <cstdlib>
 #include <cmath>
 #include "CNF.hh"
 
@@ -60,12 +61,20 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
     for (short y=0; y<G.NS_sz(); ++y) {
         for (short x=0; x<G.EW_sz(); ++x) {
             XY xy {x,y};
+	    CNF::Model m;
+	    CNF::Clause c;
             if ( G.exists(xy) )  {
                 const Full_Stat s = (*p_stat0)[xy];
 
                 for (On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
-                    const double RHS = (s.on_node==i ? 1 : 0 );
-                    model.addConstr( RHS == var(xy,0,i) );
+		  //const double RHS = (s.on_node==i ? 1 : 0 );
+		  //model.addConstr( RHS == var(xy,0,i) );
+		  CNF::Var RHS = (s.on_node==i ? CNF::One : not(CNF::One) );
+		  CNF::Var lol = var(xy,0,i);
+		  c = RHS or not(lol);
+		  m.addClause(c);
+		  c = not(RHS) or lol;
+		  m.addClause(c);
                 }
                 // // punish not leaving the state through large cost
                 // for (unsigned t=1; t<t_max; ++t) {
@@ -75,16 +84,34 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
                 //     // x.set( GRB_DoubleAttr_Obj, x.get(GRB_DoubleAttr_Obj) + 100. );
                 // }
                 for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
-                    const double RHS = (s.ndstat==i ? 1 : 0 );
-                    model.addConstr( RHS == var(xy,0,i) );
+		  //const double RHS = (s.ndstat==i ? 1 : 0 );
+		  //model.addConstr( RHS == var(xy,0,i) );
+		  CNF::Var RHS = (s.ndstat==i ? CNF::One : not(CNF::One) );
+		  CNF::Var lol = var(xy,0,i);
+		  c = RHS or not(lol);
+		  m.addClause(c);
+		  c = not(RHS) or lol;
+		  m.addClause(c);
                 }
                 for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
-                    const double RHS = (s.r_vert==i ? 1 : 0 );
-                    model.addConstr( RHS == var(xy,0,i) );
+		  //const double RHS = (s.r_vert==i ? 1 : 0 );
+		  // model.addConstr( RHS == var(xy,0,i) );
+		  CNF::Var RHS = (s.r_vert==i ? CNF::One : not(CNF::One) );
+		  CNF::Var lol = var(xy,0,i);
+		  c = RHS or not(lol);
+		  m.addClause(c);
+		  c = not(RHS) or lol;
+		  m.addClause(c);
                 }
                 for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
-                    const double RHS = (s.r_mv==i ? 1 : 0 );
-                    model.addConstr( RHS == var(xy,0,i) );
+		  //const double RHS = (s.r_mv==i ? 1 : 0 );
+		  //model.addConstr( RHS == var(xy,0,i) );
+		  CNF::Var RHS = (s.r_mv==i ? CNF::One : not(CNF::One) );
+		  CNF::Var lol = var(xy,0,i);
+		  c = RHS or not(lol);
+		  m.addClause(c);
+		  c = not(RHS) or lol;
+		  m.addClause(c);
                 }
             } // if exists
         } // for x
@@ -99,29 +126,55 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
     for (short y=0; y<G.NS; ++y) {
         for (short x=0; x<G.EW; ++x) {
             XY xy {x,y};
+	    CNF::Model m;
+	    CNF::Clause c;
             if ( G.exists(xy) )  {
                 const Full_Stat s = (*p_state)[xy];
 
                 if ( s.on_node!=On_Node::empty && ( !my_opts.ignore_C0 || s.on_node!=On_Node::Car0 ) ) {
                     for (    On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
-                        const double RHS = (s.on_node==i ? 1 : 0 );
-                        model.addConstr(     RHS == var(xy,t_max,i) );
+		      //const double RHS = (s.on_node==i ? 1 : 0 );
+		      //model.addConstr(     RHS == var(xy,t_max,i) );
+		      CNF::Var RHS = (s.on_node==i ? CNF::One : not(CNF::One) );
+		      CNF::Var lol = var(xy,t_max,i);
+		      c = RHS or not(lol);
+		      m.addClause(c);
+		      c = not(RHS) or lol;
+		      m.addClause(c);
                     } //^ for stat
                 } //^ if whether to ignore C0
                 if (!my_opts.ignore_robots) {
                     for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
-                        const double RHS = (s.ndstat==i ? 1 : 0 );
-                        model.addConstr( RHS == var(xy,t_max,i) );
+		      //const double RHS = (s.ndstat==i ? 1 : 0 );
+		      //model.addConstr( RHS == var(xy,t_max,i) );
+		      CNF::Var RHS = (s.ndstat==i ? CNF::One : not(CNF::One) );
+		      CNF::Var lol = var(xy,t_max,i);
+		      c = RHS or not(lol);
+		      m.addClause(c);
+		      c = not(RHS) or lol;
+		      m.addClause(c);
                     }
                     for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
-                        const double RHS = (s.r_vert==i ? 1 : 0 );
-                        model.addConstr( RHS == var(xy,t_max,i) );
+		      //const double RHS = (s.r_vert==i ? 1 : 0 );
+		      //model.addConstr( RHS == var(xy,t_max,i) );
+		      CNF::Var RHS = (s.r_vert==i ? CNF::One : not(CNF::One) );
+		      CNF::Var lol = var(xy,t_max,i);
+		      c = RHS or not(lol);
+		      m.addClause(c);
+		      c = not(RHS) or lol;
+		      m.addClause(c);
                     }
                     for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
                         const Direction d = get_direction(i);
                         if ( G.move(xy,d)!=nowhere ) {
-                            const double RHS = (s.r_mv==i ? 1 : 0 );
-                            model.addConstr( RHS == var(xy,t_max,i) );
+			  //const double RHS = (s.r_mv==i ? 1 : 0 );
+			  //model.addConstr( RHS == var(xy,t_max,i) );
+			  CNF::Var RHS = (s.r_mv==i ? CNF::One : not(CNF::One) );
+			  CNF::Var lol = var(xy,t_max,i);
+			  c = RHS or not(lol);
+			  m.addClause(c);
+			  c = not(RHS) or lol;
+			  m.addClause(c);
                         } //^ if dir exists
                     }
                 } // if (do robots)
@@ -132,9 +185,13 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
 
 //********************************************************************************************************************************************************************************************************
 
+char command[512];
+char input_CNF[512];
 void GridSpace::Grid_Sat::optimize()
 {
-    You - need - to - implement - this - function;
+  sprintf(input_CNF, "out");
+  sprintf(command,"cd ~//SAT_solver_oriented_coloring/cryptominisat-master/build; nohup ./cryptominisat5_simple %s&>Output_file &", input_CNF);
+  system(command);
 } //^ optimize()
 
 //********************************************************************************************************************************************************************************************************
@@ -158,8 +215,8 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const On_Node wh
     if ((unsigned)what >  (unsigned)On_Node::SIZE) throw std::runtime_error("Grid_Sat::var(On_Node): On_Node argument is broken (BAD BUG)");
 
     if (v==nowhere) {
-        if (what==On_Node::empty) return 1;
-        else                      return 0;
+      if (what==On_Node::empty) return CNF::One;
+      else                      return not(CNF::One);
     } else {
         if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(On_Node): node does not exist.");
         return onnode_vars[v][t][(int)what];
@@ -173,8 +230,8 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const NdStat who
     if ((unsigned)who >  (unsigned)NdStat::SIZE) throw std::runtime_error("Grid_Sat::var(NdStat): NdStat argument is broken (BAD BUG)");
 
     if (v==nowhere) {
-        if (who==NdStat::nobodyhome) return 1;
-        else                         return 0;
+      if (who==NdStat::nobodyhome) return CNF::One;
+      else                         return not(CNF::One);
     } else {
         if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(NdStat): node does not exist.");
         return ndstat_vars[v][t][(int)who];
@@ -187,7 +244,7 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const R_Vertical
     if ((unsigned)vert == (unsigned)R_Vertical::SIZE) throw std::range_error  ("Grid_Sat::var(R_Vertical): R_Vertical argument is out of range");
     if ((unsigned)vert >  (unsigned)R_Vertical::SIZE) throw std::runtime_error("Grid_Sat::var(R_Vertical): R_Vertical argument is broken (BAD BUG)");
 
-    if (v==nowhere) return 0;
+    if (v==nowhere) return not(CNF::One);
     else {
         if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(R_Vertical): node does not exist.");
         return rvertical_vars[v][t][(int)vert];
@@ -200,7 +257,7 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const R_Move whe
     if ((unsigned)where == (unsigned)R_Move::SIZE) throw std::range_error  ("Grid_Sat::var(R_Move): R_Move argument is out of range");
     if ((unsigned)where >  (unsigned)R_Move::SIZE) throw std::runtime_error("Grid_Sat::var(R_Move): R_Move argument is broken (BAD BUG)");
 
-    if (v==nowhere) return 0;
+    if (v==nowhere) return not(CNF::One);
     else {
         if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(R_Move): node does not exist.");
         const Direction d = get_direction(where);
@@ -332,19 +389,19 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_car2        = var(v,       t,    On_Node::Car2);
 	
 	CNF::Clause c;
-	c = Here_now_empty             or Here_now_car0              or Here_now_car1       or Here_now_car2;
+	c = Here_now_empty      or Here_now_car0       or Here_now_car1  or Here_now_car2;
 	m.addClause(c);
-	c = not(Here_now_empty)        or not(Here_now_car0);
+	c = not(Here_now_empty) or not(Here_now_car0);
 	m.addClause(c);
-	c = not(Here_now_empty)        or not(Here_now_car1);
+	c = not(Here_now_empty) or not(Here_now_car1);
 	m.addClause(c);
-	c = not(Here_now_empty)        or not(Here_now_car2);
+	c = not(Here_now_empty) or not(Here_now_car2);
 	m.addClause(c);
-	c = not(ere_now_car0)          or not(Here_now_car1);
+	c = not(Here_now_car0)   or not(Here_now_car1);
 	m.addClause(c);
-	c = not(Here_now_car0)         or not(Here_now_car2);
+	c = not(Here_now_car0)  or not(Here_now_car2);
 	m.addClause(c);
-	c = not(Here_now_car1)         or not(Here_now_car2);
+	c = not(Here_now_car1)  or not(Here_now_car2);
 	m.addClause(c);
 	
 	CNF::Var Here_now_nobodyhome       = var(v,       t,    NdStat::nobodyhome  );
@@ -359,6 +416,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_R_vertical       = var(v,       t,    NdStat::R_vertical  );
 	
 	c = Here_now_nobodyhome                                                                                                    or Here_now_R_ready        or Here_now_C0R_ready         or Here_now_C1R_ready  or Here_now_C2R_ready                  or Here_now_R_moving       or Here_now_C0R_moving        or Here_now_C1R_moving or Here_now_C2R_moving                 or Here_now_R_vertical;
+
 	m.addClause(c);      
 	c = not(Here_now_nobodyhome) or not(Here_now_R_ready);
 	m.addClause(c);
@@ -736,7 +794,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	m.addClause(c);
 	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or not(Here_now_C0R_mvS3)                or Here_now_C0R_mvS0;
 	m.addClause(c);
-	c = Here_now_C0R_moving                    or                                                                                           or  Here_now_C0R_accE     or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or not(Here_now_C0R_mvS0);
+	c = Here_now_C0R_moving                    or                                                                                           Here_now_C0R_accE         or Here_now_C0R_mvE1      or Here_now_C0R_mvE0      or                                       Here_now_C0R_accW         or Here_now_C0R_mvW1      or Here_now_C0R_mvW0      or                                       Here_now_C0R_accN         or Here_now_C0R_mvN1      or Here_now_C0R_mvN2      or Here_now_C0R_mvN3                     or Here_now_C0R_mvN0      or                                                                                           Here_now_C0R_accS         or Here_now_C0R_mvS1      or Here_now_C0R_mvS2      or Here_now_C0R_mvS3                     or not(Here_now_C0R_mvS0);
 	m.addClause(c);
 	// 16 choose 2
 	c = not(Here_now_C0R_accE)                 or not(Here_now_C0R_mvE1);
@@ -1060,7 +1118,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_accS);
 	m.addClause(c);
 	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvS1);
-	m.addClause(c)
+	m.addClause(c);
 	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvS2);
 	m.addClause(c);
 	c = not(Here_now_C1R_accE)                 or not(Here_now_C1R_mvS3);
@@ -1651,7 +1709,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	CNF::Var Here_now_C2R_mvS0  = var(v,    t,     R_Move::w2_mvS0);
 
         // Abbreviations
-	CNF::Var Here_now_Cr_accE ;
+	CNF::Var Here_now_CR_accE ;
 	// neccessarly
 	c = not(Here_now_CR_accE)  or Here_now_C0R_accE      or Here_now_C1R_accE      or Here_now_C2R_accE;
 	m.addClause(c);
@@ -2732,7 +2790,6 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	m.addClause(c);
 	c = not(E_now_R_mvW0) or not(S_now_CR_mvN3);
 	m.addClause(c);
-
 	c = not(W_now_R_accE) or not(W_now_R_mvE0);
 	m.addClause(c);
 	c = not(W_now_R_accE) or not(N_now_R_accS);
@@ -3305,7 +3362,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	c = not(Here_now_R_mvE0)  or E_now_nobodyhome or E_now_R_mvE0  or E_now_R_accE                                  	                                                                               or E_now_CR_mvE1;
 	m.addClause(c);
 	c = not(Here_now_R_accE)  or E_now_nobodyhome                  or E_now_R_accE                                    	                                                                               or E_now_CR_mvE1;
-	m.addClause(C);
+	m.addClause(c);
 	c = not(Here_now_R_mvE0)  or W_now_nobodyhome or W_now_R_mvE0                                   ;
 	m.addClause(c); 
 	c = not(Here_now_R_mvW0)  or W_now_nobodyhome or W_now_R_mvW0  or W_now_R_accW                                  	                                                                               or W_now_CR_mvW1;
@@ -6027,17 +6084,17 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 
 	c = not(Here_now_R_drop)     or Here_will_R_ready;
 	m.addClause(c); //
-	c = not(Here_now_C0R_ready) or Here_now_C1R_ready       or Here_now_C2R_ready      or Here_will_empty                   or Here_will_R_drop;
+	c = not(Here_now_C0R_ready)  or Here_now_C1R_ready       or Here_now_C2R_ready      or Here_will_empty                     or Here_will_R_drop;
 	m.addClause(c);
-	c = Here_now_C0R_ready      or not(Here_now_C1R_ready)  or Here_now_C2R_ready      or Here_will_empty                   or Here_will_R_drop;
+	c = Here_now_C0R_ready       or not(Here_now_C1R_ready)  or Here_now_C2R_ready      or Here_will_empty                     or Here_will_R_drop;
 	m.addClause(c);
-	c = Here_now_C0R_ready      or Here_now_C1R_ready       or not(Here_now_C2R_ready) or Here_will_empty                   or Here_will_R_drop;
+	c = Here_now_C0R_ready       or Here_now_C1R_ready       or not(Here_now_C2R_ready) or Here_will_empty                     or Here_will_R_drop;
 	m.addClause(c);
-	c = not(Here_will_C0R_ready) or not(Here_will_C1R_ready);
+	c = not(Here_now_C0R_ready)  or not(Here_now_C1R_ready);
 	m.addClause(c);
-	c = not(Here_will_C0R_ready) or not(Here_will_C2R_ready);
+	c = not(Here_now_C0R_ready)  or not(Here_now_C2R_ready);
 	m.addClause(c);
-        c = not(Here_will_C1R_ready) or not(Here_will_C2R_ready);
+        c = not(Here_now_C1R_ready)  or not(Here_now_C2R_ready);
 	m.addClause(c); //
 	
 
