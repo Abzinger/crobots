@@ -8,6 +8,7 @@
 #include <forward_list>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 namespace CNF {
 
@@ -48,6 +49,7 @@ namespace CNF {
 
     Clause operator or (Var u, Var v)                          { Clause c; u.check(); c.c.push_front(u); v.check(); c.c.push_front(v); return c; }
 
+
     // ****************************************************************************************************
     // Formulas
 
@@ -56,6 +58,7 @@ namespace CNF {
         int         n_vars;
         unsigned    n_clauses;
         std::string f;
+        std::vector<char> the_value;
     public:
         Model(): n_vars(1), n_clauses(0) {}
 
@@ -67,6 +70,10 @@ namespace CNF {
 
         // Output
         void dump(std::ostream & out)                          { out<<"p "<<n_vars<<' '<<n_clauses<<'\n'<<One.i<<" 0\n"<<f; }
+        void read_DIMACS(std::istream & in);
+
+        bool get_value(Var v)                                  { if(abs(v.i)<1 || abs(v.i)>n_vars) throw std::runtime_error("CNF::Model::get_value(): querying non-existing variable.");  if((unsigned)abs(v.i)>=the_value.size()) throw std::runtime_error("CNF::Model::get_value(): I don't have a value for that variable."); return the_value[abs(v.i)]; }
+
     };
 
 } //^ namespace
