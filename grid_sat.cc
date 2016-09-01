@@ -189,8 +189,8 @@ char command[512];
 char input_CNF[512];
 void GridSpace::Grid_Sat::optimize()
 {
-  sprintf(input_CNF, "out");
-  sprintf(command,"cd ~//SAT_solver_oriented_coloring/cryptominisat-master/build; nohup ./cryptominisat5_simple %s&>Output_file &", input_CNF);
+  std::ofstream out("input_crobots");
+  std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build; nohup ./cryptominisat5_simple input_crobots&>Output_file &");
   system(command);
 } //^ optimize()
 
@@ -261,7 +261,7 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const R_Move whe
     else {
         if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(R_Move): node does not exist.");
         const Direction d = get_direction(where);
-        return ( G.move(v,d)==nowhere ?    (GRBLinExpr)0.   :   (GRBLinExpr)rmv_vars[v][t][(int)where]  );
+        return ( G.move(v,d)==nowhere ?    (CNF::Var)not(CNF::One)   :   (CNF::Var)rmv_vars[v][t][(int)where]  );
     }
 } // var()
 
@@ -293,9 +293,9 @@ void GridSpace::Grid_Sat::make_vars()
 
 void GridSpace::Grid_Sat::atom_vars(const XY v, const unsigned t)
 {
-    auto vartype = GRB_BINARY;
+    // auto vartype = GRB_BINARY;
     // auto vartype = GRB_CONTINUOUS;
-
+    CNF::Model m;
     // how many vars per node,time ---in total?
     constexpr int total_size = (int)On_Node::SIZE + (int)NdStat::SIZE + (int)R_Vertical::SIZE + (int)R_Move::SIZE;
 
@@ -310,22 +310,26 @@ void GridSpace::Grid_Sat::atom_vars(const XY v, const unsigned t)
     onnode_vars[v][t] = var_array+offset;
     for (On_Node i=begin_On_Node(); i!=end_On_Node(); ++i) {
         std::sprintf(var_name_buffer, "onnd[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-        var_array[offset++] = model.addVar(        0,         1,          0.,    vartype,  var_name_buffer);
+        //var_array[offset++] = model.addVar(        0,         1,          0.,    vartype,  var_name_buffer);
         //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
+	CNF::Var var_name_buffer = var(v,t,i);
     }
 
     ndstat_vars[v][t] = var_array+offset;
     for (NdStat i=begin_NdStat(); i!=end_NdStat(); ++i) {
         std::sprintf(var_name_buffer, "ndst[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-        double cost = (  i==NdStat::R_ready || i==NdStat::nobodyhome  ?  0.  :  t/(100.*t_max)  );
-        var_array[offset++] = model.addVar(        0,         1,        cost,    vartype,  var_name_buffer);
+        //double cost = (  i==NdStat::R_ready || i==NdStat::nobodyhome  ?  0.  :  t/(100.*t_max)  );
+        //var_array[offset++] = model.addVar(        0,         1,        cost,    vartype,  var_name_buffer);
         //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
+	//Not sure it works this way 
+	CNF::Var var_name_buffer = (  i==NdStat::R_ready || i==NdStat::nobodyhome  ?  0.  :  t/(100.*t_max)*var(v,t,i);
     } // for (ndstat)
 
     rvertical_vars[v][t] = var_array+offset;
     for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
         std::sprintf(var_name_buffer, "rvrt[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-        var_array[offset++] = model.addVar(0,1,0.,vartype, var_name_buffer);
+        //var_array[offset++] = model.addVar(0,1,0.,vartype, var_name_buffer);
+	CNF::Var var_name_buffer = var(v,t,i);
     }
 
 
@@ -334,8 +338,9 @@ void GridSpace::Grid_Sat::atom_vars(const XY v, const unsigned t)
         const Direction d = get_direction(i);
         if ( G.move(v,d)!=nowhere ) {
             std::sprintf(var_name_buffer, "rmv[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-            var_array[offset++] = model.addVar(        0,         1,           0,    vartype,  var_name_buffer);
+            //var_array[offset++] = model.addVar(        0,         1,           0,    vartype,  var_name_buffer);
             //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
+	    CNF::Var var_name_buffer = var(v,t,i);
         } else {
             ++offset;
         }
