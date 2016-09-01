@@ -7,6 +7,7 @@
 #include <string>
 #include <forward_list>
 #include <iostream>
+#include <stdexcept>
 
 namespace CNF {
 
@@ -21,13 +22,14 @@ namespace CNF {
         struct One {};
         Var():    i(0) {}
         Var(One): i(1) {}
+        void check() const { if (!i) throw std::runtime_error("CNF::Var::check(): non-existing variable!"); }
     };
 
     Var One{ Var::One{} };
     Var Zero = not(One);
 
     inline
-    Var operator not(Var v)                                    { Var not_v; not_v.i=-v.i; return not_v; }
+    Var operator not(Var v)                                    { v.check(); Var not_v; not_v.i=-v.i; return not_v; }
 
 
     // ****************************************************************************************************
@@ -37,14 +39,14 @@ namespace CNF {
     {
         friend class Model;
         friend Clause operator or (Var,Var);
-        Clause & operator = (Var v)                            { c.clear(); c.push_front(v); return *this; }
+        Clause & operator = (Var v)                            { v.check(); c.clear(); c.push_front(v); return *this; }
 
-        Clause & operator or (Var v)                           { c.push_front(v); return *this; }
+        Clause & operator or (Var v)                           { v.check(); c.push_front(v); return *this; }
     private:
         std::forward_list< Var > c;
     };
 
-    Clause operator or (Var u, Var v)                          { Clause c; c.c.push_front(u); c.c.push_front(v); return c; }
+    Clause operator or (Var u, Var v)                          { Clause c; u.check(); c.c.push_front(u); v.check(); c.c.push_front(v); return c; }
 
     // ****************************************************************************************************
     // Formulas

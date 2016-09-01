@@ -2,11 +2,14 @@
 // Part of the robots project
 // Author: Dirk Oliver Theis
 #include "grid_sat.hh"
+#include "CNF.hh"
+
 #include <stdexcept>
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include "CNF.hh"
+#include <fstream>
+
 
 // *****************************************************************************************************************************
 // *    Grid_Sat  member functions
@@ -39,7 +42,7 @@ GridSpace::Grid_Sat::Grid_Sat(const Grid & _G, const unsigned _t_max):
 
 GridSpace::Grid_Sat::~Grid_Sat()
 {
-    // delete GRBVar arrays
+    // delete Var arrays
     for (unsigned t=0; t<=t_max; ++t) {
         for (short y=0; y<G.NS_sz(); ++y) {
             for (short x=0; x<G.EW_sz(); ++x) {
@@ -61,8 +64,7 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
     for (short y=0; y<G.NS_sz(); ++y) {
         for (short x=0; x<G.EW_sz(); ++x) {
             XY xy {x,y};
-	    CNF::Model m;
-	    CNF::Clause c;
+		    CNF::Clause c;
             if ( G.exists(xy) )  {
                 const Full_Stat s = (*p_stat0)[xy];
 
@@ -76,13 +78,6 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
 		  c = not(RHS) or lol;
 		  m.addClause(c);
                 }
-                // // punish not leaving the state through large cost
-                // for (unsigned t=1; t<t_max; ++t) {
-                //     GRBLinExpr _x = var(xy,t,s.on_node);
-                //     if (_x.size() != 1) throw std::runtime_error("Grid_Sat::set_initial_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
-                //     // GRBVar x = _x.getVar(0);
-                //     // x.set( GRB_DoubleAttr_Obj, x.get(GRB_DoubleAttr_Obj) + 100. );
-                // }
                 for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
 		  //const double RHS = (s.ndstat==i ? 1 : 0 );
 		  //model.addConstr( RHS == var(xy,0,i) );
@@ -126,8 +121,7 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
     for (short y=0; y<G.NS; ++y) {
         for (short x=0; x<G.EW; ++x) {
             XY xy {x,y};
-	    CNF::Model m;
-	    CNF::Clause c;
+		    CNF::Clause c;
             if ( G.exists(xy) )  {
                 const Full_Stat s = (*p_state)[xy];
 
@@ -198,7 +192,7 @@ void GridSpace::Grid_Sat::optimize()
 
 std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  const
 {
-    You - need - to - implement - this - function.
+    // You - need - to - implement - this - function.
         // Look up in grid_gurobi.cc what it does there.
 } // get_solution()
 
@@ -261,7 +255,7 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const R_Move whe
     else {
         if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(R_Move): node does not exist.");
         const Direction d = get_direction(where);
-        return ( G.move(v,d)==nowhere ?    (CNF::Var)not(CNF::One)   :   (CNF::Var)rmv_vars[v][t][(int)where]  );
+        return ( G.move(v,d)==nowhere ?    CNF::Zero   :   rmv_vars[v][t][(int)where]  );
     }
 } // var()
 
@@ -293,43 +287,33 @@ void GridSpace::Grid_Sat::make_vars()
 
 void GridSpace::Grid_Sat::atom_vars(const XY v, const unsigned t)
 {
-    // auto vartype = GRB_BINARY;
-    // auto vartype = GRB_CONTINUOUS;
-    CNF::Model m;
     // how many vars per node,time ---in total?
     constexpr int total_size = (int)On_Node::SIZE + (int)NdStat::SIZE + (int)R_Vertical::SIZE + (int)R_Move::SIZE;
 
     // allocate the mem
-    CNF::Var * var_array = new GRBVar[total_size];
+    CNF::Var * var_array = new CNF::Var[total_size];
 
     // store the vars
-    char var_name_buffer[1024];  // for the variable names
+    // char var_name_buffer[1024];  // for the variable names
 
     int offset = 0;
 
     onnode_vars[v][t] = var_array+offset;
     for (On_Node i=begin_On_Node(); i!=end_On_Node(); ++i) {
-        std::sprintf(var_name_buffer, "onnd[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-        //var_array[offset++] = model.addVar(        0,         1,          0.,    vartype,  var_name_buffer);
-        //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
-	CNF::Var var_name_buffer = var(v,t,i);
+        // std::sprintf(var_name_buffer, "onnd[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
+        var_array[offset++] = model.addVar();
     }
 
     ndstat_vars[v][t] = var_array+offset;
     for (NdStat i=begin_NdStat(); i!=end_NdStat(); ++i) {
-        std::sprintf(var_name_buffer, "ndst[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-        //double cost = (  i==NdStat::R_ready || i==NdStat::nobodyhome  ?  0.  :  t/(100.*t_max)  );
-        //var_array[offset++] = model.addVar(        0,         1,        cost,    vartype,  var_name_buffer);
-        //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
-	//Not sure it works this way 
-	CNF::Var var_name_buffer = (  i==NdStat::R_ready || i==NdStat::nobodyhome  ?  0.  :  t/(100.*t_max)*var(v,t,i);
+        // std::sprintf(var_name_buffer, "ndst[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
+        var_array[offset++] = model.addVar();
     } // for (ndstat)
 
     rvertical_vars[v][t] = var_array+offset;
     for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
-        std::sprintf(var_name_buffer, "rvrt[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-        //var_array[offset++] = model.addVar(0,1,0.,vartype, var_name_buffer);
-	CNF::Var var_name_buffer = var(v,t,i);
+        // std::sprintf(var_name_buffer, "rvrt[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
+        var_array[offset++] = model.addVar();
     }
 
 
@@ -337,10 +321,8 @@ void GridSpace::Grid_Sat::atom_vars(const XY v, const unsigned t)
     for (R_Move i=begin_R_Move(); i!=end_R_Move(); ++i) {
         const Direction d = get_direction(i);
         if ( G.move(v,d)!=nowhere ) {
-            std::sprintf(var_name_buffer, "rmv[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
-            //var_array[offset++] = model.addVar(        0,         1,           0,    vartype,  var_name_buffer);
-            //                   GRBVar addVar(double lb, double ub,  double obj,  char type,  string name    )
-	    CNF::Var var_name_buffer = var(v,t,i);
+            // std::sprintf(var_name_buffer, "rmv[%.3d:(%.2d,%.2d):%s]",t,v.x,v.y, to_string(i) );
+            var_array[offset++] = model.addVar();
         } else {
             ++offset;
         }
@@ -371,12 +353,6 @@ void GridSpace::Grid_Sat::make_constraints()
     } // for y
 } // constraints()
 
-#define IMPLIES       <=
-#define REQUIRES      <=
-#define FOLLOWS_FROM  >=
-#define EQUIVALENT_TO ==
-#define OR            +
-#define NOT           1-
 
 //********************************************************************************************************************************************************************************************************
 //       A T O M   C O N S T R A I N T S
@@ -385,8 +361,8 @@ void GridSpace::Grid_Sat::make_constraints()
 
 void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 {
-      // B A S I C
-      {
+    // B A S I C
+    {
 	CNF::Model m;
 	CNF::Var Here_now_empty       = var(v,       t,    On_Node::empty);
 	CNF::Var Here_now_car0        = var(v,       t,    On_Node::Car0);
@@ -1641,25 +1617,24 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 
     // M O V E M E N T
     {
-        CNF::Model m;
-	CNF::Clause c;
-        CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
-	CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
+    	CNF::Clause c;
+        //CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
+	//CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
 	CNF::Var Here_now_R_accE    = var(v,    t,     R_Move::accE);
 	CNF::Var Here_now_R_mvE0    = var(v,    t,     R_Move::mvE0);
 	CNF::Var Here_now_R_accW    = var(v,    t,     R_Move::accW);
 	CNF::Var Here_now_R_mvW0    = var(v,    t,     R_Move::mvW0);
-	CNF::Var Here_now_R_accN    = var(v,    t,     R_Move::accN);
+	//CNF::Var Here_now_R_accN    = var(v,    t,     R_Move::accN);
 	CNF::Var Here_now_R_mvN1    = var(v,    t,     R_Move::mvN1);
 	CNF::Var Here_now_R_mvN0    = var(v,    t,     R_Move::mvN0);
 	CNF::Var Here_now_R_accS    = var(v,    t,     R_Move::accS);
 	CNF::Var Here_now_R_mvS1    = var(v,    t,     R_Move::mvS1);
 	CNF::Var Here_now_R_mvS0    = var(v,    t,     R_Move::mvS0);
-	CNF::Var Here_now_R_lift    = var(v,    t,     R_Vertical::lift);
-	CNF::Var Here_now_R_lifting1= var(v,    t,     R_Vertical::l1);
-	CNF::Var Here_now_R_lifting2= var(v,    t,     R_Vertical::l2);
-	CNF::Var Here_now_R_lifting3= var(v,    t,     R_Vertical::l3);
-	CNF::Var Here_now_R_lifting4= var(v,    t,     R_Vertical::l4);
+	//CNF::Var Here_now_R_lift    = var(v,    t,     R_Vertical::lift);
+	//CNF::Var Here_now_R_lifting1= var(v,    t,     R_Vertical::l1);
+	//CNF::Var Here_now_R_lifting2= var(v,    t,     R_Vertical::l2);
+	//CNF::Var Here_now_R_lifting3= var(v,    t,     R_Vertical::l3);
+	//CNF::Var Here_now_R_lifting4= var(v,    t,     R_Vertical::l4);
 	CNF::Var Here_now_R_drop    = var(v,    t,     R_Vertical::drop);
 	CNF::Var Here_now_C0R_ready = var(v,    t,     NdStat::C0R_ready);
 	CNF::Var Here_now_C0R_accE  = var(v,    t,     R_Move::w0_accE);
@@ -3425,8 +3400,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 
     // L I F T I N G + D R O P P I N G
     {
-        CNF::Model m;
-	CNF::Clause c;
+    	CNF::Clause c;
         CNF::Var Here_now_empty       = var(v,       t,    On_Node::empty);
 
 	CNF::Var Here_now_R_ready     = var(v,       t,    NdStat::R_ready);
@@ -3461,11 +3435,10 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 {
     if (t>=t_max) throw std::range_error("Grid_Sat::time_link_constraints(): It's too late!");
-
+    
     // B A S I C S
     {
-        CNF::Model m;
-	CNF::Clause c;
+    	CNF::Clause c;
         CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
 	CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
 	CNF::Var Here_now_R_accE    = var(v,    t,     R_Move::accE);
@@ -3648,11 +3621,10 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	c = not(Here_will_C2R_ready) or Here_now_C2R_ready                                                                                                  or W_now_C2R_mvE1                                                                                                      or E_now_C2R_mvW1                                                                                                      or S_now_C2R_mvN3                                                                                                      or N_now_C2R_mvS3                                                                                                      or Here_now_R_lifting4;
 	m.addClause(c);
     }
-
+    
     // M O V E M E N T
     {
-        CNF::Model m;
-	CNF::Clause c;
+    	CNF::Clause c;
         CNF::Var Here_now_nobodyhome= var(v,    t,     NdStat::nobodyhome);
 	CNF::Var Here_now_R_ready   = var(v,    t,     NdStat::R_ready);
 	CNF::Var Here_now_R_accE    = var(v,    t,     R_Move::accE);
@@ -5988,8 +5960,7 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 
     // L I F T I N G + D R O P P I N G
     { // Lifting process
-        CNF::Model m;
-	CNF::Clause c;
+    	CNF::Clause c;
         CNF::Var Here_now_empty            = var(v,       t,    On_Node::empty);
 	CNF::Var Here_now_C0               = var(v,       t,    On_Node::Car0);
 	CNF::Var Here_now_C1               = var(v,       t,    On_Node::Car1);
@@ -6070,8 +6041,7 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	m.addClause(c); //
     }
     { // Dropping process
-        CNF::Model m;
-	CNF::Clause c;
+    	CNF::Clause c;
         CNF::Var Here_now_C0R_ready        = var(v,       t,    NdStat::C0R_ready);
 	CNF::Var Here_now_C1R_ready        = var(v,       t,    NdStat::C1R_ready);
 	CNF::Var Here_now_C2R_ready        = var(v,       t,    NdStat::C2R_ready);
@@ -6121,8 +6091,7 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	m.addClause(c); //
     }
     {// Lift/drop and  PARKED cars
-        CNF::Model m;
-	CNF::Clause c;
+    	CNF::Clause c;
         CNF::Var Here_now_R_lifting4  = var(v,       t,      R_Vertical::l4);
 	CNF::Var Here_now_R_drop      = var(v,       t,      R_Vertical::drop);
 	CNF::Var Here_now_empty       = var(v,       t,      On_Node::empty);
@@ -6225,180 +6194,5 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
     }
 
 } // time_link_constraints()
-
-// ************************************************************************************************************************
-// * Callback function
-// ************************************************************************************************************************
-
-void GridSpace::Grid_Sat_Callback::callback() {
-    switch (where) {
-    case 0:
-        break;
-        std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: POLLING  Periodic polling callback"<<std::endl;
-    case 1:
-        break;
-        std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: PRESOLVE Currently performing presolve"<<std::endl;
-        std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
-        std::cout<<"CALLBACK: The number of columns removed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_COLDEL)<<std::endl;
-        std::cout<<"CALLBACK: The number of rows removed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_ROWDEL)<<std::endl;
-        std::cout<<"CALLBACK: The number of constraint senses changed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_SENCHG)<<std::endl;
-        std::cout<<"CALLBACK: The number of variable bounds changed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_BNDCHG)<<std::endl;
-        std::cout<<"CALLBACK: The number of coefficients changed by presolve to this point: "<<getIntInfo(GRB_CB_PRE_COECHG)<<std::endl;
-    case 2:
-        break;
-        std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: SIMPLEX  Currently in simplex"<<std::endl;
-        std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
-        std::cout<<"CALLBACK: Current simplex iteration count: "<<getDoubleInfo(GRB_CB_SPX_ITRCNT)<<std::endl;
-        std::cout<<"CALLBACK: Current simplex objective value: "<<getDoubleInfo(GRB_CB_SPX_OBJVAL)<<std::endl;
-        std::cout<<"CALLBACK: Current primal infeasibility: "<<getDoubleInfo(GRB_CB_SPX_PRIMINF)<<std::endl;
-        std::cout<<"CALLBACK: Current dual infeasibility: "<<getDoubleInfo(GRB_CB_SPX_DUALINF)<<std::endl;
-        std::cout<<"CALLBACK: Is problem current perturbed? "<<getIntInfo(GRB_CB_SPX_ISPERT)<<std::endl;
-    case 3:
-        break;
-        std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: MIP      Currently in MIP"<<std::endl;
-        std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
-        std::cout<<"CALLBACK: Current best objective: "<<getDoubleInfo(GRB_CB_MIP_OBJBST)<<std::endl;
-        std::cout<<"CALLBACK: Current best objective bound: "<<getDoubleInfo(GRB_CB_MIP_OBJBND)<<std::endl;
-        std::cout<<"CALLBACK: Current explored node count: "<<getDoubleInfo(GRB_CB_MIP_NODCNT)<<std::endl;
-        std::cout<<"CALLBACK: Current count of feasible solutions found: "<<getIntInfo(GRB_CB_MIP_SOLCNT)<<std::endl;
-        std::cout<<"CALLBACK: Current count of cutting planes applied: "<<getIntInfo(GRB_CB_MIP_CUTCNT)<<std::endl;
-        std::cout<<"CALLBACK: Current unexplored node count: "<<getDoubleInfo(GRB_CB_MIP_NODLFT)<<std::endl;
-        std::cout<<"CALLBACK: Current simplex iteration count: "<<getDoubleInfo(GRB_CB_MIP_ITRCNT)<<std::endl;
-    case 4:
-        if ( my_daddy.my_opts.exit_when_better >= getDoubleInfo(GRB_CB_MIPSOL_OBJ) ) {
-            std::cout<<"CALLBACK: found a solution which is at least as good as given parameter. Aborting."<<std::endl;
-            abort();
-        }
-        if ( my_daddy.my_opts.early_exit ) {
-            if (my_daddy.my_opts.hardwire) {
-                std::cout<<"CALLBACK: found a solution with matching terminal state (hardwired). Aborting."<<std::endl;
-                abort();
-            } else if (terminal_status_matches()) {
-                std::cout<<"CALLBACK: found a solution with matching terminal state (not hardwired). Aborting."<<std::endl;
-                abort();
-            }
-        }
-        break;
-        std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: MIPSOL   Found a new MIP incumbent"<<std::endl;
-        std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
-        std::cout<<"CALLBACK: Objective value for new solution: "<<getDoubleInfo(GRB_CB_MIPSOL_OBJ)<<std::endl;
-        std::cout<<"CALLBACK: Current best objective: "<<getDoubleInfo(GRB_CB_MIPSOL_OBJBST)<<std::endl;
-        std::cout<<"CALLBACK: Current best objective bound: "<<getDoubleInfo(GRB_CB_MIPSOL_OBJBND)<<std::endl;
-        std::cout<<"CALLBACK: Current explored node count: "<<getDoubleInfo(GRB_CB_MIPSOL_NODCNT)<<std::endl;
-        std::cout<<"CALLBACK: Current count of feasible solutions found: "<<getIntInfo(GRB_CB_MIPSOL_SOLCNT)<<std::endl;
-    case 5:
-        break;
-        std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: MIPNODE  Currently exploring a MIP node"<<std::endl;
-        std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
-        std::cout<<"CALLBACK: Optimization status of current MIP node: "<<getIntInfo(GRB_CB_MIPNODE_STATUS)<<std::endl;
-        std::cout<<"CALLBACK: Optimization status is:";
-        switch (getIntInfo(GRB_CB_MIPNODE_STATUS)) {
-        case  1: std::cout<<" LOADED          Model is loaded, but no solution information is available.\n";
-            break;
-        case  2: std::cout<<" OPTIMAL         Model was solved to optimality (subject to tolerances), and an optimal solution is available.\n";
-            break;
-        case  3: std::cout<<" INFEASIBLE      Model was proven to be infeasible.\n";
-            break;
-        case  4: std::cout<<" INF_OR_UNBD     Model was proven to be either infeasible or unbounded. To obtain a more definitive conclusion, set the DualReductions parameter to 0 and reoptimize.\n";
-            break;
-        case  5: std::cout<<" UNBOUNDED       Model was proven to be unbounded. Important note: an unbounded status indicates the presence of an unbounded ray that allows the objective to improve without limit. It says nothing about whether the model has a feasible solution. If you require information on feasibility, you should set the objective to zero and reoptimize.\n";
-            break;
-        case  6: std::cout<<" CUTOFF          Optimal objective for model was proven to be worse than the value specified in the Cutoff parameter. No solution information is available.\n";
-            break;
-        case  7: std::cout<<" ITERATION_LIMIT Optimization terminated because the total number of simplex iterations performed exceeded the value specified in the IterationLimit parameter, or because the total number of barrier iterations exceeded the value specified in the BarIterLimit parameter.\n";
-            break;
-        case  8: std::cout<<" NODE_LIMIT      Optimization terminated because the total number of branch-and-cut nodes explored exceeded the value specified in the NodeLimit parameter.\n";
-            break;
-        case  9: std::cout<<" TIME_LIMIT      Optimization terminated because the time expended exceeded the value specified in the TimeLimit parameter.\n";
-            break;
-        case 10: std::cout<<" SOLUTION_LIMIT  Optimization terminated because the number of solutions found reached the value specified in the SolutionLimit parameter.\n";
-            break;
-        case 11: std::cout<<" INTERRUPTED     Optimization was terminated by the user.\n";
-            break;
-        case 12: std::cout<<" NUMERIC         Optimization was terminated due to unrecoverable numerical difficulties.\n";
-            break;
-        case 13: std::cout<<" SUBOPTIMAL      Unable to satisfy optimality tolerances; a sub-optimal solution is available.\n";
-            break;
-        case 14: std::cout<<" INPROGRESS      An asynchronous optimization call was made, but the associated optimization run is not yet complete.\n";
-            break;
-        default: std::cout<<" WEIRD           You shoulnd't be here!!!\n";
-        }
-        std::cout<<"CALLBACK: Current best objective: "<<getDoubleInfo(GRB_CB_MIPNODE_OBJBST)<<std::endl;
-        std::cout<<"CALLBACK: Current best objective bound: "<<getDoubleInfo(GRB_CB_MIPNODE_OBJBND)<<std::endl;
-        std::cout<<"CALLBACK: Current explored node count: "<<getDoubleInfo(GRB_CB_MIPNODE_NODCNT)<<std::endl;
-        std::cout<<"CALLBACK: Current count of feasible solutions found: "<<getIntInfo(GRB_CB_MIPNODE_SOLCNT)<<std::endl;
-    case 6:
-        break;
-        // std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: MESSAGE  Printing a log message"<<std::endl;
-        // std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
-        // std::cout<<"CALLBACK: The message that is being printed: "<<getStringInfo(GRB_CB_MSG_STRING)<<std::endl;
-    case 7:
-        break;
-        std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: BARRIER  Currently in barrier"<<std::endl;
-        std::cout<<"CALLBACK: Elapsed solver runtime (seconds): "<<getDoubleInfo(GRB_CB_RUNTIME)<<std::endl;
-        std::cout<<"CALLBACK: Current barrier iteration count: "<<getIntInfo(GRB_CB_BARRIER_ITRCNT)<<std::endl;
-        std::cout<<"CALLBACK: Primal objective value for current barrier iterate: "<<getDoubleInfo(GRB_CB_BARRIER_PRIMOBJ)<<std::endl;
-        std::cout<<"CALLBACK: Dual objective value for current barrier iterate: "<<getDoubleInfo(GRB_CB_BARRIER_DUALOBJ)<<std::endl;
-        std::cout<<"CALLBACK: Primal infeasibility for current barrier iterate: "<<getDoubleInfo(GRB_CB_BARRIER_PRIMINF)<<std::endl;
-        std::cout<<"CALLBACK: Dual infeasibility for current barrier iterate: "<<getDoubleInfo(GRB_CB_BARRIER_DUALINF)<<std::endl;
-        std::cout<<"CALLBACK: Complementarity violation for current barrier iterate: "<<getDoubleInfo(GRB_CB_BARRIER_COMPL)<<std::endl;
-    default:
-        std::cout<<"CALLBACK: HEY, GUROBI CALLED BACK: WEIRD   You're not supposed to be here!!!"<<std::endl;
-    }
-} //^ callback()
-
-
-bool GridSpace::Grid_Sat_Callback::terminal_status_matches()
-{
-    for (short y=0; y<my_daddy.G.NS_sz(); ++y) {
-        for (short x=0; x<my_daddy.G.EW_sz(); ++x) {
-            XY xy {x,y};
-            if ( my_daddy.G.exists(xy) )  {
-                const Full_Stat s = (*my_daddy.p_terminal_state)[xy];
-
-                if ( s.on_node!=On_Node::empty && ( !my_daddy.my_opts.ignore_C0 || s.on_node!=On_Node::Car0 ) ) {
-                    for (    On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
-                        const double RHS = (s.on_node==i ? 1 : 0 );
-                        GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
-                        if (_x.size() != 1) throw std::runtime_error("Grid_Sat::set_terminal_state(): There's something wrong with this On_Node variable (GRBLinExpr has !=1 terms).");
-                        GRBVar x = _x.getVar(0);
-                        if ( std::fabs(getSolution(x) - RHS) > .1 )   return false;
-                    } //^ for stat
-                } //^ if whether to ignore C0
-                if (!my_daddy.my_opts.ignore_robots) {
-                    for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
-                        const double RHS = (s.ndstat==i ? 1 : 0 );
-                        GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
-                        if (_x.size() != 1) throw std::runtime_error("Grid_Sat::set_terminal_state(): There's something wrong with this NdStat variable (GRBLinExpr has !=1 terms).");
-                        GRBVar x = _x.getVar(0);
-                        if ( std::fabs(getSolution(x) - RHS) > .1 )   return false;
-                    } //^ for
-                    for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
-                        const double RHS = (s.r_vert==i ? 1 : 0 );
-                        GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
-                        if (_x.size() != 1) throw std::runtime_error("Grid_Sat::set_terminal_state(): There's something wrong with this R_Vertical variable (GRBLinExpr has !=1 terms).");
-                        GRBVar x = _x.getVar(0);
-                        if ( std::fabs(getSolution(x) - RHS) > .1 )   return false;
-                    } //^ for
-                    for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
-                        const double RHS = (s.r_mv==i ? 1 : 0 );
-                        double val = 0.;
-                        const Direction d = get_direction(i);
-                        if ( my_daddy.G.move(xy,d)!=nowhere ) {
-                            GRBLinExpr _x = my_daddy.var(xy,my_daddy.t_max,i);
-                            if (_x.size() != 1) throw std::runtime_error("Grid_Sat::set_terminal_state(): There's something wrong with this R_Move variable (GRBLinExpr has !=1 terms).");
-                            GRBVar x = _x.getVar(0);
-                            val = getSolution(x);
-                        }
-                        if ( std::fabs(val - RHS) > .1 )   return false;
-                    } //^ for
-                } // if (do robots)
-            } // if exists
-        } // for x
-    } // for y
-    return true;
-} //^ terminal_status_matches()
-
-
 
 // EOF grid_gurobi.cc
