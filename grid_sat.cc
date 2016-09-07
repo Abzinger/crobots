@@ -178,22 +178,26 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
 
 //********************************************************************************************************************************************************************************************************
 
-char command[512];
-char input_CNF[512];
 void GridSpace::Grid_Sat::optimize()
 {
-  std::ofstream out("input_crobots");
-  model.dump(out);
-  std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build; nohup ./cryptominisat5_simple input_crobots&>Output_file &");
-  system(command);
+    static char command[512];
+    // static char input_CNF[512];
+    {
+        std::ofstream out("input_crobots");
+        model.dump(out);
+    }
+    std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build; nohup ./cryptominisat5_simple input_crobots&>Output_file &");
+    system(command);
+    {
+        std::ifstream sat_output("Output_file");
+        model.read_DIMACS(sat_output);
+    }
 } //^ optimize()
 
 //********************************************************************************************************************************************************************************************************
 
 std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  const
 {
-  std::ifstream sat_output("Output_file");
-  model.read_DIMACS(sat_output);
   std::vector< Stat_Vector_t > fullsol (t_max+1, G);
   for (unsigned t=0; t<=t_max; ++t) {
     XY v {0,0};
