@@ -14,8 +14,6 @@
 // *****************************************************************************************************************************
 // *    Grid_Sat  member functions
 // *****************************************************************************************************************************
-
-std::ofstream out("input_crobots");
 GridSpace::Grid_Sat::Grid_Sat(const Grid & _G, const unsigned _t_max):
     G                          {_G},
     t_max                      {_t_max},
@@ -78,7 +76,6 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
 		  model.addClause(c);
 		  c = not(RHS) or lol;
 		  model.addClause(c);
-		  model.dump(out);
                 }
                 for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
 		  //const double RHS = (s.ndstat==i ? 1 : 0 );
@@ -89,7 +86,6 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
 		  model.addClause(c);
 		  c = not(RHS) or lol;
 		  model.addClause(c);
-		  model.dump(out);
                 }
                 for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
 		  //const double RHS = (s.r_vert==i ? 1 : 0 );
@@ -100,7 +96,6 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
 		  model.addClause(c);
 		  c = not(RHS) or lol;
 		  model.addClause(c);
-		  model.dump(out);
                 }
                 for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
 		  //const double RHS = (s.r_mv==i ? 1 : 0 );
@@ -111,7 +106,6 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
 		  model.addClause(c);
 		  c = not(RHS) or lol;
 		  model.addClause(c);
-		  model.dump(out);
                 }
             } // if exists
         } // for x
@@ -140,7 +134,6 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
 		      model.addClause(c);
 		      c = not(RHS) or lol;
 		      model.addClause(c);
-		      model.dump(out);
                     } //^ for stat
                 } //^ if whether to ignore C0
                 if (!my_opts.ignore_robots) {
@@ -153,7 +146,6 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
 		      model.addClause(c);
 		      c = not(RHS) or lol;
 		      model.addClause(c);
-		      model.dump(out);
                     }
                     for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
 		      //const double RHS = (s.r_vert==i ? 1 : 0 );
@@ -164,7 +156,6 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
 		      model.addClause(c);
 		      c = not(RHS) or lol;
 		      model.addClause(c);
-		      model.dump(out);
                     }
                     for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
                         const Direction d = get_direction(i);
@@ -177,7 +168,6 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
 			  model.addClause(c);
 			  c = not(RHS) or lol;
 			  model.addClause(c);
-			  model.dump(out);
                         } //^ if dir exists
                     }
                 } // if (do robots)
@@ -192,6 +182,8 @@ char command[512];
 char input_CNF[512];
 void GridSpace::Grid_Sat::optimize()
 {
+  std::ofstream out("input_crobots");
+  model.dump(out);
   std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build; nohup ./cryptominisat5_simple input_crobots&>Output_file &");
   system(command);
 } //^ optimize()
@@ -211,7 +203,7 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  con
 	  On_Node on_node = On_Node::SIZE;
 	  for (On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
 	    CNF::Var x = var(v,t,i);
-	    const double val = model.get_value(x);
+	    const bool val = model.get_value(x);
 	    if (val>.1 && val<.9)    throw std::runtime_error("Grid_Sat::get_solution(): This On_Node variable doesn't appear to be integral.");
 	    if (val > .5) {
 	      if (on_node!=On_Node::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 On_Node variables with value 1.");
@@ -221,7 +213,7 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  con
 	  NdStat ndstat = NdStat::SIZE;
 	  for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
 	    CNF::Var x = var(v,t,i);
-	    const double val = model.get_value(x);
+	    const bool val = model.get_value(x);
 	    if (val>.1 && val<.9) throw std::runtime_error("Grid_Sat::get_solution(): This NdStat variable doesn't appear to be integral.");
 	    if (val > .5) {
 	      if (ndstat!=NdStat::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 NdStat variables with value 1.");
@@ -232,7 +224,7 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  con
 	  R_Vertical r_vert = R_Vertical::SIZE;
 	  for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
 	    CNF::Var x = var(v,t,i);
-	    const double val = model.get_value(x);
+	    const bool val = model.get_value(x);
 	    if (val>.1 && val<.9) throw std::runtime_error("Grid_Sat::get_solution(): This R_Vertical variable doesn't appear to be integral.");
 	    if (val > .5) {
 	      if (r_vert!=R_Vertical::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 R_Vertical variables with value 1.");
@@ -243,7 +235,7 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  con
 	  R_Move r_mv = R_Move::SIZE;
 	  for (R_Move     i=begin_R_Move();     i!=end_R_Move();     ++i) {
 	    const Direction d = get_direction(i);
-	    double val = 0.;
+	    bool val = 0;
 	    if ( G.move(v,d)!=nowhere ) {
 	      CNF::Var x = var(v,t,i);
 	      val = model.get_value(x);
@@ -1681,7 +1673,6 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	c = not(Here_now_C2R_mvS3)                 or not(Here_now_C2R_mvS0);
 	model.addClause(c);
 
-	model.dump(out);
     } // endof B A S I C
 
     // M O V E M E N T
@@ -6016,8 +6007,6 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	model.addClause(c);
 	c = not(Here_now_C2R_mvW0) or E_now_nobodyhome or W_now_C0R_mvW0 or W_now_C1R_mvW0 or W_now_C2R_mvW0;
 	model.addClause(c);
-
-	model.dump(out);
     }
 
 
@@ -6046,8 +6035,6 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	model.addClause(c);
 	c = not(Here_now_R_drop)     or  not(Here_now_empty);
 	model.addClause(c);
-
-	model.dump(out);
     }
 
 } // atom_constraints()
@@ -6245,8 +6232,6 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	model.addClause(c);
 	c = not(Here_will_C2R_ready) or Here_now_C2R_ready                                                                                                  or W_now_C2R_mvE1                                                                                                      or E_now_C2R_mvW1                                                                                                      or S_now_C2R_mvN3                                                                                                      or N_now_C2R_mvS3                                                                                                      or Here_now_R_lifting4;
 	model.addClause(c);
-
-	model.dump(out);
     }
     
     // M O V E M E N T
@@ -7168,8 +7153,6 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	model.addClause(c); //
 	c = not(Here_now_C2R_mvW1)  or Here_will_nobodyhome    or Here_will_R_mvW0;
 	model.addClause(c); //
-
-	model.dump(out);	
     }
 
 
@@ -7240,8 +7223,6 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	model.addClause(c); //
 	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_will_C1R_ready or Here_will_C2R_ready;
 	model.addClause(c); //
-
-	model.dump(out);
 	
     }
     { // Dropping process
@@ -7293,8 +7274,6 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	model.addClause(c); //
 	c = not(Here_now_R_drop)     or Here_now_C0R_ready        or Here_now_C1R_ready       or Here_now_C2R_ready;
 	model.addClause(c); //
-
-	model.dump(out);	
     }
     {// Lift/drop and  PARKED cars
     	CNF::Clause c;
@@ -7396,8 +7375,6 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	
 	c = Here_now_empty           or not(Here_will_empty)      or (Here_now_R_lifting4);
 	model.addClause(c); //
-
-	model.dump(out);
     }
 
 } // time_link_constraints()
