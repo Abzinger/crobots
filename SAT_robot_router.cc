@@ -22,8 +22,6 @@ static
 int parse_options(int argc, char *const*argv,
                   const char *                                  *p_filename,
                   int                                           *p_t_max,
-                  bool                                          *p_hardwire,
-                  bool                                          *p_early_exit,
                   bool                                          *p_ignore_robots,
                   bool                                          *p_ignore_C0);
 
@@ -35,21 +33,16 @@ int main(int argc, char *const*argv) try
 
     const char * filename;
     int          t_max;
-    bool         hardwire;
-    bool         early_exit;
     bool         ignore_robots;
     bool         ignore_C0;
 
     const int errval=parse_options(argc,argv,
                                    &filename, &t_max,
-                                   &hardwire, &early_exit,
                                    &ignore_robots, &ignore_C0);
     if (errval) return errval;
 
     std::cout<<"File:                     "<<filename                        <<'\n'
              <<"t_max:                    "<<t_max                           <<'\n'
-             <<"Hardwire terminal state:  "<<(hardwire ? "yes" : "no")       <<'\n'
-             <<"Early exit:               "<<(early_exit ? "yes" : "no")     <<'\n'
              <<"Ignoring robots:          "<<(ignore_robots ? "yes" : "no")  <<'\n'
              <<"Ignoring type-0 cars:     "<<(ignore_C0 ? "yes" : "no")      <<'\n';
 
@@ -140,8 +133,6 @@ catch(...) {
 int parse_options(int argc, char *const*argv,
                   const char *                                  *p_filename,
                   int                                           *p_t_max,
-                  bool                                          *p_hardwire,
-                  bool                                          *p_early_exit,
                   bool                                          *p_ignore_robots,
                   bool                                          *p_ignore_C0)
 {
@@ -150,9 +141,6 @@ int parse_options(int argc, char *const*argv,
         " where  filename    is the name of a instance file in robroute format;\n"
         "        t_max       is the maximum time.\n"
         "Options:\n"
-        " -w       The terminal state is hardwired into the model\n"
-        "          (default: it's in the objecive function).\n"
-        " -x       exit as soon as a solution with matching terminal state is found\n"
         " -i ign   In the terminal state, ignore:\n"
         "          nothing (default),             if ign=0;\n"
         "          the positions of the robots,   if ign=R;\n"
@@ -164,19 +152,15 @@ int parse_options(int argc, char *const*argv,
     *p_t_max    = -2000000;
 
     // defaults:
-    *p_hardwire        = false;
-    *p_early_exit      = false;
     *p_ignore_robots   = false;
     *p_ignore_C0       = false;
 
-    const char * options = "hwxf:t:i:";
+    const char * options = "hf:t:i:";
     for (char arg=getopt(argc, argv, options); arg!=-1; arg=getopt(argc, argv, options) ) {
         switch (arg) {
         case 'h': std::cout<<usgMsg;                   return 1;
         case 'f': *p_filename = optarg;                break;
         case 't': *p_t_max    = std::atoi(optarg);     break;
-        case 'w': *p_hardwire = true;                  break;
-        case 'x': *p_early_exit = true;                break;
         case 'i': if (std::string(optarg)=="0")  *p_ignore_robots=false, *p_ignore_C0=false;
             else  if (std::string(optarg)=="R")  *p_ignore_robots=true;
             else  if (std::string(optarg)=="C0") *p_ignore_C0=true;
