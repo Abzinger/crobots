@@ -208,8 +208,7 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  con
 	  for (On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
 	    CNF::Var x = var(v,t,i);
 	    const bool val = model.get_value(x);
-	    if (val>.1 && val<.9)    throw std::runtime_error("Grid_Sat::get_solution(): This On_Node variable doesn't appear to be integral.");
-	    if (val > .5) {
+	    if (val) {
 	      if (on_node!=On_Node::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 On_Node variables with value 1.");
 	      on_node=i;
 	    }
@@ -218,8 +217,7 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  con
 	  for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
 	    CNF::Var x = var(v,t,i);
 	    const bool val = model.get_value(x);
-	    if (val>.1 && val<.9) throw std::runtime_error("Grid_Sat::get_solution(): This NdStat variable doesn't appear to be integral.");
-	    if (val > .5) {
+	    if (val) {
 	      if (ndstat!=NdStat::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 NdStat variables with value 1.");
 	      ndstat=i;
 	    }
@@ -229,8 +227,7 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  con
 	  for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
 	    CNF::Var x = var(v,t,i);
 	    const bool val = model.get_value(x);
-	    if (val>.1 && val<.9) throw std::runtime_error("Grid_Sat::get_solution(): This R_Vertical variable doesn't appear to be integral.");
-	    if (val > .5) {
+	    if (val) {
 	      if (r_vert!=R_Vertical::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 R_Vertical variables with value 1.");
 	      r_vert=i;
 	    }
@@ -244,8 +241,7 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  con
 	      CNF::Var x = var(v,t,i);
 	      val = model.get_value(x);
 	    }
-	    if (val>.1 && val<.9) throw std::runtime_error("Grid_Sat::get_solution(): This R_Move variable doesn't appear to be integral.");
-	    if (val > .5) {
+	    if (val) {
 	      if (r_mv!=R_Move::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 R_Move variables with value 1.");
 	      r_mv=i;
 	    }
