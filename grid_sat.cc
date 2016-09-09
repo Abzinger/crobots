@@ -63,7 +63,7 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
     for (short y=0; y<G.NS_sz(); ++y) {
         for (short x=0; x<G.EW_sz(); ++x) {
             XY xy {x,y};
-		    CNF::Clause c;
+	    CNF::Clause c;
             if ( G.exists(xy) )  {
                 const Full_Stat s = (*p_stat0)[xy];
 
@@ -181,13 +181,16 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
 void GridSpace::Grid_Sat::optimize()
 {
     static char command[512];
+    static char command_2[512];
     // static char input_CNF[512];
     {
         std::ofstream out("input_crobots");
         model.dump(out);
     }
-    std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build; nohup ./cryptominisat5_simple input_crobots&>Output_file &");
+    std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build; ./cryptominisat5_simple input_crobots&>Output_file &");
     system(command);
+    // std::sprintf(command,"cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build; cp Output_file ~/crobots; rm Outputfile; rm input_crobots");
+    system(command_2);
     {
         std::ifstream sat_output("Output_file");
         model.read_DIMACS(sat_output);
