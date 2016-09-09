@@ -70,7 +70,7 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
                 for (On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
 		  //const double RHS = (s.on_node==i ? 1 : 0 );
 		  //model.addConstr( RHS == var(xy,0,i) );
-		  CNF::Var RHS = (s.on_node==i ? CNF::One : not(CNF::One) );
+		  CNF::Var RHS = (s.on_node==i ? CNF::One : CNF::Zero );
 		  CNF::Var lol = var(xy,0,i);
 		  c = RHS or not(lol);
 		  model.addClause(c);
@@ -80,7 +80,7 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
                 for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
 		  //const double RHS = (s.ndstat==i ? 1 : 0 );
 		  //model.addConstr( RHS == var(xy,0,i) );
-		  CNF::Var RHS = (s.ndstat==i ? CNF::One : not(CNF::One) );
+		  CNF::Var RHS = (s.ndstat==i ? CNF::One : CNF::Zero );
 		  CNF::Var lol = var(xy,0,i);
 		  c = RHS or not(lol);
 		  model.addClause(c);
@@ -90,7 +90,7 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
                 for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
 		  //const double RHS = (s.r_vert==i ? 1 : 0 );
 		  // model.addConstr( RHS == var(xy,0,i) );
-		  CNF::Var RHS = (s.r_vert==i ? CNF::One : not(CNF::One) );
+		  CNF::Var RHS = (s.r_vert==i ? CNF::One : CNF::Zero );
 		  CNF::Var lol = var(xy,0,i);
 		  c = RHS or not(lol);
 		  model.addClause(c);
@@ -100,7 +100,7 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
                 for (R_Move       i=begin_R_Move();       i!=end_R_Move();       ++i) {
 		  //const double RHS = (s.r_mv==i ? 1 : 0 );
 		  //model.addConstr( RHS == var(xy,0,i) );
-		  CNF::Var RHS = (s.r_mv==i ? CNF::One : not(CNF::One) );
+		  CNF::Var RHS = (s.r_mv==i ? CNF::One : CNF::Zero );
 		  CNF::Var lol = var(xy,0,i);
 		  c = RHS or not(lol);
 		  model.addClause(c);
@@ -128,7 +128,7 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
                     for (    On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
 		      //const double RHS = (s.on_node==i ? 1 : 0 );
 		      //model.addConstr(     RHS == var(xy,t_max,i) );
-		      CNF::Var RHS = (s.on_node==i ? CNF::One : not(CNF::One) );
+		      CNF::Var RHS = (s.on_node==i ? CNF::One : CNF::Zero );
 		      CNF::Var lol = var(xy,t_max,i);
 		      c = RHS or not(lol);
 		      model.addClause(c);
@@ -140,7 +140,7 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
                     for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
 		      //const double RHS = (s.ndstat==i ? 1 : 0 );
 		      //model.addConstr( RHS == var(xy,t_max,i) );
-		      CNF::Var RHS = (s.ndstat==i ? CNF::One : not(CNF::One) );
+		      CNF::Var RHS = (s.ndstat==i ? CNF::One : CNF::Zero );
 		      CNF::Var lol = var(xy,t_max,i);
 		      c = RHS or not(lol);
 		      model.addClause(c);
@@ -150,7 +150,7 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
                     for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
 		      //const double RHS = (s.r_vert==i ? 1 : 0 );
 		      //model.addConstr( RHS == var(xy,t_max,i) );
-		      CNF::Var RHS = (s.r_vert==i ? CNF::One : not(CNF::One) );
+		      CNF::Var RHS = (s.r_vert==i ? CNF::One : CNF::Zero );
 		      CNF::Var lol = var(xy,t_max,i);
 		      c = RHS or not(lol);
 		      model.addClause(c);
@@ -162,7 +162,7 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
                         if ( G.move(xy,d)!=nowhere ) {
 			  //const double RHS = (s.r_mv==i ? 1 : 0 );
 			  //model.addConstr( RHS == var(xy,t_max,i) );
-			  CNF::Var RHS = (s.r_mv==i ? CNF::One : not(CNF::One) );
+			  CNF::Var RHS = (s.r_mv==i ? CNF::One : CNF::Zero );
 			  CNF::Var lol = var(xy,t_max,i);
 			  c = RHS or not(lol);
 			  model.addClause(c);
@@ -270,7 +270,7 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const On_Node wh
 
     if (v==nowhere) {
       if (what==On_Node::empty) return CNF::One;
-      else                      return not(CNF::One);
+      else                      return CNF::Zero;
     } else {
         if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(On_Node): node does not exist.");
         return onnode_vars[v][t][(int)what];
@@ -285,7 +285,7 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const NdStat who
 
     if (v==nowhere) {
       if (who==NdStat::nobodyhome) return CNF::One;
-      else                         return not(CNF::One);
+      else                         return CNF::Zero;
     } else {
         if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(NdStat): node does not exist.");
         return ndstat_vars[v][t][(int)who];
@@ -298,7 +298,7 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const R_Vertical
     if ((unsigned)vert == (unsigned)R_Vertical::SIZE) throw std::range_error  ("Grid_Sat::var(R_Vertical): R_Vertical argument is out of range");
     if ((unsigned)vert >  (unsigned)R_Vertical::SIZE) throw std::runtime_error("Grid_Sat::var(R_Vertical): R_Vertical argument is broken (BAD BUG)");
 
-    if (v==nowhere) return not(CNF::One);
+    if (v==nowhere) return CNF::Zero;
     else {
         if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(R_Vertical): node does not exist.");
         return rvertical_vars[v][t][(int)vert];
@@ -311,7 +311,7 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const R_Move whe
     if ((unsigned)where == (unsigned)R_Move::SIZE) throw std::range_error  ("Grid_Sat::var(R_Move): R_Move argument is out of range");
     if ((unsigned)where >  (unsigned)R_Move::SIZE) throw std::runtime_error("Grid_Sat::var(R_Move): R_Move argument is broken (BAD BUG)");
 
-    if (v==nowhere) return not(CNF::One);
+    if (v==nowhere) return CNF::Zero;
     else {
         if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(R_Move): node does not exist.");
         const Direction d = get_direction(where);
