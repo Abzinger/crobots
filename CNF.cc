@@ -2,6 +2,11 @@
 
 #include <stdexcept>
 
+CNF::Var CNF::One { CNF::Var::One{} };
+CNF::Var CNF::Zero = not(One);
+
+
+
 void CNF::Model::addClause(const Clause & c)
 {
     for (auto v=c.c.begin(); v!=c.c.end(); ++v)  {

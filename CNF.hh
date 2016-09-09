@@ -26,8 +26,7 @@ namespace CNF {
         void check() const { if (!i) throw std::runtime_error("CNF::Var::check(): non-existing variable!"); }
     };
 
-    Var One{ Var::One{} };
-    Var Zero = not(One);
+    extern Var Zero,One;
 
     inline
     Var operator not(Var v)                                    { v.check(); Var not_v; not_v.i=-v.i; return not_v; }
@@ -47,6 +46,7 @@ namespace CNF {
         std::forward_list< Var > c;
     };
 
+    inline
     Clause operator or (Var u, Var v)                          { Clause c; u.check(); c.c.push_front(u); v.check(); c.c.push_front(v); return c; }
 
 
