@@ -60,13 +60,13 @@ namespace CNF {
         std::string f;
         std::vector<char> the_value;
     public:
-        Model(): n_vars(1), n_clauses(0) {}
+        Model(): n_vars(1), n_clauses(1) {}
 
         // Variables:
         Var addVar()                                           { Var v; v.i = ++n_vars;  return v; }
 
         // Clauses
-        void addClause(const Clause & c);
+        unsigned addClause(const Clause & c);
 
         // Output
         void dump(std::ostream & out)                          { out<<"p "<<n_vars<<' '<<n_clauses<<'\n'<<One.i<<"  0\n"<<f; }
