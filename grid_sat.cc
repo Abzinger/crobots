@@ -208,12 +208,11 @@ void GridSpace::Grid_Sat::optimize()
 		if(std::cin.peek() == 'v')
 		  {
 		    char _sol[512];
-		    std::cin.get(_sol, 512, '0');
+		    std::cin.get(_sol, 512, '\n');
 		    sat_output<<_sol;
 		  }
 	      }
 	  }// ^if 's'
-	if (std::cin.peek() == '0') continue;
       }// ^While
 
     if(flag == 1)
