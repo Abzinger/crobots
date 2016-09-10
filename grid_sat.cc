@@ -180,21 +180,47 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
 
 void GridSpace::Grid_Sat::optimize()
 {
-    static char command[512];
-    static char command_2[512];
+    static char command[512] ;
+    static char _command[512];
+    int flag = 0;
     // static char input_CNF[512];
     {
         std::ofstream out("input_crobots");
         model.dump(out);
     }
-    std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build; ./cryptominisat5_simple input_crobots&>Output_file &");
+    std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; ./cryptominisat5_simple input_crobots&>Pre-output_file &");
     system(command);
-    // std::sprintf(command,"cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build; cp Output_file ~/crobots; rm Outputfile; rm input_crobots");
-    system(command_2);
-    {
+    std::sprintf(_command,"cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; cp Pre-output_file ~/crobots; rm Pre-output_file; rm input_crobots");
+    system(_command);
+    std::ifstream sat_preoutput("Pre-output_file");
+    while(true)
+      {
+	if( std::cin.peek() == 'c') std::cin.ignore(512,'\n');
+	if( std::cin.peek() == 's')
+	  {
+	    char sol[14];
+	    char str[] = {'s',' ','U','N','S','A','T','I','S','F','I','A','B','L','E'};
+	    std::cin.get(sol, 512, '\n');
+	    if(sol == str) flag = 1; 
+	    else
+	      {
+		std::ofstream sat_output("Output_file");
+		if(std::cin.peek() == 'v')
+		  {
+		    char _sol[512];
+		    std::cin.get(_sol, 512, '0');
+		    sat_output<<_sol;
+		  }
+	      }
+	  }// ^if 's'
+	if (std::cin.peek() == '0') continue;
+      }// ^While
+
+    if(flag == 1)
+      {
         std::ifstream sat_output("Output_file");
         model.read_DIMACS(sat_output);
-    }
+      }
 } //^ optimize()
 
 //********************************************************************************************************************************************************************************************************
