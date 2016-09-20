@@ -69,7 +69,7 @@ namespace CNF {
         unsigned addClause(const Clause & c);
 
         // Output
-        void dump(std::ostream & out)                          { out<<"p "<<n_vars<<' '<<n_clauses<<'\n'<<One.i<<"  0\n"<<f; }
+        void dump(std::ostream & out)                          { out<<"p cnf "<<n_vars<<' '<<n_clauses<<'\n'<<One.i<<"  0\n"<<f; }
         void read_DIMACS(std::istream & in);
 
         bool get_value(Var v)                                  { if(abs(v.i)<1 || abs(v.i)>n_vars) throw std::runtime_error("CNF::Model::get_value(): querying non-existing variable.");  if((unsigned)abs(v.i)>=the_value.size()) throw std::runtime_error("CNF::Model::get_value(): I don't have a value for that variable."); return the_value[abs(v.i)]; }

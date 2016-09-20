@@ -63,7 +63,7 @@ void GridSpace::Grid_Sat::set_initial_state(const Stat_Vector_t *p_stat0)
     for (short y=0; y<G.NS_sz(); ++y) {
         for (short x=0; x<G.EW_sz(); ++x) {
             XY xy {x,y};
-		    CNF::Clause c;
+	    CNF::Clause c;
             if ( G.exists(xy) )  {
                 const Full_Stat s = (*p_stat0)[xy];
 
@@ -180,18 +180,59 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
 
 void GridSpace::Grid_Sat::optimize()
 {
-    static char command[512];
-    // static char input_CNF[512];
+    static char command[512] ;
+    static char command_[512];
+    static char _command[512];
+    int flag = 0;
     {
         std::ofstream out("input_crobots");
         model.dump(out);
     }
-    std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build; nohup ./cryptominisat5_simple input_crobots&>Output_file &");
+    std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; ./cryptominisat5 -s 1 input_crobots>Pre_output_file 2>&1 &");
     system(command);
-    {
+    std::sprintf(command_,"cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; ./cryptominisat5 -s 1 input_crobots 2>>Pre_output_file &");
+    system(command_);
+    std::sprintf(_command,"cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; cp Pre_output_file ~/crobots; cp Pre_output_file _Pre; cp input_crobots _try_in; rm input_crobots; rm Pre_output_file");
+    system(_command);
+    std::string line;
+    std::ifstream sat_preoutput("Pre_output_file");
+    while(getline (sat_preoutput,line))
+      {
+	if( sat_preoutput.peek() == 'c')sat_preoutput.ignore(512,'\n');
+	if( sat_preoutput.peek() == 's')
+	  {
+	    char sol[14];
+	    char str[] = {'s',' ','U','N','S','A','T','I','S','F','I','A','B','L','E'};
+	    sat_preoutput.get(sol, 512, '\n');
+	    printf("SOL %s\n",sol);
+	    printf("here\n");
+	    for(int i=0;i<15;++i){
+	      if(sol[i] == str[i])
+		{
+		  flag = 1;
+		}else
+		{
+		  flag = 0;
+		}
+	    }
+	    if(flag == 0)
+	      {
+		std::ofstream sat_output("Output_file");
+		if(sat_preoutput.peek() == 'v')
+		  {
+		    char _sol[512];
+		    sat_preoutput.get(_sol, 512, '\n');
+		    sat_output<<_sol;
+		  }
+	      }
+	  }// ^if 's'
+      }// ^While
+    printf("%d", flag);
+    if(flag == 0)
+      {
         std::ifstream sat_output("Output_file");
         model.read_DIMACS(sat_output);
-    }
+      }
 } //^ optimize()
 
 //********************************************************************************************************************************************************************************************************
@@ -458,6 +499,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	c = Here_now_nobodyhome                                                                                                    or Here_now_R_ready        or Here_now_C0R_ready         or Here_now_C1R_ready  or Here_now_C2R_ready                  or Here_now_R_moving       or Here_now_C0R_moving        or Here_now_C1R_moving or Here_now_C2R_moving                 or Here_now_R_vertical;
 
 	model.addClause(c);      
+	//10 choose 2
 	c = not(Here_now_nobodyhome) or not(Here_now_R_ready);
 	model.addClause(c);
 	c = not(Here_now_nobodyhome) or not(Here_now_C0R_ready);
@@ -564,36 +606,37 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	model.addClause(c);
 	c = Here_now_C0R_ready          or Here_now_C1R_ready       or Here_now_C2R_ready      or Here_now_C0R_moving              or Here_now_C1R_moving      or not(Here_now_C2R_moving) or Here_now_empty;
 	model.addClause(c);
-	c = not(Here_now_C0R_ready)     or not(Here_now_C1R_ready);
-	model.addClause(c);
-	c = not(Here_now_C0R_ready)     or not(Here_now_C2R_ready);
-	model.addClause(c);
-	c = not(Here_now_C0R_ready)     or not(Here_now_C0R_moving);
-	model.addClause(c);
-	c = not(Here_now_C0R_ready)     or not(Here_now_C1R_moving);
-	model.addClause(c);
-	c = not(Here_now_C0R_ready)     or not(Here_now_C2R_moving);
-	model.addClause(c);
-	c = not(Here_now_C1R_ready)     or not(Here_now_C2R_ready);
-	model.addClause(c);
-	c = not(Here_now_C1R_ready)     or not(Here_now_C0R_moving);
-	model.addClause(c);
-	c = not(Here_now_C1R_ready)     or not(Here_now_C1R_moving);
-	model.addClause(c);
-	c = not(Here_now_C1R_ready)     or not(Here_now_C2R_moving);
-	model.addClause(c);
-	c = not(Here_now_C2R_ready)     or not(Here_now_C0R_moving);
-	model.addClause(c);
-	c = not(Here_now_C2R_ready)     or not(Here_now_C1R_moving);
-	model.addClause(c);
-	c = not(Here_now_C2R_ready)     or not(Here_now_C2R_moving);
-	model.addClause(c);
-	c = not(Here_now_C0R_moving)    or not(Here_now_C1R_moving);
-	model.addClause(c);
-	c = not(Here_now_C0R_moving)    or not(Here_now_C2R_moving);
-	model.addClause(c);
-	c = not(Here_now_C1R_moving)    or not(Here_now_C2R_moving);
-	model.addClause(c);
+	//The following were were added by the previous constraint
+	//c = not(Here_now_C0R_ready)     or not(Here_now_C1R_ready);
+	//model.addClause(c);
+	//c = not(Here_now_C0R_ready)     or not(Here_now_C2R_ready);
+	//model.addClause(c);
+	//c = not(Here_now_C0R_ready)     or not(Here_now_C0R_moving);
+	//model.addClause(c);
+	//c = not(Here_now_C0R_ready)     or not(Here_now_C1R_moving);
+	//model.addClause(c);
+	//c = not(Here_now_C0R_ready)     or not(Here_now_C2R_moving);
+	//model.addClause(c);
+	//c = not(Here_now_C1R_ready)     or not(Here_now_C2R_ready);
+	//model.addClause(c);
+	//c = not(Here_now_C1R_ready)     or not(Here_now_C0R_moving);
+	//model.addClause(c);
+	//c = not(Here_now_C1R_ready)     or not(Here_now_C1R_moving);
+	//model.addClause(c);
+	//c = not(Here_now_C1R_ready)     or not(Here_now_C2R_moving);
+	//model.addClause(c);
+	//c = not(Here_now_C2R_ready)     or not(Here_now_C0R_moving);
+	//model.addClause(c);
+	//c = not(Here_now_C2R_ready)     or not(Here_now_C1R_moving);
+	//model.addClause(c);
+	//c = not(Here_now_C2R_ready)     or not(Here_now_C2R_moving);
+	//model.addClause(c);
+	//c = not(Here_now_C0R_moving)    or not(Here_now_C1R_moving);
+	//model.addClause(c);
+	//c = not(Here_now_C0R_moving)    or not(Here_now_C2R_moving);
+	//model.addClause(c);
+	//c = not(Here_now_C1R_moving)    or not(Here_now_C2R_moving);
+	//model.addClause(c);
 
 
 	const CNF::Var Here_now_R_lift           = var(v,       t,    R_Vertical::lift);
@@ -1480,7 +1523,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	model.addClause(c);
 	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvN0);
 	model.addClause(c);
-	c = not(Here_now_C0R_mvE1)                 or not(Here_now_C2R_accS);
+	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_accS);
 	model.addClause(c);
 	c = not(Here_now_C2R_mvE1)                 or not(Here_now_C2R_mvS1);
 	model.addClause(c);
@@ -1898,8 +1941,8 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 
 
         // At most one robot moving towards this node:
-	c =  E_now_R_accW   or E_now_R_mvW0                                                                                      or W_now_R_accE   or W_now_R_mvE0                                                                                      or N_now_R_accS   or N_now_R_mvS0   or N_now_R_mvS1                                                                    or S_now_R_accN   or S_now_R_mvN0   or S_now_R_mvN1                                                                    or E_now_C0R_accW or E_now_C1R_accW or E_now_C2R_accW                                                                  or E_now_C0R_mvW0 or E_now_C1R_mvW0 or E_now_C2R_mvW0                                                                  or E_now_C0R_mvW1 or E_now_C1R_mvW1 or E_now_C2R_mvW1                                                                  or W_now_C0R_accE or W_now_C1R_accE or W_now_C2R_accE                                                                  or W_now_C0R_mvE0 or W_now_C1R_mvE0 or W_now_C2R_mvE0                                                                  or W_now_C0R_mvE1 or W_now_C1R_mvE1 or W_now_C2R_mvE1                                                                  or N_now_C0R_accS or N_now_C1R_accS or N_now_C2R_accS                                                                  or N_now_C0R_mvS0 or N_now_C1R_mvS0 or N_now_C2R_mvS0                                                                  or N_now_C0R_mvS1 or N_now_C1R_mvS1 or N_now_C2R_mvS1                                                                  or N_now_C0R_mvS2 or N_now_C1R_mvS2 or N_now_C2R_mvS2                                                                  or N_now_C0R_mvS3 or N_now_C1R_mvS3 or N_now_C2R_mvS3                                                                  or S_now_C0R_accN or S_now_C1R_accN or S_now_C2R_accN                                                                  or S_now_C0R_mvN0 or S_now_C1R_mvN0 or S_now_C2R_mvN0                                                                  or S_now_C0R_mvN1 or S_now_C1R_mvN1 or S_now_C2R_mvN1                                                                  or S_now_C0R_mvN2 or S_now_C1R_mvN2 or S_now_C2R_mvN2                                                                  or S_now_C0R_mvN3 or S_now_C1R_mvN3 or S_now_C2R_mvN3;
-	model.addClause(c);
+	//c =  E_now_R_accW   or E_now_R_mvW0                                                                                      or W_now_R_accE   or W_now_R_mvE0                                                                                      or N_now_R_accS   or N_now_R_mvS0   or N_now_R_mvS1                                                                    or S_now_R_accN   or S_now_R_mvN0   or S_now_R_mvN1                                                                    or E_now_C0R_accW or E_now_C1R_accW or E_now_C2R_accW                                                                  or E_now_C0R_mvW0 or E_now_C1R_mvW0 or E_now_C2R_mvW0                                                                  or E_now_C0R_mvW1 or E_now_C1R_mvW1 or E_now_C2R_mvW1                                                                  or W_now_C0R_accE or W_now_C1R_accE or W_now_C2R_accE                                                                  or W_now_C0R_mvE0 or W_now_C1R_mvE0 or W_now_C2R_mvE0                                                                  or W_now_C0R_mvE1 or W_now_C1R_mvE1 or W_now_C2R_mvE1                                                                  or N_now_C0R_accS or N_now_C1R_accS or N_now_C2R_accS                                                                  or N_now_C0R_mvS0 or N_now_C1R_mvS0 or N_now_C2R_mvS0                                                                  or N_now_C0R_mvS1 or N_now_C1R_mvS1 or N_now_C2R_mvS1                                                                  or N_now_C0R_mvS2 or N_now_C1R_mvS2 or N_now_C2R_mvS2                                                                  or N_now_C0R_mvS3 or N_now_C1R_mvS3 or N_now_C2R_mvS3                                                                  or S_now_C0R_accN or S_now_C1R_accN or S_now_C2R_accN                                                                  or S_now_C0R_mvN0 or S_now_C1R_mvN0 or S_now_C2R_mvN0                                                                  or S_now_C0R_mvN1 or S_now_C1R_mvN1 or S_now_C2R_mvN1                                                                  or S_now_C0R_mvN2 or S_now_C1R_mvN2 or S_now_C2R_mvN2                                                                  or S_now_C0R_mvN3 or S_now_C1R_mvN3 or S_now_C2R_mvN3;
+	//model.addClause(c); because the constraint is 1 >= x1 + x2
 	// 58 choose 2
 	c = not(E_now_R_accW) or not(E_now_R_mvW0);
 	model.addClause(c);
@@ -3359,7 +3402,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 	c = not(E_now_C2R_accW) or not(E_now_C2R_mvW0);
 	model.addClause(c);
 	
-	c = not(E_now_C0R_accW) or not(E_now_C0R_mvW1);
+	c = not(E_now_C2R_accW) or not(E_now_C0R_mvW1);
 	model.addClause(c);
 	c = not(E_now_C2R_accW) or not(E_now_C1R_mvW1);
 	model.addClause(c);
@@ -5849,164 +5892,161 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 
 	
 
-	c = not(Here_now_R_mvN0)  or N_now_nobodyhome or N_now_R_mvN0   or N_now_R_accN   or N_now_R_mvN1                 	                         or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                                                or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3;
+	c = not(Here_now_R_mvN0)   or N_now_nobodyhome  or N_now_R_mvN0   or N_now_R_accN   or N_now_R_mvN1                 	                          or N_now_C0R_mvN2    or N_now_C1R_mvN2 or N_now_C2R_mvN2                                                               or N_now_C0R_mvN3    or N_now_C1R_mvN3 or N_now_C2R_mvN3;
 	model.addClause(c);
-	c = not(N_now_R_accN)     or N_now_nobodyhome                   or N_now_R_accN   or N_now_R_mvN1                   	                         or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                                                or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3;
+	c = not(N_now_R_accN)      or N_now_nobodyhome                    or N_now_R_accN   or N_now_R_mvN1                   	                          or N_now_C0R_mvN2    or N_now_C1R_mvN2 or N_now_C2R_mvN2                                                               or N_now_C0R_mvN3    or N_now_C1R_mvN3 or N_now_C2R_mvN3;
 	model.addClause(c);
-	c = not(Here_now_R_mvN1)  or N_now_nobodyhome                                     or N_now_R_mvN1                 	                         or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3;
+	c = not(Here_now_R_mvN1)   or N_now_nobodyhome                                      or N_now_R_mvN1                 	                          or N_now_C0R_mvN3    or N_now_C1R_mvN3 or N_now_C2R_mvN3;
 	model.addClause(c);
-	c = not(Here_now_R_mvN0)  or S_now_nobodyhome or S_now_R_mvN0                                   ;
+	c = not(Here_now_R_mvN0)   or S_now_nobodyhome  or S_now_R_mvN0                                   ;
 	model.addClause(c);
-	c = not(Here_now_R_mvS0)  or S_now_nobodyhome or S_now_R_mvS0   or S_now_R_accS   or S_now_R_mvS1                      	                         or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                                                or S_now_C0R_mvS3   or S_now_C1R_mvN3 or S_now_C2R_mvS3;
+	c = not(Here_now_R_mvS0)   or S_now_nobodyhome  or S_now_R_mvS0   or S_now_R_accS   or S_now_R_mvS1                      	                  or S_now_C0R_mvS2    or S_now_C1R_mvS2 or S_now_C2R_mvS2                                                               or S_now_C0R_mvS3    or S_now_C1R_mvN3 or S_now_C2R_mvS3;
 	model.addClause(c);
-	c = not(Here_now_R_accS)  or S_now_nobodyhome                   or S_now_R_accS   or S_now_R_mvS1                     	                         or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                                                or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3;
+	c = not(Here_now_R_accS)   or S_now_nobodyhome                    or S_now_R_accS   or S_now_R_mvS1                     	                  or S_now_C0R_mvS2    or S_now_C1R_mvS2 or S_now_C2R_mvS2                                                               or S_now_C0R_mvS3    or S_now_C1R_mvS3 or S_now_C2R_mvS3;
 	model.addClause(c);
-	c = not(Here_now_R_mvS1)  or S_now_nobodyhome                                     or S_now_R_mvS1                   	                         or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3;
+	c = not(Here_now_R_mvS1)   or S_now_nobodyhome                                      or S_now_R_mvS1                   	                          or S_now_C0R_mvS3    or S_now_C1R_mvS3 or S_now_C2R_mvS3;
 	model.addClause(c);
-	c = not(Here_now_R_mvS0)  or S_now_nobodyhome or N_now_R_mvS0                                   ;
+	c = not(Here_now_R_mvS0)   or S_now_nobodyhome  or N_now_R_mvS0                                   ;
 	model.addClause(c);
-	c = not(Here_now_R_mvE0)  or E_now_nobodyhome or E_now_R_mvE0   or E_now_R_accE                                    	                         or E_now_C0R_mvE1   or E_now_C1R_mvE1 or E_now_C2R_mvE1;
+	c = not(Here_now_R_mvE0)   or E_now_nobodyhome  or E_now_R_mvE0   or E_now_R_accE                                    	                          or E_now_C0R_mvE1    or E_now_C1R_mvE1 or E_now_C2R_mvE1;
 	model.addClause(c);
-	c = not(Here_now_R_accE)  or E_now_nobodyhome                   or E_now_R_accE                                    	                         or E_now_C0R_mvE1   or E_now_C1R_mvE1 or E_now_C2R_mvE1;
+	c = not(Here_now_R_accE)   or E_now_nobodyhome                    or E_now_R_accE                                    	                          or E_now_C0R_mvE1    or E_now_C1R_mvE1 or E_now_C2R_mvE1;
 	model.addClause(c);
-	c = not(Here_now_R_mvE0)  or W_now_nobodyhome or W_now_R_mvE0                                   ;
+	c = not(Here_now_R_mvE0)   or W_now_nobodyhome  or W_now_R_mvE0                                   ;
 	model.addClause(c); 
-	c = not(Here_now_R_mvW0)  or W_now_nobodyhome or W_now_R_mvW0   or W_now_R_accW                                    	                         or W_now_C0R_mvW1   or W_now_C1R_mvW1 or W_now_C2R_mvW1;
+	c = not(Here_now_R_mvW0)   or W_now_nobodyhome  or W_now_R_mvW0   or W_now_R_accW                                    	                          or W_now_C0R_mvW1    or W_now_C1R_mvW1 or W_now_C2R_mvW1;
 	model.addClause(c);
-        c = not(Here_now_R_accW)  or W_now_nobodyhome                   or W_now_R_accW                                    	                         or W_now_C0R_mvW1   or W_now_C1R_mvW1 or W_now_C2R_mvW1;
+        c = not(Here_now_R_accW)   or W_now_nobodyhome                    or W_now_R_accW                                    	                          or W_now_C0R_mvW1    or W_now_C1R_mvW1 or W_now_C2R_mvW1;
 	model.addClause(c);
-	c = not(Here_now_R_mvW0)  or W_now_nobodyhome or E_now_R_mvW0                                   ; 
-	model.addClause(c);
-
-
-	c = not(Here_now_C0R_mvN0) or N_now_nobodyhome or N_now_C0R_mvN0 or N_now_C1R_mvN0 or N_now_C2R_mvN0                                              or N_now_C0R_accN   or N_now_C1R_accN or N_now_C2R_accN                               	                         or N_now_C0R_mvN1   or N_now_C1R_mvN1 or N_now_C2R_mvN1                                	                        or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                	                               or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3 or N_now_R_accN                                                or N_now_R_mvN1;
-	model.addClause(c);
-	c = not(Here_now_C0R_accN) or N_now_nobodyhome                                                                                                    or N_now_C0R_accN   or N_now_C1R_accN or N_now_C2R_accN                               	                         or N_now_C0R_mvN1   or N_now_C1R_mvN1 or N_now_C2R_mvN1                                	                        or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                	                               or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3 or N_now_R_accN                                                or N_now_R_mvN1;
-	model.addClause(c);
-	c = not(Here_now_C0R_mvN1) or N_now_nobodyhome                                                                  	                          or N_now_C0R_mvN1   or N_now_C1R_mvN1 or N_now_C2R_mvN1                                	                         or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                	                        or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3 or N_now_R_mvN1;
-	model.addClause(c);
-	c = not(Here_now_C0R_mvN2) or N_now_nobodyhome                                                                   	                          or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                	                         or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3;
-	model.addClause(c);
-	c = not(Here_now_C0R_mvN3) or N_now_nobodyhome                                                                   	                          or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3;
-	model.addClause(c);
-	c = not(Here_now_C0R_mvN0) or S_now_nobodyhome or N_now_C0R_mvN0 or N_now_C1R_mvN0 or N_now_C2R_mvN0;
+	c = not(Here_now_R_mvW0)   or W_now_nobodyhome  or E_now_R_mvW0                                   ; 
 	model.addClause(c);
 
-	c = not(Here_now_C0R_mvS0) or S_now_nobodyhome or S_now_C0R_mvS0 or S_now_C1R_mvS0 or S_now_C2R_mvS0                                              or S_now_C0R_accS   or S_now_C1R_accS or S_now_C2R_accS                               	                         or S_now_C0R_mvS1   or S_now_C1R_mvS1 or S_now_C2R_mvS1                                	                        or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                	                               or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3 or S_now_R_accS                                                or S_now_R_mvS1;
-	model.addClause(c);
-	c = not(Here_now_C0R_accS) or S_now_nobodyhome                                                                                                    or S_now_C0R_accS   or S_now_C1R_accS or S_now_C2R_accS                               	                         or S_now_C0R_mvS1   or S_now_C1R_mvS1 or S_now_C2R_mvS1                                	                        or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                	                               or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3 or S_now_R_accS                                                or S_now_R_mvS1;
-	model.addClause(c);
-	c = not(Here_now_C0R_mvS1) or S_now_nobodyhome                                                                  	                          or S_now_C0R_mvS1   or S_now_C1R_mvS1 or S_now_C2R_mvS1                                	                         or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                	                        or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3 or S_now_R_mvS1;
-	model.addClause(c);
-	c = not(Here_now_C0R_mvS2) or S_now_nobodyhome                                                                   	                          or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                	                         or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3;
-	model.addClause(c);
-	c = not(Here_now_C0R_mvS3) or S_now_nobodyhome                                                                   	                          or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3;
-	model.addClause(c);
-	c = not(Here_now_C0R_mvS0) or S_now_nobodyhome or S_now_C0R_mvS0 or S_now_C1R_mvS0 or S_now_C2R_mvS0;
-	model.addClause(c);    
 
-	c = not(Here_now_C0R_mvE0) or E_now_nobodyhome or E_now_C0R_mvE0 or E_now_C1R_mvE0 or E_now_C2R_mvE0                                              or E_now_C0R_accE   or E_now_C1R_accE or E_now_C2R_accE                               	                         or E_now_C0R_mvE1   or E_now_C1R_mvE1 or E_now_C2R_mvE1 or E_now_R_accE;
+	c = not(Here_now_C0R_mvN0) or Here_now_C1R_mvN0     or Here_now_C2R_mvN0
+	   or N_now_nobodyhome     or N_now_C0R_mvN0        or N_now_C1R_mvN0          or N_now_C2R_mvN0                          or N_now_C0R_accN       or N_now_C1R_accN        or N_now_C2R_accN                               	                 or N_now_C0R_mvN1       or N_now_C1R_mvN1        or N_now_C2R_mvN1                                	                or N_now_C0R_mvN2       or N_now_C1R_mvN2        or N_now_C2R_mvN2                                	               or N_now_C0R_mvN3       or N_now_C1R_mvN3        or N_now_C2R_mvN3          or N_now_R_accN                            or N_now_R_mvN1;
 	model.addClause(c);
-	c = not(Here_now_C0R_accE) or E_now_nobodyhome                                                                                                    or E_now_C0R_accE   or E_now_C1R_accE or E_now_C2R_accE                               	                         or E_now_C0R_mvE1   or E_now_C1R_mvE1 or E_now_C2R_mvE1 or E_now_R_accE;
+	c = Here_now_C0R_mvN0      or not(Here_now_C1R_mvN0) or Here_now_C2R_mvN0                                                  or N_now_nobodyhome    or N_now_C0R_mvN0         or N_now_C1R_mvN0         or N_now_C2R_mvN0                           or N_now_C0R_accN      or N_now_C1R_accN         or N_now_C2R_accN                               	                 or N_now_C0R_mvN1      or N_now_C1R_mvN1         or N_now_C2R_mvN1                                	                or N_now_C0R_mvN2      or N_now_C1R_mvN2         or N_now_C2R_mvN2                                	               or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3         or N_now_R_accN                             or N_now_R_mvN1;
 	model.addClause(c);
-	c = not(Here_now_C0R_mvE1) or E_now_nobodyhome                                                                   	                          or E_now_C0R_mvE1   or E_now_C1R_mvE1 or E_now_C2R_mvE1;
+	c = Here_now_C0R_mvN0      or Here_now_C1R_mvN0      or not(Here_now_C2R_mvN0)                                             or N_now_nobodyhome    or N_now_C0R_mvN0         or N_now_C1R_mvN0         or N_now_C2R_mvN0                           or N_now_C0R_accN      or N_now_C1R_accN         or N_now_C2R_accN                               	                 or N_now_C0R_mvN1      or N_now_C1R_mvN1         or N_now_C2R_mvN1                                	                or N_now_C0R_mvN2      or N_now_C1R_mvN2         or N_now_C2R_mvN2                                	               or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3         or N_now_R_accN                             or N_now_R_mvN1;
+	model.addClause(c);//3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_accN) or Here_now_C1R_accN      or Here_now_C2R_accN                                                  or N_now_nobodyhome                                                                                                    or N_now_C0R_accN      or N_now_C1R_accN         or N_now_C2R_accN                               	                 or N_now_C0R_mvN1      or N_now_C1R_mvN1         or N_now_C2R_mvN1                                	                or N_now_C0R_mvN2      or N_now_C1R_mvN2         or N_now_C2R_mvN2                                	               or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3         or N_now_R_accN                             or N_now_R_mvN1;
 	model.addClause(c);
-	c = not(Here_now_C0R_mvE0) or W_now_nobodyhome or E_now_C0R_mvE0 or E_now_C1R_mvE0 or E_now_C2R_mvE0;
+	c = Here_now_C0R_accN      or not(Here_now_C1R_accN) or Here_now_C2R_accN                                                  or N_now_nobodyhome                                                                                                    or N_now_C0R_accN      or N_now_C1R_accN         or N_now_C2R_accN                               	                 or N_now_C0R_mvN1      or N_now_C1R_mvN1         or N_now_C2R_mvN1                                	                or N_now_C0R_mvN2      or N_now_C1R_mvN2         or N_now_C2R_mvN2                                	               or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3         or N_now_R_accN                             or N_now_R_mvN1;
 	model.addClause(c);
-	c = not(Here_now_C0R_mvW0) or W_now_nobodyhome or W_now_C0R_mvW0 or W_now_C1R_mvW0 or W_now_C2R_mvW0                                              or W_now_C0R_accE   or W_now_C1R_accW or W_now_C2R_accW                               	                         or W_now_C0R_mvE1   or W_now_C1R_mvW1 or W_now_C2R_mvW1 or W_now_R_accW;
+	c = Here_now_C0R_accN      or Here_now_C1R_accN      or not(Here_now_C2R_accN)                                             or N_now_nobodyhome                                                                                                    or N_now_C0R_accN      or N_now_C1R_accN         or N_now_C2R_accN                               	                 or N_now_C0R_mvN1      or N_now_C1R_mvN1         or N_now_C2R_mvN1                                	                or N_now_C0R_mvN2      or N_now_C1R_mvN2         or N_now_C2R_mvN2                                	               or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3         or N_now_R_accN                             or N_now_R_mvN1;
+	model.addClause(c);// 3 choose 2 clauses has been added before 
+	c = not(Here_now_C0R_mvN1) or Here_now_C1R_mvN1      or Here_now_C2R_mvN1                                                  or N_now_nobodyhome                                                                  	                          or N_now_C0R_mvN1      or N_now_C1R_mvN1         or N_now_C2R_mvN1                                	                 or N_now_C0R_mvN2      or N_now_C1R_mvN2         or N_now_C2R_mvN2                                	                or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3         or N_now_R_mvN1;
 	model.addClause(c);
-	c = not(Here_now_C0R_accW) or W_now_nobodyhome                                                                                                    or W_now_C0R_accW   or W_now_C1R_accW or W_now_C2R_accW                               	                         or W_now_C0R_mvW1   or W_now_C1R_mvW1 or W_now_C2R_mvW1 or W_now_R_accW;
+	c = Here_now_C0R_mvN1      or not(Here_now_C1R_mvN1) or Here_now_C2R_mvN1                                                  or N_now_nobodyhome                                                                  	                          or N_now_C0R_mvN1      or N_now_C1R_mvN1         or N_now_C2R_mvN1                                	                 or N_now_C0R_mvN2      or N_now_C1R_mvN2         or N_now_C2R_mvN2                                	                or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3         or N_now_R_mvN1;
 	model.addClause(c);
-	c = not(Here_now_C0R_mvW1) or W_now_nobodyhome                                                                   	                          or W_now_C0R_mvW1   or W_now_C1R_mvW1 or W_now_C2R_mvW1;
+	c = Here_now_C0R_mvN1      or Here_now_C1R_mvN1      or not(Here_now_C2R_mvN1)                                             or N_now_nobodyhome                                                                  	                          or N_now_C0R_mvN1      or N_now_C1R_mvN1         or N_now_C2R_mvN1                                	                 or N_now_C0R_mvN2      or N_now_C1R_mvN2         or N_now_C2R_mvN2                                	                or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3         or N_now_R_mvN1;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_mvN2) or Here_now_C1R_mvN2      or Here_now_C2R_mvN2                                                  or N_now_nobodyhome                                                                   	                          or N_now_C0R_mvN2      or N_now_C1R_mvN2         or N_now_C2R_mvN2                                	                 or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3;
 	model.addClause(c);
-	c = not(Here_now_C0R_mvW0) or E_now_nobodyhome or W_now_C0R_mvW0 or W_now_C1R_mvW0 or W_now_C2R_mvW0;
+	c = Here_now_C0R_mvN2      or not(Here_now_C1R_mvN2) or Here_now_C2R_mvN2                                                  or N_now_nobodyhome                                                                   	                          or N_now_C0R_mvN2      or N_now_C1R_mvN2         or N_now_C2R_mvN2                                	                 or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3;
+	model.addClause(c);
+	c = Here_now_C0R_mvN2      or Here_now_C1R_mvN2      or not(Here_now_C2R_mvN2)                                             or N_now_nobodyhome                                                                   	                          or N_now_C0R_mvN2      or N_now_C1R_mvN2         or N_now_C2R_mvN2                                	                 or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_mvN3) or Here_now_C1R_mvN3      or Here_now_C2R_mvN3                                                  or N_now_nobodyhome                                                                   	                          or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3;
+	model.addClause(c);
+	c = Here_now_C0R_mvN3      or not(Here_now_C1R_mvN3) or Here_now_C2R_mvN3                                                  or N_now_nobodyhome                                                                   	                          or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3;
+	model.addClause(c);
+	c = Here_now_C0R_mvN3      or Here_now_C1R_mvN3      or not(Here_now_C2R_mvN3)                                             or N_now_nobodyhome                                                                   	                          or N_now_C0R_mvN3      or N_now_C1R_mvN3         or N_now_C2R_mvN3;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_mvN0) or Here_now_C1R_mvN0      or Here_now_C2R_mvN0                                                  or S_now_nobodyhome    or N_now_C0R_mvN0         or N_now_C1R_mvN0         or N_now_C2R_mvN0;
+	model.addClause(c);
+	c = Here_now_C0R_mvN0      or not(Here_now_C1R_mvN0) or Here_now_C2R_mvN0                                                  or S_now_nobodyhome    or N_now_C0R_mvN0         or N_now_C1R_mvN0         or N_now_C2R_mvN0;
+	model.addClause(c);
+	c = Here_now_C0R_mvN0      or Here_now_C1R_mvN0      or not(Here_now_C2R_mvN0)                                             or S_now_nobodyhome    or N_now_C0R_mvN0         or N_now_C1R_mvN0         or N_now_C2R_mvN0;
+	model.addClause(c);// 3 choose 2 clauses has been added before
 
+	c = not(Here_now_C0R_mvS0) or Here_now_C1R_mvS0      or Here_now_C2R_mvS0                                                  or S_now_nobodyhome    or S_now_C0R_mvS0         or S_now_C1R_mvS0         or S_now_C2R_mvS0                           or S_now_C0R_accS      or S_now_C1R_accS         or S_now_C2R_accS                               	                 or S_now_C0R_mvS1      or S_now_C1R_mvS1         or S_now_C2R_mvS1                                	                or S_now_C0R_mvS2      or S_now_C1R_mvS2         or S_now_C2R_mvS2                                	               or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3         or S_now_R_accS                             or S_now_R_mvS1;
+	model.addClause(c);
+	c = Here_now_C0R_mvS0      or not(Here_now_C1R_mvS0) or Here_now_C2R_mvS0                                                  or S_now_nobodyhome    or S_now_C0R_mvS0         or S_now_C1R_mvS0         or S_now_C2R_mvS0                           or S_now_C0R_accS      or S_now_C1R_accS         or S_now_C2R_accS                               	                 or S_now_C0R_mvS1      or S_now_C1R_mvS1         or S_now_C2R_mvS1                                	                or S_now_C0R_mvS2      or S_now_C1R_mvS2         or S_now_C2R_mvS2                                	               or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3         or S_now_R_accS                             or S_now_R_mvS1;
+	model.addClause(c);
+	c = Here_now_C0R_mvS0      or Here_now_C1R_mvS0      or not(Here_now_C2R_mvS0)                                             or S_now_nobodyhome    or S_now_C0R_mvS0         or S_now_C1R_mvS0         or S_now_C2R_mvS0                           or S_now_C0R_accS      or S_now_C1R_accS         or S_now_C2R_accS                               	                 or S_now_C0R_mvS1      or S_now_C1R_mvS1         or S_now_C2R_mvS1                                	                or S_now_C0R_mvS2      or S_now_C1R_mvS2         or S_now_C2R_mvS2                                	               or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3         or S_now_R_accS                             or S_now_R_mvS1;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_accS) or Here_now_C1R_accS      or Here_now_C2R_accS                                                  or S_now_nobodyhome                                                                                                    or S_now_C0R_accS      or S_now_C1R_accS         or S_now_C2R_accS                               	                 or S_now_C0R_mvS1      or S_now_C1R_mvS1         or S_now_C2R_mvS1                                	                or S_now_C0R_mvS2      or S_now_C1R_mvS2         or S_now_C2R_mvS2                                	               or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3         or S_now_R_accS                             or S_now_R_mvS1;
+	model.addClause(c);
+	c = Here_now_C0R_accS      or not(Here_now_C1R_accS) or Here_now_C2R_accS                                                  or S_now_nobodyhome                                                                                                    or S_now_C0R_accS      or S_now_C1R_accS         or S_now_C2R_accS                               	                 or S_now_C0R_mvS1      or S_now_C1R_mvS1         or S_now_C2R_mvS1                                	                or S_now_C0R_mvS2      or S_now_C1R_mvS2         or S_now_C2R_mvS2                                	               or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3         or S_now_R_accS                             or S_now_R_mvS1;
+	model.addClause(c);
+	c = Here_now_C0R_accS      or Here_now_C1R_accS      or not(Here_now_C2R_accS)                                             or S_now_nobodyhome                                                                                                    or S_now_C0R_accS      or S_now_C1R_accS         or S_now_C2R_accS                               	                 or S_now_C0R_mvS1      or S_now_C1R_mvS1         or S_now_C2R_mvS1                                	                or S_now_C0R_mvS2      or S_now_C1R_mvS2         or S_now_C2R_mvS2                                	               or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3         or S_now_R_accS                             or S_now_R_mvS1;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_mvS1) or Here_now_C1R_mvS1      or Here_now_C2R_mvS1                                                  or S_now_nobodyhome                                                                  	                          or S_now_C0R_mvS1      or S_now_C1R_mvS1         or S_now_C2R_mvS1                                	                 or S_now_C0R_mvS2      or S_now_C1R_mvS2         or S_now_C2R_mvS2                                                     or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3         or S_now_R_mvS1;
+	model.addClause(c);
+	c = Here_now_C0R_mvS1      or not(Here_now_C1R_mvS1) or Here_now_C2R_mvS1                                                  or S_now_nobodyhome                                                                  	                          or S_now_C0R_mvS1      or S_now_C1R_mvS1         or S_now_C2R_mvS1                                	                 or S_now_C0R_mvS2      or S_now_C1R_mvS2         or S_now_C2R_mvS2                                                     or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3         or S_now_R_mvS1;
+	model.addClause(c);
+	c = Here_now_C0R_mvS1      or Here_now_C1R_mvS1      or not(Here_now_C2R_mvS1)                                             or S_now_nobodyhome                                                                  	                          or S_now_C0R_mvS1      or S_now_C1R_mvS1         or S_now_C2R_mvS1                                	                 or S_now_C0R_mvS2      or S_now_C1R_mvS2         or S_now_C2R_mvS2                                                     or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3         or S_now_R_mvS1;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_mvS2) or Here_now_C1R_mvS2      or Here_now_C2R_mvS2                                                  or S_now_nobodyhome                                                                   	                          or S_now_C0R_mvS2      or S_now_C1R_mvS2         or S_now_C2R_mvS2                                	                 or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3;
+	model.addClause(c);
+	c = Here_now_C0R_mvS2      or not(Here_now_C1R_mvS2) or Here_now_C2R_mvS2                                                  or S_now_nobodyhome                                                                   	                          or S_now_C0R_mvS2      or S_now_C1R_mvS2         or S_now_C2R_mvS2                                	                 or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3;
+	model.addClause(c);
+	c = Here_now_C0R_mvS2      or Here_now_C1R_mvS2      or not(Here_now_C2R_mvS2)                                             or S_now_nobodyhome                                                                   	                          or S_now_C0R_mvS2      or S_now_C1R_mvS2         or S_now_C2R_mvS2                                	                 or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_mvS3) or Here_now_C1R_mvS3      or Here_now_C2R_mvS3                                                  or S_now_nobodyhome                                                                   	                          or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3;
+	model.addClause(c);
+	c = Here_now_C0R_mvS3      or not(Here_now_C1R_mvS3) or Here_now_C2R_mvS3                                                  or S_now_nobodyhome                                                                   	                          or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3;
+	model.addClause(c);
+	c = Here_now_C0R_mvS3      or Here_now_C1R_mvS3      or not(Here_now_C2R_mvS3)                                             or S_now_nobodyhome                                                                   	                          or S_now_C0R_mvS3      or S_now_C1R_mvS3         or S_now_C2R_mvS3;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_mvS0) or Here_now_C1R_mvS0      or Here_now_C2R_mvS0                                                  or S_now_nobodyhome    or S_now_C0R_mvS0         or S_now_C1R_mvS0         or S_now_C2R_mvS0;
+	model.addClause(c);
+	c = Here_now_C0R_mvS0      or not(Here_now_C1R_mvS0) or Here_now_C2R_mvS0                                                  or S_now_nobodyhome    or S_now_C0R_mvS0         or S_now_C1R_mvS0         or S_now_C2R_mvS0;
+	model.addClause(c);
+	c = Here_now_C0R_mvS0      or Here_now_C1R_mvS0      or not(Here_now_C2R_mvS0)                                             or S_now_nobodyhome    or S_now_C0R_mvS0         or S_now_C1R_mvS0         or S_now_C2R_mvS0;
+	model.addClause(c);// 3 choose 2 clauses has been added before
 
-	c = not(Here_now_C1R_mvN0) or N_now_nobodyhome or N_now_C0R_mvN0 or N_now_C1R_mvN0 or N_now_C2R_mvN0                                              or N_now_C0R_accN   or N_now_C1R_accN or N_now_C2R_accN                               	                         or N_now_C0R_mvN1   or N_now_C1R_mvN1 or N_now_C2R_mvN1                                	                        or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                	                               or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3 or N_now_R_accN                                                or N_now_R_mvN1;
+	c = not(Here_now_C0R_mvE0) or Here_now_C1R_mvE0      or Here_now_C2R_mvE0                                                  or E_now_nobodyhome    or E_now_C0R_mvE0         or E_now_C1R_mvE0         or E_now_C2R_mvE0                           or E_now_C0R_accE      or E_now_C1R_accE         or E_now_C2R_accE                               	                 or E_now_C0R_mvE1      or E_now_C1R_mvE1         or E_now_C2R_mvE1         or E_now_R_accE;
 	model.addClause(c);
-	c = not(Here_now_C1R_accN) or N_now_nobodyhome                                                                                                    or N_now_C0R_accN   or N_now_C1R_accN or N_now_C2R_accN                               	                         or N_now_C0R_mvN1   or N_now_C1R_mvN1 or N_now_C2R_mvN1                                	                        or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                	                               or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3 or N_now_R_accN                                                or N_now_R_mvN1;
+	c = Here_now_C0R_mvE0      or not(Here_now_C1R_mvE0) or Here_now_C2R_mvE0                                                  or E_now_nobodyhome    or E_now_C0R_mvE0         or E_now_C1R_mvE0         or E_now_C2R_mvE0                           or E_now_C0R_accE      or E_now_C1R_accE         or E_now_C2R_accE                               	                 or E_now_C0R_mvE1      or E_now_C1R_mvE1         or E_now_C2R_mvE1         or E_now_R_accE;
 	model.addClause(c);
-	c = not(Here_now_C1R_mvN1) or N_now_nobodyhome                                                                  	                          or N_now_C0R_mvN1   or N_now_C1R_mvN1 or N_now_C2R_mvN1                                	                         or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                	                        or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3 or N_now_R_mvN1;
+	c = Here_now_C0R_mvE0      or Here_now_C1R_mvE0      or not(Here_now_C2R_mvE0)                                             or E_now_nobodyhome    or E_now_C0R_mvE0         or E_now_C1R_mvE0         or E_now_C2R_mvE0                           or E_now_C0R_accE      or E_now_C1R_accE         or E_now_C2R_accE                               	                 or E_now_C0R_mvE1      or E_now_C1R_mvE1         or E_now_C2R_mvE1         or E_now_R_accE;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_accE) or Here_now_C1R_accE      or Here_now_C2R_accE                                                  or E_now_nobodyhome                                                                                                    or E_now_C0R_accE      or E_now_C1R_accE         or E_now_C2R_accE                               	                 or E_now_C0R_mvE1      or E_now_C1R_mvE1         or E_now_C2R_mvE1         or E_now_R_accE;
 	model.addClause(c);
-	c = not(Here_now_C1R_mvN2) or N_now_nobodyhome                                                                   	                          or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                	                         or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3;
+	c = Here_now_C0R_accE      or not(Here_now_C1R_accE) or Here_now_C2R_accE                                                  or E_now_nobodyhome                                                                                                    or E_now_C0R_accE      or E_now_C1R_accE         or E_now_C2R_accE                               	                 or E_now_C0R_mvE1      or E_now_C1R_mvE1         or E_now_C2R_mvE1         or E_now_R_accE;
 	model.addClause(c);
-	c = not(Here_now_C1R_mvN3) or N_now_nobodyhome                                                                   	                          or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3;
+	c = Here_now_C0R_accE      or Here_now_C1R_accE      or not(Here_now_C2R_accE)                                             or E_now_nobodyhome                                                                                                    or E_now_C0R_accE      or E_now_C1R_accE         or E_now_C2R_accE                               	                 or E_now_C0R_mvE1      or E_now_C1R_mvE1         or E_now_C2R_mvE1         or E_now_R_accE;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_mvE1) or Here_now_C1R_mvE1      or Here_now_C2R_mvE1                                                  or E_now_nobodyhome                                                                   	                          or E_now_C0R_mvE1      or E_now_C1R_mvE1         or E_now_C2R_mvE1;
 	model.addClause(c);
-	c = not(Here_now_C1R_mvN0) or S_now_nobodyhome or N_now_C0R_mvN0 or N_now_C1R_mvN0 or N_now_C2R_mvN0;
+	c = Here_now_C0R_mvE1      or not(Here_now_C1R_mvE1) or Here_now_C2R_mvE1                                                  or E_now_nobodyhome                                                                   	                          or E_now_C0R_mvE1      or E_now_C1R_mvE1         or E_now_C2R_mvE1;
 	model.addClause(c);
-
-	c = not(Here_now_C1R_mvS0) or S_now_nobodyhome or S_now_C0R_mvS0 or S_now_C1R_mvS0 or S_now_C2R_mvS0                                              or S_now_C0R_accS   or S_now_C1R_accS or S_now_C2R_accS                               	                         or S_now_C0R_mvS1   or S_now_C1R_mvS1 or S_now_C2R_mvS1                                	                        or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                	                               or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3 or S_now_R_accS                                                or S_now_R_mvS1;
+	c = Here_now_C0R_mvE1      or Here_now_C1R_mvE1      or not(Here_now_C2R_mvE1)                                             or E_now_nobodyhome                                                                   	                          or E_now_C0R_mvE1      or E_now_C1R_mvE1         or E_now_C2R_mvE1;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_mvE0) or Here_now_C1R_mvE0      or Here_now_C2R_mvE0                                                  or W_now_nobodyhome    or E_now_C0R_mvE0         or E_now_C1R_mvE0         or E_now_C2R_mvE0;
 	model.addClause(c);
-	c = not(Here_now_C1R_accS) or S_now_nobodyhome                                                                                                    or S_now_C0R_accS   or S_now_C1R_accS or S_now_C2R_accS                               	                         or S_now_C0R_mvS1   or S_now_C1R_mvS1 or S_now_C2R_mvS1                                	                        or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                	                               or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3 or S_now_R_accS                                                or S_now_R_mvS1;
+	c = Here_now_C0R_mvE0      or not(Here_now_C1R_mvE0) or Here_now_C2R_mvE0                                                  or W_now_nobodyhome    or E_now_C0R_mvE0         or E_now_C1R_mvE0         or E_now_C2R_mvE0;
 	model.addClause(c);
-	c = not(Here_now_C1R_mvS1) or S_now_nobodyhome                                                                  	                          or S_now_C0R_mvS1   or S_now_C1R_mvS1 or S_now_C2R_mvS1                                	                         or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                	                        or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3 or S_now_R_mvS1;
+	c = Here_now_C0R_mvE0      or Here_now_C1R_mvE0      or not(Here_now_C2R_mvE0)                                             or W_now_nobodyhome    or E_now_C0R_mvE0         or E_now_C1R_mvE0         or E_now_C2R_mvE0;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_mvW0) or Here_now_C1R_mvW0      or Here_now_C2R_mvW0                                                  or W_now_nobodyhome    or W_now_C0R_mvW0         or W_now_C1R_mvW0         or W_now_C2R_mvW0                           or W_now_C0R_accE      or W_now_C1R_accW         or W_now_C2R_accW                               	                 or W_now_C0R_mvE1      or W_now_C1R_mvW1         or W_now_C2R_mvW1         or W_now_R_accW;
 	model.addClause(c);
-	c = not(Here_now_C1R_mvS2) or S_now_nobodyhome                                                                   	                          or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                	                         or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3;
+	c = Here_now_C0R_mvW0      or not(Here_now_C1R_mvW0) or Here_now_C2R_mvW0                                                  or W_now_nobodyhome    or W_now_C0R_mvW0         or W_now_C1R_mvW0         or W_now_C2R_mvW0                           or W_now_C0R_accE      or W_now_C1R_accW         or W_now_C2R_accW                               	                 or W_now_C0R_mvE1      or W_now_C1R_mvW1         or W_now_C2R_mvW1         or W_now_R_accW;
 	model.addClause(c);
-	c = not(Here_now_C1R_mvS3) or S_now_nobodyhome                                                                   	                          or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3;
+	c = Here_now_C0R_mvW0      or Here_now_C1R_mvW0      or not(Here_now_C2R_mvW0)                                             or W_now_nobodyhome    or W_now_C0R_mvW0         or W_now_C1R_mvW0         or W_now_C2R_mvW0                           or W_now_C0R_accE      or W_now_C1R_accW         or W_now_C2R_accW                               	                 or W_now_C0R_mvE1      or W_now_C1R_mvW1         or W_now_C2R_mvW1         or W_now_R_accW;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_accW) or Here_now_C1R_accW      or Here_now_C2R_accW                                                  or W_now_nobodyhome                                                                                                    or W_now_C0R_accW      or W_now_C1R_accW         or W_now_C2R_accW                               	                 or W_now_C0R_mvW1      or W_now_C1R_mvW1         or W_now_C2R_mvW1         or W_now_R_accW;
 	model.addClause(c);
-	c = not(Here_now_C1R_mvS0) or S_now_nobodyhome or S_now_C0R_mvS0 or S_now_C1R_mvS0 or S_now_C2R_mvS0;
-	model.addClause(c);    
-
-	c = not(Here_now_C1R_mvE0) or E_now_nobodyhome or E_now_C0R_mvE0 or E_now_C1R_mvE0 or E_now_C2R_mvE0                                              or E_now_C0R_accE   or E_now_C1R_accE or E_now_C2R_accE                               	                         or E_now_C0R_mvE1   or E_now_C1R_mvE1 or E_now_C2R_mvE1 or E_now_R_accE;
+	c = Here_now_C0R_accW      or not(Here_now_C1R_accW) or Here_now_C2R_accW                                                  or W_now_nobodyhome                                                                                                    or W_now_C0R_accW      or W_now_C1R_accW         or W_now_C2R_accW                               	                 or W_now_C0R_mvW1      or W_now_C1R_mvW1         or W_now_C2R_mvW1         or W_now_R_accW;
 	model.addClause(c);
-	c = not(Here_now_C1R_accE) or E_now_nobodyhome                                                                                                    or E_now_C0R_accE   or E_now_C1R_accE or E_now_C2R_accE                               	                         or E_now_C0R_mvE1   or E_now_C1R_mvE1 or E_now_C2R_mvE1 or E_now_R_accE;
+	c = Here_now_C0R_accW      or Here_now_C1R_accW      or not(Here_now_C2R_accW)                                             or W_now_nobodyhome                                                                                                    or W_now_C0R_accW      or W_now_C1R_accW         or W_now_C2R_accW                               	                 or W_now_C0R_mvW1      or W_now_C1R_mvW1         or W_now_C2R_mvW1         or W_now_R_accW;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_mvW1) or Here_now_C1R_mvW1      or Here_now_C2R_mvW1                                                  or W_now_nobodyhome                                                                   	                          or W_now_C0R_mvW1      or W_now_C1R_mvW1         or W_now_C2R_mvW1;
 	model.addClause(c);
-	c = not(Here_now_C1R_mvE1) or E_now_nobodyhome                                                                   	                          or E_now_C0R_mvE1   or E_now_C1R_mvE1 or E_now_C2R_mvE1;
+	c = Here_now_C0R_mvW1      or not(Here_now_C1R_mvW1) or Here_now_C2R_mvW1                                                  or W_now_nobodyhome                                                                   	                          or W_now_C0R_mvW1      or W_now_C1R_mvW1         or W_now_C2R_mvW1;
 	model.addClause(c);
-	c = not(Here_now_C1R_mvE0) or W_now_nobodyhome or E_now_C0R_mvE0 or E_now_C1R_mvE0 or E_now_C2R_mvE0;
+	c = Here_now_C0R_mvW1      or Here_now_C1R_mvW1      or not(Here_now_C2R_mvW1)                                             or W_now_nobodyhome                                                                   	                          or W_now_C0R_mvW1      or W_now_C1R_mvW1         or W_now_C2R_mvW1;
+	model.addClause(c);// 3 choose 2 clauses has been added before
+	c = not(Here_now_C0R_mvW0) or Here_now_C1R_mvW0      or Here_now_C2R_mvW0                                                  or E_now_nobodyhome    or W_now_C0R_mvW0         or W_now_C1R_mvW0         or W_now_C2R_mvW0;
 	model.addClause(c);
-	c = not(Here_now_C1R_mvW0) or W_now_nobodyhome or W_now_C0R_mvW0 or W_now_C1R_mvW0 or W_now_C2R_mvW0                                              or W_now_C0R_accE   or W_now_C1R_accW or W_now_C2R_accW                               	                         or W_now_C0R_mvE1   or W_now_C1R_mvW1 or W_now_C2R_mvW1 or W_now_R_accW;
+	c = Here_now_C0R_mvW0      or not(Here_now_C1R_mvW0) or Here_now_C2R_mvW0                                                  or E_now_nobodyhome    or W_now_C0R_mvW0         or W_now_C1R_mvW0         or W_now_C2R_mvW0;
 	model.addClause(c);
-	c = not(Here_now_C1R_accW) or W_now_nobodyhome                                                                                                    or W_now_C0R_accW   or W_now_C1R_accW or W_now_C2R_accW                               	                         or W_now_C0R_mvW1   or W_now_C1R_mvW1 or W_now_C2R_mvW1 or W_now_R_accW;
-	model.addClause(c);
-	c = not(Here_now_C1R_mvW1) or W_now_nobodyhome                                                                   	                          or W_now_C0R_mvW1   or W_now_C1R_mvW1 or W_now_C2R_mvW1;
-	model.addClause(c);
-	c = not(Here_now_C1R_mvW0) or E_now_nobodyhome or W_now_C0R_mvW0 or W_now_C1R_mvW0 or W_now_C2R_mvW0;
-
-
-	c = not(Here_now_C2R_mvN0) or N_now_nobodyhome or N_now_C0R_mvN0 or N_now_C1R_mvN0 or N_now_C2R_mvN0                                              or N_now_C0R_accN   or N_now_C1R_accN or N_now_C2R_accN                               	                         or N_now_C0R_mvN1   or N_now_C1R_mvN1 or N_now_C2R_mvN1                                	                        or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                	                               or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3 or N_now_R_accN                                                or N_now_R_mvN1;
-	model.addClause(c);
-	c = not(Here_now_C2R_accN) or N_now_nobodyhome                                                                                                    or N_now_C0R_accN   or N_now_C1R_accN or N_now_C2R_accN                               	                         or N_now_C0R_mvN1   or N_now_C1R_mvN1 or N_now_C2R_mvN1                                	                        or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                	                               or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3 or N_now_R_accN                                                or N_now_R_mvN1;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvN1) or N_now_nobodyhome                                                                  	                          or N_now_C0R_mvN1   or N_now_C1R_mvN1 or N_now_C2R_mvN1                                	                         or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                	                        or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3 or N_now_R_mvN1;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvN2) or N_now_nobodyhome                                                                   	                          or N_now_C0R_mvN2   or N_now_C1R_mvN2 or N_now_C2R_mvN2                                	                         or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvN3) or N_now_nobodyhome                                                                   	                          or N_now_C0R_mvN3   or N_now_C1R_mvN3 or N_now_C2R_mvN3;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvN0) or S_now_nobodyhome or N_now_C0R_mvN0 or N_now_C1R_mvN0 or N_now_C2R_mvN0;
+	c = Here_now_C0R_mvW0      or Here_now_C1R_mvW0      or not(Here_now_C2R_mvW0)                                             or E_now_nobodyhome    or W_now_C0R_mvW0         or W_now_C1R_mvW0         or W_now_C2R_mvW0;
 	model.addClause(c);
 
-	c = not(Here_now_C2R_mvS0) or S_now_nobodyhome or S_now_C0R_mvS0 or S_now_C1R_mvS0 or S_now_C2R_mvS0                                              or S_now_C0R_accS   or S_now_C1R_accS or S_now_C2R_accS                               	                         or S_now_C0R_mvS1   or S_now_C1R_mvS1 or S_now_C2R_mvS1                                	                        or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                	                               or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3 or S_now_R_accS                                                or S_now_R_mvS1;
-	model.addClause(c);
-	c = not(Here_now_C2R_accS) or S_now_nobodyhome                                                                                                    or S_now_C0R_accS   or S_now_C1R_accS or S_now_C2R_accS                               	                         or S_now_C0R_mvS1   or S_now_C1R_mvS1 or S_now_C2R_mvS1                                	                        or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                	                               or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3 or S_now_R_accS                                                or S_now_R_mvS1;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvS1) or S_now_nobodyhome                                                                  	                          or S_now_C0R_mvS1   or S_now_C1R_mvS1 or S_now_C2R_mvS1                                	                         or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                	                        or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3 or S_now_R_mvS1;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvS2) or S_now_nobodyhome                                                                   	                          or S_now_C0R_mvS2   or S_now_C1R_mvS2 or S_now_C2R_mvS2                                	                         or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvS3) or S_now_nobodyhome                                                                   	                          or S_now_C0R_mvS3   or S_now_C1R_mvS3 or S_now_C2R_mvS3;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvS0) or S_now_nobodyhome or S_now_C0R_mvS0 or S_now_C1R_mvS0 or S_now_C2R_mvS0;
-	model.addClause(c);    
-
-	c = not(Here_now_C2R_mvE0) or E_now_nobodyhome or E_now_C0R_mvE0 or E_now_C1R_mvE0 or E_now_C2R_mvE0                                              or E_now_C0R_accE   or E_now_C1R_accE or E_now_C2R_accE                               	                         or E_now_C0R_mvE1   or E_now_C1R_mvE1 or E_now_C2R_mvE1 or E_now_R_accE;
-	model.addClause(c);
-	c = not(Here_now_C2R_accE) or E_now_nobodyhome                                                                                                    or E_now_C0R_accE   or E_now_C1R_accE or E_now_C2R_accE                               	                         or E_now_C0R_mvE1   or E_now_C1R_mvE1 or E_now_C2R_mvE1 or E_now_R_accE;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvE1) or E_now_nobodyhome                                                                   	                          or E_now_C0R_mvE1   or E_now_C1R_mvE1 or E_now_C2R_mvE1;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvE0) or W_now_nobodyhome or E_now_C0R_mvE0 or E_now_C1R_mvE0 or E_now_C2R_mvE0;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvW0) or W_now_nobodyhome or W_now_C0R_mvW0 or W_now_C1R_mvW0 or W_now_C2R_mvW0                                              or W_now_C0R_accE   or W_now_C1R_accW or W_now_C2R_accW                               	                         or W_now_C0R_mvE1   or W_now_C1R_mvW1 or W_now_C2R_mvW1 or W_now_R_accW;
-	model.addClause(c);
-	c = not(Here_now_C2R_accW) or W_now_nobodyhome                                                                                                    or W_now_C0R_accW   or W_now_C1R_accW or W_now_C2R_accW                               	                         or W_now_C0R_mvW1   or W_now_C1R_mvW1 or W_now_C2R_mvW1 or W_now_R_accW;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvW1) or W_now_nobodyhome                                                                   	                          or W_now_C0R_mvW1   or W_now_C1R_mvW1 or W_now_C2R_mvW1;
-	model.addClause(c);
-	c = not(Here_now_C2R_mvW0) or E_now_nobodyhome or W_now_C0R_mvW0 or W_now_C1R_mvW0 or W_now_C2R_mvW0;
-	model.addClause(c);
+     
     }
 
 
@@ -6592,7 +6632,7 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	//const CNF::Var W_will_nobodyhome= var( G.west(v),    t+1,    NdStat::nobodyhome);
 	const CNF::Var W_will_R_ready   = var( G.west(v),    t+1,    NdStat::R_ready);
 	//const CNF::Var W_will_R_accE    = var( G.west(v),    t+1,    R_Move::accE);
-	const CNF::Var W_will_R_mvE0    = var( G.west(v),    t+1,    R_Move::mvE0);
+	//const CNF::Var W_will_R_mvE0    = var( G.west(v),    t+1,    R_Move::mvE0);
 	//const CNF::Var W_will_R_accW    = var( G.west(v),    t+1,    R_Move::accW);
 	const CNF::Var W_will_R_mvW0    = var( G.west(v),    t+1,    R_Move::mvW0);
 	const CNF::Var W_will_C0R_ready = var( G.west(v),    t+1,    NdStat::C0R_ready);
@@ -6695,7 +6735,7 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	model.addClause(c);//
 	c = not(Here_will_R_mvW0) or E_now_R_accW              or E_now_R_mvW0;
 	model.addClause(c);//
-	c = not(Here_now_R_mvW0)  or Here_now_R_accW           or W_will_R_ready       or W_will_R_mvE0;
+	c = not(Here_now_R_mvW0)  or Here_now_R_accW           or W_will_R_ready       or W_will_R_mvW0;
 	model.addClause(c);
 	c = Here_now_R_mvW0       or not(Here_now_R_accW)      or W_will_R_ready       or W_will_R_mvW0;
 	model.addClause(c);
@@ -7202,26 +7242,32 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	c = Here_now_R_lifting3       or not(Here_will_R_lifting4);
 	model.addClause(c); //
 	
-	c = not(Here_will_C0R_ready)  or Here_now_empty             or Here_now_R_lifting4;
-	model.addClause(c); //
-	c = not(Here_will_C1R_ready)  or Here_now_empty             or Here_now_R_lifting4;
-	model.addClause(c); //
-	c = not(Here_will_C2R_ready)  or Here_now_empty             or Here_now_R_lifting4;
-	model.addClause(c); //
+	c = not(Here_will_C0R_ready)  or Here_will_C1R_ready        or Here_will_C2R_ready      or Here_now_empty                  or Here_now_R_lifting4;
+	model.addClause(c); 
+	c = Here_will_C0R_ready       or not(Here_will_C1R_ready)   or Here_will_C2R_ready      or Here_now_empty                  or Here_now_R_lifting4;
+	model.addClause(c); 
+	c = Here_will_C0R_ready       or Here_will_C1R_ready        or not(Here_will_C2R_ready) or Here_now_empty                  or Here_now_R_lifting4;
+	model.addClause(c);
+	c = not(Here_will_C0R_ready)  or not(Here_will_C1R_ready);
+	model.addClause(c);
+	c = not(Here_will_C0R_ready)  or not(Here_will_C2R_ready);
+	model.addClause(c);
+	c = not(Here_will_C1R_ready)  or not(Here_will_C2R_ready);
+	model.addClause(c);//
 
-	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_now_C1         or Here_now_C2;
+	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_now_C1              or Here_now_C2;
 	model.addClause(c);  // maybe make these lazy?!?  
-	c = not(Here_now_R_lifting4)  or Here_now_C0                or Here_now_C1         or Here_will_C2R_ready;
+	c = not(Here_now_R_lifting4)  or Here_now_C0                or Here_now_C1              or Here_will_C2R_ready;
 	model.addClause(c); //
-	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_now_C1         or Here_will_C2R_ready;
+	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_now_C1              or Here_will_C2R_ready;
 	model.addClause(c); //
-	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_will_C1R_ready or Here_now_C2;
+	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_will_C1R_ready      or Here_now_C2;
 	model.addClause(c); //
-	c = not(Here_now_R_lifting4)  or Here_now_C0                or Here_will_C1R_ready or Here_now_C2;
+	c = not(Here_now_R_lifting4)  or Here_now_C0                or Here_will_C1R_ready      or Here_now_C2;
 	model.addClause(c); //
-	c = not(Here_now_R_lifting4)  or Here_now_C0                or Here_will_C1R_ready or Here_will_C2R_ready;
+	c = not(Here_now_R_lifting4)  or Here_now_C0                or Here_will_C1R_ready      or Here_will_C2R_ready;
 	model.addClause(c); //
-	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_will_C1R_ready or Here_will_C2R_ready;
+	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_will_C1R_ready      or Here_will_C2R_ready;
 	model.addClause(c); //
 	
     }
@@ -7258,21 +7304,21 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	model.addClause(c); //
 	
 
-	c = not(Here_now_R_drop)     or Here_will_C0              or Here_will_C1             or Here_will_C2;
+	c = not(Here_will_R_drop)     or Here_will_C0              or Here_will_C1             or Here_will_C2;
 	model.addClause(c); // maybe make these lazy?!?
-	c = not(Here_now_R_drop)     or Here_now_C0R_ready        or Here_will_C1             or Here_will_C2;
+	c = not(Here_will_R_drop)     or Here_now_C0R_ready        or Here_will_C1             or Here_will_C2;
 	model.addClause(c); //
-	c = not(Here_now_R_drop)     or Here_will_C0              or Here_will_C1             or Here_now_C2R_ready;
+	c = not(Here_will_R_drop)     or Here_will_C0              or Here_will_C1             or Here_now_C2R_ready;
 	model.addClause(c); //
-	c = not(Here_now_R_drop)     or Here_now_C0R_ready        or Here_will_C1             or Here_now_C2R_ready;
+	c = not(Here_will_R_drop)     or Here_now_C0R_ready        or Here_will_C1             or Here_now_C2R_ready;
 	model.addClause(c); //
-	c = not(Here_now_R_drop)     or Here_now_C0R_ready        or Here_now_C1R_ready       or Here_will_C2;
+	c = not(Here_will_R_drop)     or Here_now_C0R_ready        or Here_now_C1R_ready       or Here_will_C2;
 	model.addClause(c); //
-	c = not(Here_now_R_drop)     or Here_will_C0              or Here_now_C1R_ready       or Here_will_C2;
+	c = not(Here_will_R_drop)     or Here_will_C0              or Here_now_C1R_ready       or Here_will_C2;
 	model.addClause(c); //
-	c = not(Here_now_R_drop)     or Here_will_C0              or Here_now_C1R_ready       or Here_now_C2R_ready;
+	c = not(Here_will_R_drop)     or Here_will_C0              or Here_now_C1R_ready       or Here_now_C2R_ready;
 	model.addClause(c); //
-	c = not(Here_now_R_drop)     or Here_now_C0R_ready        or Here_now_C1R_ready       or Here_now_C2R_ready;
+	c = not(Here_will_R_drop)     or Here_now_C0R_ready        or Here_now_C1R_ready       or Here_now_C2R_ready;
 	model.addClause(c); //
     }
     {// Lift/drop and  PARKED cars
@@ -7297,14 +7343,14 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	model.addClause(c);
 	c = Here_now_R_lifting4      or not(Here_now_empty)       or Here_will_R_drop         or Here_will_empty;
 	model.addClause(c);
-	c = not(Here_now_R_lifting4) or not(Here_now_empty);
+	c = not(Here_now_R_lifting4) or not(Here_now_empty);// not sure
 	model.addClause(c);
 	// sufficient
 	c = not(Here_will_R_drop)    or Here_will_empty           or Here_now_R_lifting4      or Here_now_empty;
 	model.addClause(c);
 	c = Here_will_R_drop         or not(Here_will_empty)      or Here_now_R_lifting4      or Here_now_empty;
 	model.addClause(c);
-	c = not(Here_will_R_drop)    or not(Here_will_empty);
+	c = not(Here_will_R_drop)    or not(Here_will_empty);//not sure
 	model.addClause(c); //
 
 
@@ -7322,61 +7368,55 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	c = not(Here_will_R_lifting4)or not(Here_now_R_lifting4);
 	model.addClause(c); //
 
-
-	
 	c = not(Here_will_R_drop)    or Here_now_empty;
 	model.addClause(c); //
-	c = not( Here_now_R_lifting4)or Here_will_empty;
+	c = not(Here_now_R_lifting4) or Here_will_empty;
 	model.addClause(c); //
 
-
-	
 	c = not(Here_will_C0)        or Here_will_C1              or Here_now_C0              or Here_now_C1                       or Here_will_R_drop;
 	model.addClause(c);
 	c = Here_will_C0             or not(Here_will_C1)         or Here_now_C0              or Here_now_C1                       or Here_will_R_drop;
 	model.addClause(c);
-	c = not(Here_will_C0)        or not(Here_will_C1);
+	c = not(Here_will_C0)        or not(Here_will_C1);//not sure
 	model.addClause(c); //
 	c = not(Here_will_C0)        or Here_will_C2              or Here_now_C0              or Here_now_C2                       or Here_will_R_drop;
 	model.addClause(c);
 	c = Here_will_C0             or not(Here_will_C2)         or Here_now_C0              or Here_now_C2                       or Here_will_R_drop;
 	model.addClause(c);
-	c = not(Here_will_C0)        or not(Here_will_C2);
+	c = not(Here_will_C0)        or not(Here_will_C2);//not sure
 	model.addClause(c); //
 	c = not(Here_will_C1)        or Here_will_C2              or Here_now_C1              or Here_now_C2                       or Here_will_R_drop;
 	model.addClause(c);
 	c = Here_will_C1             or not(Here_will_C2)         or Here_now_C1              or Here_now_C2                       or Here_will_R_drop;
 	model.addClause(c);
-	c = not(Here_will_C1)        or not(Here_will_C2);
+	c = not(Here_will_C1)        or not(Here_will_C2);//not sure
 	model.addClause(c); //
 
-
-	
 	c = not(Here_now_C0)         or Here_now_C1               or Here_will_C0             or Here_will_C1                      or Here_will_R_lifting4;
 	model.addClause(c);
 	c = Here_now_C0              or not(Here_now_C1)          or Here_will_C0             or Here_will_C1                      or Here_will_R_lifting4;
 	model.addClause(c);
-	c = not(Here_now_C0)         or not(Here_now_C1);
+	c = not(Here_now_C0)         or not(Here_now_C1);// not sure
 	model.addClause(c); //
 	c = not(Here_now_C0)         or Here_now_C2               or Here_will_C0             or Here_will_C2                      or Here_will_R_lifting4;
 	model.addClause(c);
 	c = Here_now_C0              or not(Here_now_C2)          or Here_will_C0             or Here_will_C2                      or Here_will_R_lifting4;
 	model.addClause(c);
-	c = not(Here_now_C0)         or not(Here_now_C2);
+	c = not(Here_now_C0)         or not(Here_now_C2);// not sure
 	model.addClause(c); //
 	c = not(Here_now_C1)         or Here_now_C2               or Here_will_C1             or Here_will_C2                      or Here_will_R_lifting4;
 	model.addClause(c);
 	c = Here_now_C1              or not(Here_now_C2)          or Here_will_C1             or Here_will_C2                      or Here_will_R_lifting4;
 	model.addClause(c);
-	c = not(Here_now_C1)         or not(Here_now_C2);
+	c = not(Here_now_C1)         or not(Here_now_C2);// not sure
 	model.addClause(c); //
 
 
 	
-	c = Here_now_empty           or not(Here_will_empty)      or (Here_now_R_lifting4);
+	c = Here_now_empty           or not(Here_will_empty)      or Here_now_R_lifting4;
 	model.addClause(c); //
     }
 
 } // time_link_constraints()
 
-// EOF grid_gurobi.cc
+// EOF grid_sat.cc
