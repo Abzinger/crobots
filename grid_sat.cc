@@ -188,10 +188,10 @@ void GridSpace::Grid_Sat::optimize()
         std::ofstream out("input_crobots");
         model.dump(out);
     }
-    std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; ./cryptominisat5 -s 1 input_crobots>Pre_output_file 2>&1 &");
+    std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; ./cryptominisat5 -s 1 input_crobots > Pre_output_file 2>&1");
     system(command);
-    std::sprintf(command_,"cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; ./cryptominisat5 -s 1 input_crobots 2>>Pre_output_file &");
-    system(command_);
+//    std::sprintf(command_,"cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; ./cryptominisat5 -s 1 input_crobots 2>>Pre_output_file &");
+//    system(command_);
     std::sprintf(_command,"cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; cp Pre_output_file ~/crobots; cp Pre_output_file _Pre; cp input_crobots _try_in; rm input_crobots; rm Pre_output_file");
     system(_command);
     std::string line;
