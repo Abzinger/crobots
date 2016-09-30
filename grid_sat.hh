@@ -49,6 +49,8 @@ namespace GridSpace {
 
         My_Options my_opts;
 
+      int has_solution;
+     
     private:
 	const unsigned t_max;
 
