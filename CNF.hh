@@ -24,6 +24,8 @@ namespace CNF {
         Var():    i(0) {}
         Var(One): i(1) {}
         void check() const { if (!i) throw std::runtime_error("CNF::Var::check(): non-existing variable!"); }
+
+        int dump() const {return i;}
     };
 
     extern Var Zero,One;

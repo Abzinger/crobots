@@ -238,6 +238,7 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  con
 	    On_Node on_node = On_Node::SIZE;
 	    for (On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
 	      CNF::Var x = var(v,t,i);
+              print("The var: %d\n",x.dump());
 	      const bool val = model.get_value(x);
 	      if (val) {
 		if (on_node!=On_Node::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 On_Node variables with value 1.");
