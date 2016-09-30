@@ -42,10 +42,10 @@ namespace GridSpace {
         std::vector< Stat_Vector_t >  get_solution() const;
 
     protected:
-	CNF::Var var(XY, unsigned t, On_Node    )   const;
-	CNF::Var var(XY, unsigned t, NdStat     )   const;
-	CNF::Var var(XY, unsigned t, R_Vertical )   const;
-	CNF::Var var(XY, unsigned t, R_Move     )   const;
+	CNF::Var var(XY, unsigned t, On_Node    )   const;      std::string var(XY, unsigned t, On_Node    )   const;
+	CNF::Var var(XY, unsigned t, NdStat     )   const;      std::string var(XY, unsigned t, NdStat     )   const;
+	CNF::Var var(XY, unsigned t, R_Vertical )   const;      std::string var(XY, unsigned t, R_Vertical )   const;
+	CNF::Var var(XY, unsigned t, R_Move     )   const;      std::string var(XY, unsigned t, R_Move     )   const;
 
         My_Options my_opts;
 
