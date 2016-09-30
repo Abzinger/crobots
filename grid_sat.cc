@@ -16,6 +16,7 @@
 // *****************************************************************************************************************************
 GridSpace::Grid_Sat::Grid_Sat(const Grid & _G, const unsigned _t_max):
     G                          {_G},
+    has_solution               {0},
     t_max                      {_t_max},
     p_model                    {new CNF::Model},
     model                      {*p_model},
@@ -180,121 +181,111 @@ void GridSpace::Grid_Sat::set_terminal_state(const Stat_Vector_t * p_state)
 
 void GridSpace::Grid_Sat::optimize()
 {
-    static char command[512] ;
-    static char command_[512];
-    static char _command[512];
-    int flag = 0;
+  static char command[512] ;
+  static char _command[512];
+  int unsat =0;
+  {
+    std::ofstream out("input_crobots");
+    model.dump(out);
+  }
+  std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; ./cryptominisat5 -s 1 input_crobots>Pre_output_file 2>&1");
+  system(command);
+  std::sprintf(_command,"cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; cp Pre_output_file ~/crobots; cp Pre_output_file _Pre; cp input_crobots _try_in; rm input_crobots; rm Pre_output_file");
+  system(_command);
+  std::ifstream sat_preoutput("Pre_output_file");
+  while(sat_preoutput.peek() == 'c')
     {
-        std::ofstream out("input_crobots");
-        model.dump(out);
+      //sat_preoutput>>std::skipws;
+      sat_preoutput.ignore(10000,'\n');
     }
-    std::sprintf(command,"cp input_crobots /home/abdullah/SAT_solver_oriented_coloring/cryptominisat-master/build/;rm input_crobots; cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; ./cryptominisat5 -s 1 input_crobots>Pre_output_file 2>&1 &");
-    system(command);
-    std::sprintf(command_,"cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; ./cryptominisat5 -s 1 input_crobots 2>>Pre_output_file &");
-    system(command_);
-    std::sprintf(_command,"cd ~/SAT_solver_oriented_coloring/cryptominisat-master/build/; cp Pre_output_file ~/crobots; cp Pre_output_file _Pre; cp input_crobots _try_in; rm input_crobots; rm Pre_output_file");
-    system(_command);
-    std::string line;
-    std::ifstream sat_preoutput("Pre_output_file");
-    while(getline (sat_preoutput,line))
+  if( sat_preoutput.peek() == 's')
+    {
+      sat_preoutput.get();
+      std::string sol;
+      sat_preoutput>>std::skipws>>sol;
+      if( sol == "UNSATISFIABLE") unsat = +1;
+      else if( sol == "SATISFIABLE") unsat = -1;
+      else throw std::string("CNF::Model::optimize(): Something went wrong, SAT_solver break without making desicion.");
+    }
+  if(unsat==+1)
+    {
+      has_solution = -1;
+    }
+  else if (unsat==-1){
+    //sat_preoutput.ignore(512,'\n');
+    sat_preoutput>>std::ws;
+    if( sat_preoutput.peek() == 'v')
       {
-	if( sat_preoutput.peek() == 'c')sat_preoutput.ignore(512,'\n');
-	if( sat_preoutput.peek() == 's')
-	  {
-	    char sol[14];
-	    char str[] = {'s',' ','U','N','S','A','T','I','S','F','I','A','B','L','E'};
-	    sat_preoutput.get(sol, 512, '\n');
-	    printf("SOL %s\n",sol);
-	    printf("here\n");
-	    for(int i=0;i<15;++i){
-	      if(sol[i] == str[i])
-		{
-		  flag = 1;
-		}else
-		{
-		  flag = 0;
-		}
-	    }
-	    if(flag == 0)
-	      {
-		std::ofstream sat_output("Output_file");
-		if(sat_preoutput.peek() == 'v')
-		  {
-		    char _sol[512];
-		    sat_preoutput.get(_sol, 512, '\n');
-		    sat_output<<_sol;
-		  }
-	      }
-	  }// ^if 's'
-      }// ^While
-    printf("%d", flag);
-    if(flag == 0)
-      {
-        std::ifstream sat_output("Output_file");
-        model.read_DIMACS(sat_output);
-      }
+	model.read_DIMACS(sat_preoutput);	
+	has_solution = +1;
+      }else throw std::string("CNF::Model::optimize(): Something went wrong, Solution not written by SAT_solver.");
+  }
+  else throw std::string("CNF::Model::optimize(): Something went wrong, SAT_solver didn't lunch properly.");
+  //printf("%d\n",has_solution);
 } //^ optimize()
 
 //********************************************************************************************************************************************************************************************************
 
 std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  const
 {
-  std::vector< Stat_Vector_t > fullsol (t_max+1, G);
-  for (unsigned t=0; t<=t_max; ++t) {
-    XY v {0,0};
-    for (v.y=0; v.y<G.NS_sz(); ++v.y) {
-      for (v.x=0; v.x<G.EW_sz(); ++v.x) {
-	if ( G.exists(v) ) {
-	  On_Node on_node = On_Node::SIZE;
-	  for (On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
-	    CNF::Var x = var(v,t,i);
-	    const bool val = model.get_value(x);
-	    if (val) {
-	      if (on_node!=On_Node::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 On_Node variables with value 1.");
-	      on_node=i;
-	    }
-	  } // for  On_Node
-	  NdStat ndstat = NdStat::SIZE;
-	  for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
-	    CNF::Var x = var(v,t,i);
-	    const bool val = model.get_value(x);
-	    if (val) {
-	      if (ndstat!=NdStat::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 NdStat variables with value 1.");
-	      ndstat=i;
-	    }
-	  } // for  NdStat
-
-	  R_Vertical r_vert = R_Vertical::SIZE;
-	  for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
-	    CNF::Var x = var(v,t,i);
-	    const bool val = model.get_value(x);
-	    if (val) {
-	      if (r_vert!=R_Vertical::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 R_Vertical variables with value 1.");
-	      r_vert=i;
-	    }
-	  } // for  R_Vertical
-
-	  R_Move r_mv = R_Move::SIZE;
-	  for (R_Move     i=begin_R_Move();     i!=end_R_Move();     ++i) {
-	    const Direction d = get_direction(i);
-	    bool val = 0;
-	    if ( G.move(v,d)!=nowhere ) {
+  if (has_solution == 1){
+    std::vector< Stat_Vector_t > fullsol (t_max+1, G);
+    for (unsigned t=0; t<=t_max; ++t) {
+      XY v {0,0};
+      for (v.y=0; v.y<G.NS_sz(); ++v.y) {
+	for (v.x=0; v.x<G.EW_sz(); ++v.x) {
+	  if ( G.exists(v) ) {
+	    On_Node on_node = On_Node::SIZE;
+	    for (On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
 	      CNF::Var x = var(v,t,i);
-	      val = model.get_value(x);
-	    }
-	    if (val) {
-	      if (r_mv!=R_Move::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 R_Move variables with value 1.");
-	      r_mv=i;
-	    }
-	  } // for  R_Move
+	      const bool val = model.get_value(x);
+	      if (val) {
+		if (on_node!=On_Node::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 On_Node variables with value 1.");
+		on_node=i;
+	      }
+	    } // for  On_Node
+	    NdStat ndstat = NdStat::SIZE;
+	    for (NdStat     i=begin_NdStat();     i!=end_NdStat();     ++i) {
+	      CNF::Var x = var(v,t,i);
+	      const bool val = model.get_value(x);
+	      if (val) {
+		if (ndstat!=NdStat::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 NdStat variables with value 1.");
+		ndstat=i;
+	      }
+	    } // for  NdStat
 
-	  fullsol[t][v] = Full_Stat{on_node,ndstat,r_vert,r_mv};		
-	} // if exists
-      } // for x
-    } // for y
-  } // for t
-  
-  return fullsol;
+	    R_Vertical r_vert = R_Vertical::SIZE;
+	    for (R_Vertical i=begin_R_Vertical(); i!=end_R_Vertical(); ++i) {
+	      CNF::Var x = var(v,t,i);
+	      const bool val = model.get_value(x);
+	      if (val) {
+		if (r_vert!=R_Vertical::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 R_Vertical variables with value 1.");
+		r_vert=i;
+	      }
+	    } // for  R_Vertical
+
+	    R_Move r_mv = R_Move::SIZE;
+	    for (R_Move     i=begin_R_Move();     i!=end_R_Move();     ++i) {
+	      const Direction d = get_direction(i);
+	      bool val = 0;
+	      if ( G.move(v,d)!=nowhere ) {
+		CNF::Var x = var(v,t,i);
+		val = model.get_value(x);
+	      }
+	      if (val) {
+		if (r_mv!=R_Move::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 R_Move variables with value 1.");
+		r_mv=i;
+	      }
+	    } // for  R_Move
+
+	    fullsol[t][v] = Full_Stat{on_node,ndstat,r_vert,r_mv};		
+	  } // if exists
+	} // for x
+      } // for y
+    } // for t
+    return fullsol;
+  }// if solution exits
+  else return std::vector< Stat_Vector_t >{};
 } // get_solution()
 
 
@@ -1942,7 +1933,7 @@ void GridSpace::Grid_Sat::atom_constraints(const XY v, const unsigned t)
 
         // At most one robot moving towards this node:
 	//c =  E_now_R_accW   or E_now_R_mvW0                                                                                      or W_now_R_accE   or W_now_R_mvE0                                                                                      or N_now_R_accS   or N_now_R_mvS0   or N_now_R_mvS1                                                                    or S_now_R_accN   or S_now_R_mvN0   or S_now_R_mvN1                                                                    or E_now_C0R_accW or E_now_C1R_accW or E_now_C2R_accW                                                                  or E_now_C0R_mvW0 or E_now_C1R_mvW0 or E_now_C2R_mvW0                                                                  or E_now_C0R_mvW1 or E_now_C1R_mvW1 or E_now_C2R_mvW1                                                                  or W_now_C0R_accE or W_now_C1R_accE or W_now_C2R_accE                                                                  or W_now_C0R_mvE0 or W_now_C1R_mvE0 or W_now_C2R_mvE0                                                                  or W_now_C0R_mvE1 or W_now_C1R_mvE1 or W_now_C2R_mvE1                                                                  or N_now_C0R_accS or N_now_C1R_accS or N_now_C2R_accS                                                                  or N_now_C0R_mvS0 or N_now_C1R_mvS0 or N_now_C2R_mvS0                                                                  or N_now_C0R_mvS1 or N_now_C1R_mvS1 or N_now_C2R_mvS1                                                                  or N_now_C0R_mvS2 or N_now_C1R_mvS2 or N_now_C2R_mvS2                                                                  or N_now_C0R_mvS3 or N_now_C1R_mvS3 or N_now_C2R_mvS3                                                                  or S_now_C0R_accN or S_now_C1R_accN or S_now_C2R_accN                                                                  or S_now_C0R_mvN0 or S_now_C1R_mvN0 or S_now_C2R_mvN0                                                                  or S_now_C0R_mvN1 or S_now_C1R_mvN1 or S_now_C2R_mvN1                                                                  or S_now_C0R_mvN2 or S_now_C1R_mvN2 or S_now_C2R_mvN2                                                                  or S_now_C0R_mvN3 or S_now_C1R_mvN3 or S_now_C2R_mvN3;
-	//model.addClause(c); because the constraint is 1 >= x1 + x2
+	//model.addClause(c); //because the constraint is 1 >= x1 + x2
 	// 58 choose 2
 	c = not(E_now_R_accW) or not(E_now_R_mvW0);
 	model.addClause(c);
@@ -6263,15 +6254,15 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	c = not(Here_now_C0R_ready)  or Here_will_C0R_ready                                                                                                 or Here_will_C0R_accE  or Here_will_C0R_accN or Here_will_C0R_accW or Here_will_C0R_accS                                                                                                                                                      or Here_will_R_drop;
 	model.addClause(c);
 	c = not(Here_will_C0R_ready) or Here_now_C0R_ready                                                                                                  or W_now_C0R_mvE1                                                                                                      or E_now_C0R_mvW1                                                                                                      or S_now_C0R_mvN3                                                                                                      or N_now_C0R_mvS3                                                                                                      or Here_now_R_lifting4;
-	model.addClause(c);
+	model.addClause(c);// <--- S_now_C0R_mvN3 in the model 3 3 1  1 1 0 0
 	c = not(Here_now_C1R_ready)  or Here_will_C1R_ready                                                                                                 or Here_will_C1R_accE  or Here_will_C1R_accN or Here_will_C1R_accW or Here_will_C1R_accS                                                                                                                                                      or Here_will_R_drop;
 	model.addClause(c);
 	c = not(Here_will_C1R_ready) or Here_now_C1R_ready                                                                                                  or W_now_C1R_mvE1                                                                                                      or E_now_C1R_mvW1                                                                                                      or S_now_C1R_mvN3                                                                                                      or N_now_C1R_mvS3                                                                                                      or Here_now_R_lifting4;
 	model.addClause(c);
 	c = not(Here_now_C2R_ready)  or Here_will_C2R_ready                                                                                                 or Here_will_C2R_accE or Here_will_C2R_accN or Here_will_C2R_accW or Here_will_C2R_accS                                                                                                                                                       or Here_will_R_drop;
 	model.addClause(c);
-	c = not(Here_will_C2R_ready) or Here_now_C2R_ready                                                                                                  or W_now_C2R_mvE1                                                                                                      or E_now_C2R_mvW1                                                                                                      or S_now_C2R_mvN3                                                                                                      or N_now_C2R_mvS3                                                                                                      or Here_now_R_lifting4;
-	model.addClause(c);
+ 	c = not(Here_will_C2R_ready) or Here_now_C2R_ready                                                                                                  or W_now_C2R_mvE1                                                                                                      or E_now_C2R_mvW1                                                                                                      or S_now_C2R_mvN3                                                                                                      or N_now_C2R_mvS3                                                                                                      or Here_now_R_lifting4;
+ 	model.addClause(c);
     }
     
     // M O V E M E N T
@@ -6761,35 +6752,35 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 
 	
 	c = not(Here_will_R_accN) or Here_now_R_ready;
-	model.addClause(c);//
-	// neccessarly
+	model.addClause(c);
+	//neccessarly
 	c = not(Here_will_R_mvN1) or Here_now_R_accN           or Here_now_R_mvN0;
 	model.addClause(c);
-	// sufficient
+	//sufficient
 	c = not(Here_now_R_accN)  or Here_now_R_mvN0           or Here_will_R_mvN1;
 	model.addClause(c);
 	c = Here_now_R_accN       or not(Here_now_R_mvN0)      or Here_will_R_mvN1;
 	model.addClause(c);
 	c = not(Here_now_R_accN)  or not(Here_now_R_mvN0);
-	model.addClause(c);//	
+	model.addClause(c);	
 	c = not(Here_will_R_mvN0) or S_now_R_mvN1;
-	model.addClause(c);//
+	model.addClause(c);
 	c = not(Here_now_R_mvN0)  or Here_now_R_accN           or Here_will_R_mvN1;
 	model.addClause(c);
 	c = Here_now_R_mvN0       or not(Here_now_R_accN)      or Here_will_R_mvN1;
 	model.addClause(c);
 	c = not(Here_now_R_mvN0)  or not(Here_now_R_accN);
-	model.addClause(c);//
+	model.addClause(c);
 	c = not(Here_now_R_mvN1)  or N_will_R_mvN0             or N_will_R_ready;
-	model.addClause(c);//
+	model.addClause(c);
 	c = not(Here_now_R_mvN1)  or Here_will_nobodyhome      or Here_will_R_mvN0;
-	model.addClause(c);//
+	model.addClause(c);
 	c = N_will_R_ready        or not(Here_now_R_mvN1)      or not(N_now_C0R_mvN3);
-	model.addClause(c);// Crobot ahead.  Hint: contrapositive
+	model.addClause(c);//Crobot ahead.  Hint: contrapositive
 	c = N_will_R_ready        or not(Here_now_R_mvN1)      or not(N_now_C1R_mvN3);
-	model.addClause(c);// Crobot ahead.  Hint: contrapositive
+	model.addClause(c);//Crobot ahead.  Hint: contrapositive
 	c = N_will_R_ready        or not(Here_now_R_mvN1)      or not(N_now_C2R_mvN3);
-	model.addClause(c);// Crobot ahead.  Hint: contrapositive	
+	model.addClause(c);//Crobot ahead.  Hint: contrapositive	
 
 	
 	c = not(Here_will_R_accS) or Here_now_R_ready;
@@ -6823,7 +6814,7 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	c = S_will_R_ready        or not(Here_now_R_mvS1)      or not(S_now_C2R_mvS3);
 	model.addClause(c);// Crobot ahead.  Hint: contrapositive
 
-        // C r o b o t  0
+        // // C r o b o t  0
 	c = not(Here_will_C0R_accN) or Here_now_C0R_ready;
 	model.addClause(c); //
 	// neccesarly
@@ -6845,7 +6836,7 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	c = not(Here_now_C0R_mvN2)  or Here_will_C0R_mvN3;
 	model.addClause(c); //
 	c = not(Here_will_C0R_mvN0) or S_now_C0R_mvN3;
-	model.addClause(c); //
+	model.addClause(c); // <----- The is a problem S_now_C0R_mvN3
 	c = not(Here_now_C0R_accN)  or Here_now_C0R_mvN0       or Here_will_C0R_mvN1;
 	model.addClause(c);
 	c = Here_now_C0R_accN       or not(Here_now_C0R_mvN0)  or Here_will_C0R_mvN1;
@@ -6855,7 +6846,7 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	c = not(Here_now_C0R_mvN3)  or N_will_C0R_ready        or N_will_C0R_mvN0;
 	model.addClause(c); //
 	c = not(Here_now_C0R_mvN3)  or Here_will_nobodyhome    or Here_will_R_mvN0;
-	model.addClause(c); //
+	model.addClause(c); // <----- pontential error in this area S__now_C0R_mvN3
 
 	
 	c = not(Here_will_C0R_accS) or Here_now_C0R_ready;
@@ -6969,7 +6960,7 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	c = not(Here_now_C1R_mvN2)  or Here_will_C1R_mvN3;
 	model.addClause(c); //
 	c = not(Here_will_C1R_mvN0) or S_now_C1R_mvN3;
-	model.addClause(c); //
+	model.addClause(c); //<--- probelm when the car is of type 1
 	c = not(Here_now_C1R_accN)  or Here_now_C1R_mvN0       or Here_will_C1R_mvN1;
 	model.addClause(c);
 	c = Here_now_C1R_accN       or not(Here_now_C1R_mvN0)  or Here_will_C1R_mvN1;
@@ -7222,53 +7213,53 @@ void GridSpace::Grid_Sat::time_link_constraints(const XY v, const unsigned t)
 	const CNF::Var Here_will_C2R_ready       = var(v,       t+1,  NdStat::C2R_ready);
 
 
-	c = not(Here_will_R_lift)     or Here_now_R_ready;
-	model.addClause(c); //
+	 c = not(Here_will_R_lift)     or Here_now_R_ready;
+	 model.addClause(c); //
 
-	c = not(Here_now_R_lift)      or Here_will_R_lifting1;
-	model.addClause(c);
-	c = Here_now_R_lift           or not(Here_will_R_lifting1);
-	model.addClause(c); //
-	c = not(Here_now_R_lifting1)  or Here_will_R_lifting2;
-	model.addClause(c);
-	c = Here_now_R_lifting1       or not(Here_will_R_lifting2);
-	model.addClause(c); //
-	c = not(Here_now_R_lifting2)  or Here_will_R_lifting3;
-	model.addClause(c);
-	c = Here_now_R_lifting2       or not(Here_will_R_lifting3);
-	model.addClause(c); //
-	c = not(Here_now_R_lifting3)  or Here_will_R_lifting4;
-	model.addClause(c);
-	c = Here_now_R_lifting3       or not(Here_will_R_lifting4);
-	model.addClause(c); //
+	 c = not(Here_now_R_lift)      or Here_will_R_lifting1;
+	 model.addClause(c);
+	 c = Here_now_R_lift           or not(Here_will_R_lifting1);
+	 model.addClause(c); //
+	 c = not(Here_now_R_lifting1)  or Here_will_R_lifting2;
+	 model.addClause(c);
+	 c = Here_now_R_lifting1       or not(Here_will_R_lifting2);
+	 model.addClause(c); //
+	 c = not(Here_now_R_lifting2)  or Here_will_R_lifting3;
+	 model.addClause(c);
+	 c = Here_now_R_lifting2       or not(Here_will_R_lifting3);
+	 model.addClause(c); //
+	 c = not(Here_now_R_lifting3)  or Here_will_R_lifting4;
+	 model.addClause(c);
+	 c = Here_now_R_lifting3       or not(Here_will_R_lifting4);
+	 model.addClause(c); //
 	
-	c = not(Here_will_C0R_ready)  or Here_will_C1R_ready        or Here_will_C2R_ready      or Here_now_empty                  or Here_now_R_lifting4;
-	model.addClause(c); 
-	c = Here_will_C0R_ready       or not(Here_will_C1R_ready)   or Here_will_C2R_ready      or Here_now_empty                  or Here_now_R_lifting4;
-	model.addClause(c); 
-	c = Here_will_C0R_ready       or Here_will_C1R_ready        or not(Here_will_C2R_ready) or Here_now_empty                  or Here_now_R_lifting4;
-	model.addClause(c);
-	c = not(Here_will_C0R_ready)  or not(Here_will_C1R_ready);
-	model.addClause(c);
-	c = not(Here_will_C0R_ready)  or not(Here_will_C2R_ready);
-	model.addClause(c);
-	c = not(Here_will_C1R_ready)  or not(Here_will_C2R_ready);
-	model.addClause(c);//
+	 c = not(Here_will_C0R_ready)  or Here_will_C1R_ready        or Here_will_C2R_ready      or Here_now_empty                  or Here_now_R_lifting4;
+	 model.addClause(c); 
+	 c = Here_will_C0R_ready       or not(Here_will_C1R_ready)   or Here_will_C2R_ready      or Here_now_empty                  or Here_now_R_lifting4;
+	 model.addClause(c); 
+	 c = Here_will_C0R_ready       or Here_will_C1R_ready        or not(Here_will_C2R_ready) or Here_now_empty                  or Here_now_R_lifting4;
+	 model.addClause(c);
+	 c = not(Here_will_C0R_ready)  or not(Here_will_C1R_ready);
+	 model.addClause(c);
+	 c = not(Here_will_C0R_ready)  or not(Here_will_C2R_ready);
+	 model.addClause(c);
+	 c = not(Here_will_C1R_ready)  or not(Here_will_C2R_ready);
+	 model.addClause(c);//
 
-	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_now_C1              or Here_now_C2;
-	model.addClause(c);  // maybe make these lazy?!?  
-	c = not(Here_now_R_lifting4)  or Here_now_C0                or Here_now_C1              or Here_will_C2R_ready;
-	model.addClause(c); //
-	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_now_C1              or Here_will_C2R_ready;
-	model.addClause(c); //
-	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_will_C1R_ready      or Here_now_C2;
-	model.addClause(c); //
-	c = not(Here_now_R_lifting4)  or Here_now_C0                or Here_will_C1R_ready      or Here_now_C2;
-	model.addClause(c); //
-	c = not(Here_now_R_lifting4)  or Here_now_C0                or Here_will_C1R_ready      or Here_will_C2R_ready;
-	model.addClause(c); //
-	c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_will_C1R_ready      or Here_will_C2R_ready;
-	model.addClause(c); //
+	 c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_now_C1              or Here_now_C2;
+	 model.addClause(c);  // maybe make these lazy?!?  
+	 c = not(Here_now_R_lifting4)  or Here_now_C0                or Here_now_C1              or Here_will_C2R_ready;
+	 model.addClause(c); //
+	 c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_now_C1              or Here_will_C2R_ready;
+	 model.addClause(c); //
+	 c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_will_C1R_ready      or Here_now_C2;
+	 model.addClause(c); //
+	 c = not(Here_now_R_lifting4)  or Here_now_C0                or Here_will_C1R_ready      or Here_now_C2;
+	 model.addClause(c); //
+	 c = not(Here_now_R_lifting4)  or Here_now_C0                or Here_will_C1R_ready      or Here_will_C2R_ready;
+	 model.addClause(c); //
+	 c = not(Here_now_R_lifting4)  or Here_will_C0R_ready        or Here_will_C1R_ready      or Here_will_C2R_ready;
+	 model.addClause(c); //
 	
     }
     { // Dropping process

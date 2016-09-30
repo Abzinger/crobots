@@ -25,7 +25,8 @@ void CNF::Model::read_DIMACS(std::istream & in) {
     int  abs_i;
     while (true) {
         if (in.peek()=='v')  in.get();
-        in >> i;
+	if (in.peek()=='0')  break;
+        in >> i>>std::ws;
         abs_i = std::abs(i);
         if (abs_i < 1 || abs_i > n_vars) throw std::string("CNF::Model::read()_DIMACS: Syntax error: Variable index out of range");
         the_value[abs_i] = (bool)( abs_i==i );
