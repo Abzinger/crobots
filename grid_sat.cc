@@ -238,8 +238,8 @@ std::vector< GridSpace::Stat_Vector_t > GridSpace::Grid_Sat::get_solution()  con
 	    On_Node on_node = On_Node::SIZE;
 	    for (On_Node    i=begin_On_Node();    i!=end_On_Node();    ++i) {
 	      CNF::Var x = var(v,t,i);
-              print("The var: %d\n",x.dump());
 	      const bool val = model.get_value(x);
+              std::cout<<"x["<<x.dump()<<'|'<<var_name(v,t,i)<<"] == "<<(int)val<<std::endl;
 	      if (val) {
 		if (on_node!=On_Node::SIZE) throw std::runtime_error("Grid_Sat::get_solution(): There seem to be >1 On_Node variables with value 1.");
 		on_node=i;
@@ -311,6 +311,21 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const On_Node wh
 } // var()
 
 inline
+std::string GridSpace::Grid_Sat::var_name(const XY v, const unsigned t, const On_Node what) const
+{
+    if ((unsigned)what == (unsigned)On_Node::SIZE) throw std::range_error  ("Grid_Sat::var(On_Node): On_Node argument is out of range");
+    if ((unsigned)what >  (unsigned)On_Node::SIZE) throw std::runtime_error("Grid_Sat::var(On_Node): On_Node argument is broken (BAD BUG)");
+
+    if (v==nowhere) {
+        if (what==On_Node::empty) return "1";
+        else                      return "0";
+    } else {
+        if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(On_Node): node does not exist.");
+        return "("+std::to_string(v.x)+","+std::to_string(v.y)+")["+std::to_string(t)+"On_Node::"+to_string(what);
+    }
+} // var()
+
+inline
 CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const NdStat who) const
 {
     if ((unsigned)who == (unsigned)NdStat::SIZE) throw std::range_error  ("Grid_Sat::var(NdStat): NdStat argument is out of range");
@@ -322,6 +337,20 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const NdStat who
     } else {
         if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(NdStat): node does not exist.");
         return ndstat_vars[v][t][(int)who];
+    }
+} // var()
+inline
+std::string GridSpace::Grid_Sat::var_name(const XY v, const unsigned t, const NdStat who) const
+{
+    if ((unsigned)who == (unsigned)NdStat::SIZE) throw std::range_error  ("Grid_Sat::var(NdStat): NdStat argument is out of range");
+    if ((unsigned)who >  (unsigned)NdStat::SIZE) throw std::runtime_error("Grid_Sat::var(NdStat): NdStat argument is broken (BAD BUG)");
+
+    if (v==nowhere) {
+      if (who==NdStat::nobodyhome) return "1";
+      else                         return "0";
+    } else {
+        if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(NdStat): node does not exist.");
+        return "("+std::to_string(v.x)+","+std::to_string(v.y)+")["+std::to_string(t)+"NdStat::"+to_string(who);
     }
 } // var()
 
@@ -337,6 +366,18 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const R_Vertical
         return rvertical_vars[v][t][(int)vert];
     }
 } // var()
+inline
+std::string GridSpace::Grid_Sat::var_name(const XY v, const unsigned t, const R_Vertical vert) const
+{
+    if ((unsigned)vert == (unsigned)R_Vertical::SIZE) throw std::range_error  ("Grid_Sat::var(R_Vertical): R_Vertical argument is out of range");
+    if ((unsigned)vert >  (unsigned)R_Vertical::SIZE) throw std::runtime_error("Grid_Sat::var(R_Vertical): R_Vertical argument is broken (BAD BUG)");
+
+    if (v==nowhere) return "0";
+    else {
+        if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(R_Vertical): node does not exist.");
+        return "("+std::to_string(v.x)+","+std::to_string(v.y)+")["+std::to_string(t)+"R_Vert::"+to_string(vert);
+    }
+} // var()
 
 inline
 CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const R_Move where) const
@@ -349,6 +390,22 @@ CNF::Var GridSpace::Grid_Sat::var(const XY v, const unsigned t, const R_Move whe
         if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(R_Move): node does not exist.");
         const Direction d = get_direction(where);
         return ( G.move(v,d)==nowhere ?    CNF::Zero   :   rmv_vars[v][t][(int)where]  );
+    }
+} // var()
+inline
+std::string GridSpace::Grid_Sat::var_name(const XY v, const unsigned t, const R_Move where) const
+{
+    if ((unsigned)where == (unsigned)R_Move::SIZE) throw std::range_error  ("Grid_Sat::var(R_Move): R_Move argument is out of range");
+    if ((unsigned)where >  (unsigned)R_Move::SIZE) throw std::runtime_error("Grid_Sat::var(R_Move): R_Move argument is broken (BAD BUG)");
+
+    if (v==nowhere) return "0";
+    else {
+        if (! G.exists(v) ) throw std::range_error  ("Grid_Sat::var(R_Move): node does not exist.");
+        const Direction d = get_direction(where);
+        return ( G.move(v,d)==nowhere ?
+                 std::string("0")
+                 :
+                 "("+std::to_string(v.x)+","+std::to_string(v.y)+")["+std::to_string(t)+"R_Mv::"+to_string(where));
     }
 } // var()
 
