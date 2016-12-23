@@ -61,7 +61,7 @@ int main(int argc, const char *argv[]) try
     Grid * p_grid          = nullptr;
     unsigned fillarg_begin = 987654321;
 
-    std::srand(std::time(0));
+    std::srand(std::clock());
 
     if (string(argv[1]) == "-rnd1") { // random grid
         if (argc!=10) {
